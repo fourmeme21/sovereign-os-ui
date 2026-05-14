@@ -3,7 +3,6 @@ import { T, getRiskColor, getRiskLabel } from "../tokens";
 import { LANG } from "../lang";
 import { RiskScore } from "./RiskScore";
 import { WhyPanel } from "./WhyPanel";
-import { Typewriter } from "./Typewriter";
 
 export function ActionBtn({ color, onClick, children }) {
   const [hov, setHov] = useState(false);
@@ -74,28 +73,53 @@ export function RiskCard({ decision, onApprove, onReject, lang }) {
         <div className={state === "rejecting" ? "shake-wrap" : ""}>
           <div style={{ display:"flex", alignItems:"flex-start", gap:24, marginBottom:20 }}>
             <RiskScore target={decision.riskScore} />
-            <div style={{ paddingTop:10, flex:1, minWidth:0 }}>
-              <div style={{ fontSize:9, fontWeight:700, letterSpacing:".16em", color:rc, marginBottom:6 }}>
+            <div style={{ paddingTop:8, flex:1, minWidth:0 }}>
+
+              {/* risk label — CAPS, daha belirgin */}
+              <div style={{ fontSize:11, fontWeight:700, letterSpacing:".2em", color:rc, marginBottom:8 }}>
                 {getRiskLabel(decision.riskScore, lang)}
               </div>
+
+              {/* affectedArea — monospace, border-bottom ile ayrılmış */}
               <div style={{
                 fontSize:11, color:T.textSecondary, lineHeight:1.6,
                 fontFamily:"'JetBrains Mono',monospace",
                 overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
+                paddingBottom:10,
+                borderBottom:`1px solid ${T.borderSubtle}`,
+                marginBottom:10,
               }}>
                 {decision.affectedArea}
               </div>
+
+              {/* trace_id + timestamp — skor bloğunun sağına taşındı */}
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <span style={{ fontSize:9, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
+                  {`trace_id: ${decision.traceId}`}
+                </span>
+                <span style={{ fontSize:9, color:T.textTertiary }}>
+                  {decision.ago}
+                </span>
+              </div>
+
             </div>
           </div>
 
           <p style={{
-            fontSize:13, color:T.textSecondary, lineHeight:1.72,
-            marginBottom: isPending ? 20 : 0,
-            paddingBottom: isPending ? 20 : 0,
+            fontSize:15, color:T.textSecondary, lineHeight:1.8,
+            marginBottom: isPending ? 12 : 0,
+            paddingBottom: isPending ? 12 : 0,
             borderBottom: isPending ? `1px solid ${T.borderSubtle}` : "none",
           }}>
             {decision.reason}
           </p>
+
+          {/* confidence note — Adım 6 ile doldurulacak */}
+          {decision.confidence !== undefined && (
+            <p style={{ fontSize:11, color:T.textTertiary, fontStyle:"italic", marginTop:8, marginBottom: isPending ? 8 : 0, lineHeight:1.5 }}>
+              ℹ️ {decision.confidenceText}
+            </p>
+          )}
 
           {isPending && (
             <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
@@ -113,10 +137,6 @@ export function RiskCard({ decision, onApprove, onReject, lang }) {
           )}
 
           <WhyPanel visible={showWhy} lang={lang} />
-
-          <div style={{ marginTop:16, paddingTop:12, borderTop:`1px solid ${T.borderSubtle}` }}>
-            <Typewriter text={`trace_id: ${decision.traceId}`} delay={480} />
-          </div>
         </div>
 
         {(state === "approved" || state === "rejected") && (
