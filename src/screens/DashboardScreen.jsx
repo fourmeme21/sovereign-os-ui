@@ -2,7 +2,22 @@ import { T, getRiskColor } from "../tokens";
 import { LANG } from "../lang";
 import { EmptyState } from "../components/RightPanel";
 
-export function DashboardScreen({ cards, autoCount, lang, onGoPrompt }) {
+function CardSkeleton() {
+  return (
+    <div style={{ padding:"10px 0", borderBottom:`1px solid ${T.borderSubtle}` }}>
+      {[120, 80, 100].map((w, i) => (
+        <div key={i} style={{
+          height:10, width:w, borderRadius:4,
+          background:T.bgElevated, marginBottom: i < 2 ? 6 : 0,
+          animation:"pulse 1.4s ease-in-out infinite",
+          animationDelay:`${i * 0.1}s`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+export function DashboardScreen({ cards, autoCount, lang, onGoPrompt, loadingCards, onRefresh }) {
   const L = LANG[lang];
   const safe    = cards.filter(c => c.riskScore <= 3).length + autoCount;
   const pending = cards.filter(c => c.status === "PENDING_HUMAN").length;
@@ -40,12 +55,26 @@ export function DashboardScreen({ cards, autoCount, lang, onGoPrompt }) {
         ))}
       </div>
 
-      {/* Son kararlar */}
-      <div style={{ fontSize:9, fontWeight:700, letterSpacing:".14em", color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", marginBottom:12 }}>
-        {L.recentChanges}
+      {/* Header + refresh */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:".14em", color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
+          {L.recentChanges}
+        </div>
+        <button onClick={onRefresh} disabled={loadingCards} style={{
+          background:"transparent", border:`1px solid ${T.border}`,
+          borderRadius:6, padding:"3px 10px",
+          fontSize:9, fontWeight:600, cursor: loadingCards ? "not-allowed" : "pointer",
+          color: loadingCards ? T.textTertiary : T.accent,
+          fontFamily:"'JetBrains Mono',monospace", letterSpacing:".06em",
+          opacity: loadingCards ? 0.5 : 1, transition:"opacity .15s",
+        }}>
+          {loadingCards ? "..." : "↻ SYNC"}
+        </button>
       </div>
 
-      {recent.length === 0 ? (
+      {loadingCards ? (
+        Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)
+      ) : recent.length === 0 ? (
         <EmptyState icon="◈" title={L.emptyDash} sub={L.emptyDashSub} cta={L.goPrompt} onCta={onGoPrompt} />
       ) : (
         recent.map(c => {
