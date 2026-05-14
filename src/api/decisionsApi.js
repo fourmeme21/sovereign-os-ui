@@ -23,10 +23,10 @@ function verdictToStatus(verdict) {
 
 // ── Confidence: verdict + criticality'ye göre ────────────
 function deriveConfidence(verdict, criticality) {
-  if (verdict === "PERMIT" && criticality === "LOW")      return 0.92;
-  if (verdict === "PERMIT")                               return 0.80;
-  if (verdict === "DENY")                                 return 0.70;
-  if (criticality === "CRITICAL")                         return 0.45;
+  if (verdict === "PERMIT" && criticality === "LOW") return 0.92;
+  if (verdict === "PERMIT")                          return 0.80;
+  if (verdict === "DENY")                            return 0.70;
+  if (criticality === "CRITICAL")                    return 0.45;
   return 0.62;
 }
 
