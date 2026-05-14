@@ -65,9 +65,9 @@ export function GlobalStyle() {
         to   { top:115%; }
       }
       @keyframes accent-cycle {
-        0%,100% { color:#6366F1; }
-        33%     { color:#818CF8; }
-        66%     { color:#A5B4FC; }
+        0%,100% { color:#7C3AED; }
+        33%     { color:#9061F9; }
+        66%     { color:#C4B5FD; }
       }
       @keyframes dot-bounce {
         0%,100% { transform:scale(1); opacity:.35; }
