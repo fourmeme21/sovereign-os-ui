@@ -30,6 +30,39 @@ function deriveConfidence(verdict, criticality) {
   return 0.62;
 }
 
+// ── Engine _raw'dan factors üret — { s, w } formatı ─────
+// WhyPanel ve generateFactors ile hizalı
+function deriveFactors(d) {
+  const area = `${d.action ?? ""} ${d.policy ?? ""}`.toLowerCase();
+
+  const fileSens =
+    /auth|login|session|token/.test(area) ? 10 :
+    /payment|billing|stripe/.test(area)   ? 10 :
+    /security|middleware|policy/.test(area)? 8  : 3;
+
+  const changeType =
+    d.criticality === "CRITICAL" ? 10 :
+    d.criticality === "HIGH"     ? 7  :
+    d.criticality === "MEDIUM"   ? 4  : 2;
+
+  const volume = d.latency
+    ? Math.min(10, Math.round(d.latency / 20))
+    : 3;
+
+  const policyMatch =
+    d.verdict === "DENY"      ? 10 :
+    d.verdict === "ASK_HUMAN" ? 7  : 2;
+
+  return [
+    { w: 35, s: fileSens    },
+    { w: 25, s: changeType  },
+    { w: 15, s: volume      },
+    { w: 10, s: policyMatch },
+    { w: 10, s: Math.round((fileSens + changeType) / 2 * 10) / 10 },
+    { w: 5,  s: Math.round(policyMatch * 0.8 * 10) / 10            },
+  ];
+}
+
 // ── Engine kararını UI formatına map et ──────────────────
 export function mapDecision(d) {
   const riskScore = criticalityToRisk(d.criticality);
@@ -43,8 +76,8 @@ export function mapDecision(d) {
     ago:          d.time,
     latency:      d.latency,
     confidence:   deriveConfidence(d.verdict, d.criticality),
-    factors:      null, // WhyPanel engine entegrasyonu sonra
-    _raw:         d,    // orijinal engine objesi sakla
+    factors:      deriveFactors(d),
+    _raw:         d,
   };
 }
 
@@ -57,7 +90,6 @@ export async function fetchDecisions() {
 }
 
 // ── POST /api/decisions/:id/respond ─────────────────────
-// Engine endpoint hazır olunca aktif olur — şimdilik log atar
 export async function respondDecision(id, action) {
   try {
     const res = await fetch(`${ENGINE_URL}/api/decisions/${id}/respond`, {
@@ -68,7 +100,6 @@ export async function respondDecision(id, action) {
     if (!res.ok) throw new Error(`Respond error: ${res.status}`);
     return await res.json();
   } catch (err) {
-    // Endpoint henüz yoksa local state'i güncellemeye devam et
     console.warn("respond endpoint:", err.message);
     return null;
   }
