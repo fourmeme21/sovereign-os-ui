@@ -5,12 +5,3 @@ export const INIT_CARDS = [
 ];
 
 export const NAV_ICONS = ["⌘", "◈", "⚖", "⚙"];
-
-export const FACTOR_DATA = [
-  { w:35, s:8.1 },
-  { w:25, s:3.4 },
-  { w:15, s:6.2 },
-  { w:10, s:7.8 },
-  { w:10, s:2.1 },
-  { w:5,  s:5.5 },
-];
