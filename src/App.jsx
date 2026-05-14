@@ -95,7 +95,7 @@ export default function SovereignApp() {
         }}>
           <div className="logo" style={{
             width:32, height:32, borderRadius:9,
-            background:`linear-gradient(135deg, ${T.accent}, #818CF8)`,
+            background:`linear-gradient(135deg, ${T.accent}, #5B21B6)`,
             display:"flex", alignItems:"center", justifyContent:"center",
             fontSize:14, marginBottom:20,
             fontFamily:"'Syne',sans-serif", color:"#fff", fontWeight:800,
@@ -188,7 +188,7 @@ export default function SovereignApp() {
                 style={{
                   width:"100%", marginTop:10, height:46,
                   borderRadius:10, border:"none",
-                  background: canAnalyze ? `linear-gradient(135deg, ${T.accent}, #4F46E5)` : T.bgElevated,
+                  background: canAnalyze ? `linear-gradient(135deg, ${T.accent}, #5B21B6)` : T.bgElevated,
                   color: canAnalyze ? "#fff" : T.textTertiary,
                   fontSize:14, fontWeight:600,
                   cursor: canAnalyze ? "pointer" : "not-allowed",
