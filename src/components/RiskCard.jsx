@@ -136,7 +136,7 @@ export function RiskCard({ decision, onApprove, onReject, lang }) {
             </div>
           )}
 
-          <WhyPanel visible={showWhy} lang={lang} />
+          <WhyPanel visible={showWhy} lang={lang} factors={decision.factors} />
         </div>
 
         {(state === "approved" || state === "rejected") && (
