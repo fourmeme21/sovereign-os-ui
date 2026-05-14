@@ -4,6 +4,28 @@ import { LANG } from "../lang";
 import { RiskScore } from "./RiskScore";
 import { WhyPanel } from "./WhyPanel";
 
+function getConfidenceText(confidence, lang) {
+  const map = {
+    tr: {
+      high:   "Yüksek güven — yakın zamanda doğrulandı",
+      medium: "Orta güven — sinyal var, son doğrulama yok",
+      low:    "Düşük güven — eski bilgiye dayanıyor, kontrol et",
+      unknown:"Belirsiz — çelişkili veya çok eski bilgi",
+    },
+    en: {
+      high:   "High confidence — recently validated",
+      medium: "Medium confidence — signal present, no recent validation",
+      low:    "Low confidence — based on older data, verify",
+      unknown:"Uncertain — conflicting or very old information",
+    },
+  };
+  const L = map[lang];
+  if (confidence > 0.85) return L.high;
+  if (confidence > 0.60) return L.medium;
+  if (confidence > 0.40) return L.low;
+  return L.unknown;
+}
+
 export function ActionBtn({ color, onClick, children }) {
   const [hov, setHov] = useState(false);
   return (
@@ -92,7 +114,7 @@ export function RiskCard({ decision, onApprove, onReject, lang }) {
                 {decision.affectedArea}
               </div>
 
-              {/* trace_id + timestamp — skor bloğunun sağına taşındı */}
+              {/* trace_id + timestamp */}
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <span style={{ fontSize:9, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
                   {`trace_id: ${decision.traceId}`}
@@ -114,10 +136,10 @@ export function RiskCard({ decision, onApprove, onReject, lang }) {
             {decision.reason}
           </p>
 
-          {/* confidence note — Adım 6 ile doldurulacak */}
+          {/* confidence note */}
           {decision.confidence !== undefined && (
             <p style={{ fontSize:11, color:T.textTertiary, fontStyle:"italic", marginTop:8, marginBottom: isPending ? 8 : 0, lineHeight:1.5 }}>
-              ℹ️ {decision.confidenceText}
+              ℹ️ {getConfidenceText(decision.confidence, lang)}
             </p>
           )}
 
