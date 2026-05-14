@@ -10,7 +10,8 @@ export const T = {
   textPrimary:  "#EDEDEC",
   textSecondary:"#888884",
   textTertiary: "#555550",
-  accent:       "#6366F1",
+  accent:       "#7C3AED",
+  accentGlow:   "#7C3AED28",
 };
 
 export const getRiskColor = (s) =>
