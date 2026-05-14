@@ -3,7 +3,25 @@ import { T, getRiskColor } from "../tokens";
 import { LANG } from "../lang";
 import { EmptyState, MiniBtn } from "../components/RightPanel";
 
-export function DecisionsScreen({ cards, lang, onGoPrompt, approve, reject }) {
+function DecisionSkeleton() {
+  return (
+    <div style={{
+      padding:"12px 14px", marginBottom:8, borderRadius:10,
+      border:`1px solid ${T.border}`, background:T.bgSurface,
+    }}>
+      {[160, 100, 80].map((w, i) => (
+        <div key={i} style={{
+          height:10, width:w, borderRadius:4,
+          background:T.bgElevated, marginBottom: i < 2 ? 8 : 0,
+          animation:"pulse 1.4s ease-in-out infinite",
+          animationDelay:`${i * 0.12}s`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+export function DecisionsScreen({ cards, lang, onGoPrompt, approve, reject, loadingCards, onRefresh }) {
   const L = LANG[lang];
   const [filter, setFilter] = useState("all");
 
@@ -23,21 +41,35 @@ export function DecisionsScreen({ cards, lang, onGoPrompt, approve, reject }) {
 
   return (
     <div style={{ animation:"fade-in .25s ease" }}>
-      {/* Filtre tab bar */}
-      <div style={{ display:"flex", gap:4, marginBottom:20, flexWrap:"wrap" }}>
-        {filters.map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key)} style={{
-            padding:"5px 12px", borderRadius:6,
-            border:`1px solid ${filter === f.key ? T.accent : T.border}`,
-            background: filter === f.key ? `${T.accent}14` : "transparent",
-            color: filter === f.key ? T.accent : T.textTertiary,
-            fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"inherit",
-            transition:"all .15s",
-          }}>{f.label}</button>
-        ))}
+      {/* Filtre + refresh */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12, gap:8 }}>
+        <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+          {filters.map(f => (
+            <button key={f.key} onClick={() => setFilter(f.key)} style={{
+              padding:"5px 12px", borderRadius:6,
+              border:`1px solid ${filter === f.key ? T.accent : T.border}`,
+              background: filter === f.key ? `${T.accent}14` : "transparent",
+              color: filter === f.key ? T.accent : T.textTertiary,
+              fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"inherit",
+              transition:"all .15s",
+            }}>{f.label}</button>
+          ))}
+        </div>
+        <button onClick={onRefresh} disabled={loadingCards} style={{
+          background:"transparent", border:`1px solid ${T.border}`,
+          borderRadius:6, padding:"3px 10px", flexShrink:0,
+          fontSize:9, fontWeight:600, cursor: loadingCards ? "not-allowed" : "pointer",
+          color: loadingCards ? T.textTertiary : T.accent,
+          fontFamily:"'JetBrains Mono',monospace", letterSpacing:".06em",
+          opacity: loadingCards ? 0.5 : 1, transition:"opacity .15s",
+        }}>
+          {loadingCards ? "..." : "↻"}
+        </button>
       </div>
 
-      {cards.length === 0 ? (
+      {loadingCards ? (
+        Array.from({ length: 4 }).map((_, i) => <DecisionSkeleton key={i} />)
+      ) : cards.length === 0 ? (
         <EmptyState icon="⚖" title={L.noDecisions} sub={L.noDecisionsSub} cta={L.goPrompt} onCta={onGoPrompt} />
       ) : filtered.length === 0 ? (
         <EmptyState icon="◈" title={L.emptyDec} />
