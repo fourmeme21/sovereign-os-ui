@@ -76,6 +76,7 @@ export default function SovereignApp() {
         traceId:`${Math.random().toString(36).slice(2,10)}-${Math.random().toString(36).slice(2,6)}`,
         ago: lang === "tr" ? "Az önce" : "Just now",
         factors: generateFactors(score, input.slice(0, 48)),
+        confidence: Math.max(0.3, 1 - (score / 10) * 0.5 + rand(-0.1, 0.1)),
       };
       setMain(card);
       setMainKey(k => k + 1);
