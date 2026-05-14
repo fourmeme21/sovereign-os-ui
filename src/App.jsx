@@ -12,6 +12,7 @@ import { DashboardScreen } from "./screens/DashboardScreen";
 import { DecisionsScreen } from "./screens/DecisionsScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { respondDecision } from "./api/decisionsApi";
+import { StatusBar } from "./components/StatusBar";
 
 const rand  = (min, max) => Math.random() * (max - min) + min;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -321,6 +322,16 @@ export default function SovereignApp() {
         {!isMobile && (
           <button className="drawer-toggle" onClick={() => setDrawerOpen(v => !v)} title={L.decisionFlow}>⚖</button>
         )}
+
+        {/* ── STATUS BAR ── */}
+        <StatusBar
+          engineError={engineError}
+          pendingCount={visible.length}
+          autoCount={autoCount}
+          loadingCards={loadingCards}
+          onRefresh={refresh}
+          lang={lang}
+        />
 
         <nav className="bottom-nav">
           {NAV_ICONS.map((icon, i) => {
