@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { T } from "../tokens";
 import { LANG } from "../lang";
-import { FACTOR_DATA } from "../data";
 
-export function WhyPanel({ visible, lang }) {
+export function WhyPanel({ visible, lang, factors = [] }) {
   const L = LANG[lang];
   const [barsOn, setBarsOn] = useState(false);
 
@@ -39,7 +38,7 @@ export function WhyPanel({ visible, lang }) {
           </div>
         </div>
 
-        {FACTOR_DATA.map((f, i) => {
+        {factors.map((f, i) => {
           const fc = f.s > 6 ? T.danger : f.s > 3.5 ? T.warning : T.success;
           return (
             <div key={i} className={visible ? "factor-anim" : ""} style={{ marginBottom:14, animationDelay:`${i * 0.05}s` }}>
