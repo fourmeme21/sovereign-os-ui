@@ -1,0 +1,31 @@
+/* polish.css'in sonuna ekle */
+
+/* ─── COMMIT STATUS ──────────────────────────────────── */
+.commit-status {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 6px 0;
+}
+
+.commit-status.loading {
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+}
+
+.commit-status.done {
+  background: rgba(45, 212, 191, 0.1);
+  color: #5eead4;
+}
+
+.commit-status.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+.card-filepath {
+  font-size: 11px;
+  color: var(--text-muted, #6b7280);
+  font-family: monospace;
+  margin: 4px 0 0;
+}
