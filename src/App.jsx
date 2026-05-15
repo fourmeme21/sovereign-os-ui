@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { T } from "./tokens";
 import { LANG } from "./lang";
 import { INIT_CARDS, NAV_ICONS } from "./data";
@@ -7,12 +7,13 @@ import { useEnginePolling } from "./hooks/useEnginePolling";
 import { GlobalStyle } from "./components/GlobalStyle";
 import { RiskCard } from "./components/RiskCard";
 import { Skeleton } from "./components/Skeleton";
-import { RightPanelContent } from "./components/RightPanel";
 import { DashboardScreen } from "./screens/DashboardScreen";
 import { DecisionsScreen } from "./screens/DecisionsScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { respondDecision } from "./api/decisionsApi";
 import { StatusBar } from "./components/StatusBar";
+import { useJuniorStore } from "./junior/stores/juniorStore";
+import KararAkisiPanel from "./junior/components/KararAkisiPanel";
 
 const rand  = (min, max) => Math.random() * (max - min) + min;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -54,6 +55,14 @@ export default function SovereignApp() {
   const L          = LANG[lang];
   const canAnalyze = !!input.trim() && !analyzing;
 
+  // ── Junior store senkronizasyonu ──
+  useEffect(() => {
+    useJuniorStore.setState({
+      decisions: cards,
+      autoApprovedCount: autoCount,
+    });
+  }, [cards, autoCount]);
+
   const analyze = useCallback(() => {
     if (!input.trim() || analyzing) return;
     setAnalyzing(true);
@@ -79,9 +88,11 @@ export default function SovereignApp() {
         status: pending ? "PENDING_HUMAN" : "AUTO_APPROVED",
         riskScore: score,
         affectedArea: input.slice(0, 48) + (input.length > 48 ? "…" : ""),
+        humanLabel: score >= 7 ? r.high : score >= 4 ? r.medium : r.low,
         reason: score >= 7 ? r.high : score >= 4 ? r.medium : r.low,
         traceId:`${Math.random().toString(36).slice(2,10)}-${Math.random().toString(36).slice(2,6)}`,
         ago: lang === "tr" ? "Az önce" : "Just now",
+        timestamp: Date.now(),
         factors: generateFactors(score, input.slice(0, 48)),
         confidence: Math.max(0.3, 1 - (score / 10) * 0.5 + rand(-0.1, 0.1)),
       };
@@ -287,11 +298,7 @@ export default function SovereignApp() {
           display:"flex", flexDirection:"column",
           background:T.bgSurface,
         }}>
-          <RightPanelContent
-            L={L} autoCount={autoCount} visible={visible}
-            cards={cards} approved={approved} rejected={rejected}
-            approve={approve} reject={reject} lang={lang}
-          />
+          <KararAkisiPanel />
         </div>
 
         {/* ── SAĞ PANEL — drawer ── */}
@@ -312,11 +319,7 @@ export default function SovereignApp() {
               cursor:"pointer", fontSize:14, padding:"2px 6px",
             }}>✕</button>
           </div>
-          <RightPanelContent
-            L={L} autoCount={autoCount} visible={visible}
-            cards={cards} approved={approved} rejected={rejected}
-            approve={approve} reject={reject} lang={lang}
-          />
+          <KararAkisiPanel />
         </div>
 
         {!isMobile && (
