@@ -1,6 +1,6 @@
 // src/junior/components/DecisionCard.jsx
 import { useState } from "react";
-import { useJuniorStore } from "../../stores/juniorStore";
+import { useJuniorStore } from "../stores/juniorStore";
 import { useGithubBridge } from "../hooks/useGithubBridge";
 import { sendDecisionResponse } from "../api/decisionApi";
 import RiskDetail from "./RiskDetail";
