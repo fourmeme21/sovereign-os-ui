@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { T } from "./tokens";
 import { LANG } from "./lang";
 import { INIT_CARDS, NAV_ICONS } from "./data";
@@ -36,6 +37,7 @@ function generateFactors(riskScore, affectedArea) {
 }
 
 export default function SovereignApp() {
+  const navigate = useNavigate();
   const [nav, setNav]               = useState("prompt");
   const [lang, setLang]             = useState("tr");
   const [input, setInput]           = useState("");
@@ -165,6 +167,24 @@ export default function SovereignApp() {
               </button>
             );
           })}
+
+          {/* Junior butonu */}
+          <button
+            onClick={() => navigate("/junior")}
+            style={{
+              width:"100%", minHeight:44,
+              display:"flex", flexDirection:"column",
+              alignItems:"center", justifyContent:"center", gap:3,
+              background:"transparent", border:"none",
+              borderLeft:`4px solid ${T.accent}`,
+              color:T.accent, cursor:"pointer", padding:"6px 0",
+              marginTop:8,
+            }}>
+            <span style={{ fontSize:15, lineHeight:1 }}>🤖</span>
+            <span style={{ fontSize:9, fontWeight:600, letterSpacing:".06em", fontFamily:"'JetBrains Mono',monospace", lineHeight:1 }}>
+              JUNIOR
+            </span>
+          </button>
         </div>
 
         {/* ── ANA ALAN ── */}
@@ -349,6 +369,10 @@ export default function SovereignApp() {
               </button>
             );
           })}
+          <button className="bnav-item" onClick={() => navigate("/junior")}>
+            <span className="bnav-icon">🤖</span>
+            <span className="bnav-label">Junior</span>
+          </button>
         </nav>
 
       </div>
