@@ -545,10 +545,10 @@ function Nav() {
           </span>
         </div>
 
-        {/* CTA */}
-        <a href="#waitlist" style={{ textDecoration:"none" }}>
+        {/* CTA — CHANGED: href="#waitlist" → href="/junior", "Get Access →" → "Open App →" */}
+        <a href="/junior" style={{ textDecoration:"none" }}>
           <button className="btn-primary" style={{ padding:"9px 18px", fontSize:13, animation:"none" }}>
-            Get Access →
+            Open App →
           </button>
         </a>
       </div>
