@@ -4,7 +4,7 @@ import { T } from "../../tokens";
 const ENGINE_URL = import.meta.env.VITE_ENGINE_URL || "https://sovereign-engine-production-2e21.up.railway.app";
 const API_URL = "https://api.anthropic.com/v1/messages";
 
-// ── ŞİFRE KAPISI (Supabase doğrulama) ─────────────────────────
+// ── ŞİFRE KAPISI (Backend doğrulama) ─────────────────────────
 function PasswordGate({ onUnlock }) {
   const [input, setInput]     = useState("");
   const [error, setError]     = useState(false);
@@ -15,27 +15,25 @@ function PasswordGate({ onUnlock }) {
     if (!input || loading) return;
     setLoading(true);
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY
-      );
-      const { data } = await supabase
-        .from("app_settings")
-        .select("value")
-        .eq("key", "chat_password")
-        .single();
+      const res = await fetch(`${ENGINE_URL}/api/auth/verify-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: input }),
+      });
 
-      if (data?.value === input) {
-        sessionStorage.setItem("se_token", "se_ok");
+      if (res.ok) {
+        const { token } = await res.json();
+        sessionStorage.setItem("se_token", token);
         onUnlock();
       } else {
-        throw new Error("wrong");
+        setError(true);
+        setShake(true);
+        setInput("");
+        setTimeout(() => { setError(false); setShake(false); }, 1500);
       }
     } catch {
       setError(true);
       setShake(true);
-      setInput("");
       setTimeout(() => { setError(false); setShake(false); }, 1500);
     } finally {
       setLoading(false);
