@@ -257,10 +257,23 @@ function GlobalStyle() {
 
       /* Hero text overflow fix */
       @media (max-width:640px) {
-        .hero-h1 { font-size: clamp(28px,8vw,48px) !important; }
+        .hero-h1 { font-size: clamp(26px,7vw,44px) !important; line-height:1.1 !important; }
+        .hero-h1 br { display:none; }
         .hero-desc { font-size:14px !important; max-width:100% !important; }
         .hero-quote { max-width:100% !important; overflow:hidden; word-break:break-word; }
         .hero-section { overflow:hidden; }
+
+        /* FlowSection: sol hizala + touch scroll */
+        .flow-viz {
+          justify-content:flex-start !important;
+          padding:20px 16px !important;
+          -webkit-overflow-scrolling:touch;
+          scroll-snap-type:x mandatory;
+        }
+        .flow-node { min-width:60px !important; scroll-snap-align:center; }
+        .flow-connector { width:24px !important; flex-shrink:0 !important; }
+        .flow-callout { flex-direction:column !important; gap:8px !important; align-items:flex-start !important; }
+        .flow-callout .flow-hidden-badge { margin-left:0 !important; }
       }
 
       /* Hero layout */
@@ -949,7 +962,7 @@ function FlowSection() {
         </div>
 
         {/* Flow visualization */}
-        <div style={{
+        <div className="flow-viz" style={{
           display:"flex", alignItems:"center", justifyContent:"center", gap:0,
           padding:"40px 24px", borderRadius:16,
           background:T.bgPrimary, border:`1px solid ${T.border}`,
@@ -1004,7 +1017,7 @@ function FlowSection() {
         </div>
 
         {/* Hidden engine callout */}
-        <div style={{
+        <div className="flow-callout" style={{
           marginTop:24, padding:"16px 20px", borderRadius:10,
           background:`${T.bgPrimary}`, border:`1px dashed ${T.border}`,
           display:"flex", alignItems:"center", gap:12,
@@ -1013,7 +1026,7 @@ function FlowSection() {
           <span style={{ fontSize:13, color:T.textSecondary }}>
             Memory retrieval + semantic diff + policy engine — all invisible to the user.
           </span>
-          <div style={{
+          <div className="flow-hidden-badge" style={{
             marginLeft:"auto", padding:"4px 10px", borderRadius:6,
             background:T.bgSurface, border:`1px solid ${T.border}`,
             fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace",
