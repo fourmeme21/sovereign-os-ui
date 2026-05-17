@@ -12,14 +12,26 @@ function PasswordGate({ onUnlock }) {
   const [loading, setLoading] = useState(false);
 
   const handleCheck = async () => {
-  if (!input || loading) return;
-  setLoading(true);
-  try {
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    );
+    if (!input || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${ENGINE_URL}/api/auth/verify-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: input }),
+      });
+
+      if (res.ok) {
+        const { token } = await res.json();
+        sessionStorage.setItem("se_token", token);
+        onUnlock();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+};
     const { data } = await supabase
       .from('app_settings')
       .select('value')
