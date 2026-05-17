@@ -241,6 +241,84 @@ function GlobalStyle() {
         .tier-row .tier-desc { display:none; }
       }
 
+      /* ── MOBILE RESPONSIVE ─────────────────────────────────── */
+
+      /* Nav */
+      .nav-inner {
+        max-width:1120px; margin:0 auto;
+        height:60px; display:flex; align-items:center; justify-content:space-between;
+      }
+      .nav-status { display:flex; }
+      @media (max-width:540px) {
+        .nav-status { display:none; }
+        .nav-inner { gap:8px; }
+      }
+
+      /* Hero layout */
+      .hero-layout {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:64px;
+        align-items:center;
+      }
+      .hero-card-col { display:flex; flex-direction:column; gap:16px; animation:fade-up .8s .4s both; }
+      @media (max-width:768px) {
+        .hero-layout { grid-template-columns:1fr; gap:40px; }
+        .hero-card-col { display:none; }
+      }
+
+      /* Status grid */
+      .status-grid {
+        display:flex; gap:1px;
+        border-radius:14px; overflow:hidden;
+        border:1px solid ${T.border};
+      }
+      @media (max-width:768px) {
+        .status-grid { display:grid; grid-template-columns:1fr 1fr; }
+        .status-grid > div { border-right:none !important; border-bottom:1px solid ${T.border}; }
+      }
+      @media (max-width:420px) {
+        .status-grid { grid-template-columns:1fr; }
+      }
+
+      /* Problem grid */
+      .problem-grid {
+        display:grid; grid-template-columns:repeat(3,1fr);
+        gap:1px; border-radius:14px; overflow:hidden;
+        border:1px solid ${T.border};
+      }
+      @media (max-width:768px) {
+        .problem-grid { grid-template-columns:1fr; }
+        .problem-grid > div { border-right:none !important; border-bottom:1px solid ${T.border}; }
+        .problem-grid > div:last-child { border-bottom:none; }
+      }
+
+      /* Features grid */
+      .features-grid {
+        display:grid; grid-template-columns:repeat(3,1fr);
+        gap:1px; border-radius:16px; overflow:hidden;
+        border:1px solid ${T.border};
+      }
+      @media (max-width:768px) {
+        .features-grid { grid-template-columns:1fr; }
+        .features-grid > div { border-right:none !important; border-bottom:1px solid ${T.border}; }
+        .features-grid > div:last-child { border-bottom:none; }
+      }
+
+      /* Hero stats */
+      .hero-stats { display:flex; gap:32px; margin-top:40px; flex-wrap:wrap; }
+      @media (max-width:480px) { .hero-stats { gap:20px; } }
+
+      /* Section padding */
+      @media (max-width:640px) {
+        .section-pad { padding-left:16px !important; padding-right:16px !important; }
+      }
+
+      /* Footer */
+      @media (max-width:540px) {
+        .footer-inner { flex-direction:column; align-items:flex-start; gap:12px; }
+      }
+
       .flow-node {
         display:flex; flex-direction:column; align-items:center; gap:8px;
         position:relative;
@@ -514,10 +592,7 @@ function Nav() {
       borderBottom: scrolled ? `1px solid ${T.border}` : "none",
       transition:"all .25s ease",
     }}>
-      <div style={{
-        maxWidth:1120, margin:"0 auto",
-        height:60, display:"flex", alignItems:"center", justifyContent:"space-between"
-      }}>
+      <div className="nav-inner">
         {/* Logo */}
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <div style={{
@@ -534,8 +609,8 @@ function Nav() {
         </div>
 
         {/* Status pill */}
-        <div style={{
-          display:"flex", alignItems:"center", gap:7,
+        <div className="nav-status" style={{
+          alignItems:"center", gap:7,
           padding:"5px 12px", borderRadius:20,
           background:T.bgSurface, border:`1px solid ${T.border}`,
         }}>
@@ -578,10 +653,7 @@ function HeroSection() {
       }} />
 
       <div style={{ maxWidth:1120, margin:"0 auto", width:"100%", position:"relative", zIndex:1 }}>
-        <div style={{
-          display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center",
-          "@media(maxWidth:768px)": { gridTemplateColumns:"1fr" }
-        }}>
+        <div className="hero-layout">
 
           {/* Left: Copy */}
           <div>
@@ -641,10 +713,7 @@ function HeroSection() {
             </div>
 
             {/* Stats row */}
-            <div style={{
-              display:"flex", gap:32, marginTop:40,
-              animation:"fade-up .7s .65s both",
-            }}>
+            <div className="hero-stats" style={{ animation:"fade-up .7s .65s both" }}>
               {[
                 { num:1422, label:"decisions guarded" },
                 { num:94, label:"% auto-approved", suffix:"%" },
@@ -663,10 +732,7 @@ function HeroSection() {
           </div>
 
           {/* Right: Live demo card */}
-          <div style={{
-            display:"flex", flexDirection:"column", gap:16,
-            animation:"fade-up .8s .4s both",
-          }}>
+          <div className="hero-card-col">
             {/* Terminal header */}
             <div style={{
               display:"flex", alignItems:"center", gap:8,
@@ -717,10 +783,7 @@ function StatusSection() {
   return (
     <div ref={ref} className="section-reveal" style={{ padding:"0 24px 80px" }}>
       <div style={{ maxWidth:1120, margin:"0 auto" }}>
-        <div style={{
-          display:"flex", gap:1, borderRadius:14, overflow:"hidden",
-          border:`1px solid ${T.border}`,
-        }}>
+        <div className="status-grid">
           {[
             { label:"DECISIONS GUARDED", value:<Counter target={1422} />, color:T.textPrimary, bg:T.bgSurface },
             { label:"AUTO-APPROVED", value:<><Counter target={1339} /> <span style={{fontSize:12,color:T.textTertiary}}>(94.1%)</span></>, color:T.success, bg:`${T.success}08` },
@@ -792,7 +855,7 @@ function ProblemSection() {
           </h2>
         </div>
 
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:1, borderRadius:14, overflow:"hidden", border:`1px solid ${T.border}` }}>
+        <div className="problem-grid">
           {PROBLEMS.map((p, i) => (
             <div key={i} style={{
               padding:"32px 28px",
@@ -992,7 +1055,7 @@ function FeaturesSection() {
           </h2>
         </div>
 
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:1, borderRadius:16, overflow:"hidden", border:`1px solid ${T.border}` }}>
+        <div className="features-grid">
           {FEATURES.map((f, i) => (
             <div key={i} style={{
               padding:"36px 28px",
@@ -1255,10 +1318,12 @@ function Footer() {
   return (
     <footer style={{
       borderTop:`1px solid ${T.border}`,
-      padding:"24px", display:"flex",
-      alignItems:"center", justifyContent:"space-between",
-      flexWrap:"wrap", gap:12,
+      padding:"24px",
     }}>
+      <div className="footer-inner" style={{
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+        flexWrap:"wrap", gap:12,
+      }}>
       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
         <div style={{
           width:20, height:20, borderRadius:5,
@@ -1278,6 +1343,7 @@ function Footer() {
         <span style={{ fontSize:11, color:T.success, fontFamily:"'JetBrains Mono',monospace" }}>
           All systems operational
         </span>
+      </div>
       </div>
     </footer>
   );
