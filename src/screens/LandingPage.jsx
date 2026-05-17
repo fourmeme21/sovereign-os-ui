@@ -28,7 +28,7 @@ function GlobalStyle() {
       *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
       html { scroll-behavior: smooth; }
       body { background:${T.bgPrimary}; color:${T.textPrimary}; font-family:'Inter',system-ui,sans-serif; overflow-x:hidden; }
-      * { font-style: normal !important; font-synthesis: none !important; -webkit-font-synthesis: none !important; }
+      * { font-style: normal; }
       ::-webkit-scrollbar { width:3px; }
       ::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
 
