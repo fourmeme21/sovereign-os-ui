@@ -4,6 +4,7 @@ import "./ekranlar.css";
 const NAV_ITEMS = [
   { to: "/junior/gecmis", label: "Geçmiş", icon: "📋" },
   { to: "/junior/hafiza", label: "Hafıza",  icon: "🧠" },
+  { to: "/junior/chat",   label: "Chat",    icon: "💬" },
   { to: "/junior/baglan", label: "Bağlan",  icon: "🔗" },
 ];
 
