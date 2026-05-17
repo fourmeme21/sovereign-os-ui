@@ -411,3 +411,60 @@
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── MOBİL UYUMU (@media max-width: 480px) ─────────────── */
+@media (max-width: 480px) {
+
+  /* Nav: "← Ana Ekran" kısalt, item padding küçült */
+  .junior-nav { padding: 8px 10px; gap: 2px; }
+  .junior-back { font-size: 10px; padding: 4px 8px; margin-right: 4px; }
+  .junior-nav-item { padding: 5px 8px; }
+  .junior-nav-label { font-size: 10px; }
+  .junior-nav-icon { font-size: 12px; }
+
+  /* Content padding */
+  .junior-content { padding: 14px 12px; }
+
+  /* Screen header */
+  .screen-title { font-size: 15px; }
+
+  /* Status bar: wrap + küçük font */
+  .junior-status-bar {
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 5px 12px;
+    font-size: 9px;
+  }
+
+  /* Onboarding modal: padding azalt, tam genişlik */
+  .onboarding-modal {
+    padding: 20px 16px;
+    margin: 12px;
+    max-width: calc(100% - 24px);
+    gap: 16px;
+  }
+  .onboarding-title { font-size: 17px; }
+  .onboarding-desc  { font-size: 13px; }
+
+  /* Service row: gap ve padding küçült */
+  .service-row  { gap: 10px; padding: 12px; }
+  .service-label { font-size: 12px; }
+  .service-desc  { font-size: 10px; }
+  .service-status { font-size: 10px; }
+
+  /* Filter butonları */
+  .filter-btn { padding: 4px 10px; font-size: 10px; }
+
+  /* Query row: dikey diz */
+  .query-row { flex-direction: column; }
+  .query-row .btn-primary { width: 100%; }
+
+  /* Gecmis: meta sütununu biraz sıkıştır */
+  .gecmis-score  { font-size: 9px; }
+  .gecmis-status { font-size: 9px; }
+  .gecmis-time   { font-size: 9px; }
+
+  /* Onboarding actions */
+  .onboarding-actions { flex-direction: column-reverse; gap: 8px; }
+  .btn-skip, .onboarding-actions .btn-primary { width: 100%; text-align: center; }
+}
