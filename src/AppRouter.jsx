@@ -6,6 +6,7 @@ import JuniorLayout from "./junior/components/JuniorLayout";
 import KararGecmisi from "./junior/screens/KararGecmisi";
 import ProjHafizasi from "./junior/screens/ProjHafizasi";
 import Baglan from "./junior/screens/Baglan";
+import ChatScreen from "./junior/screens/ChatScreen";
 
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD ?? "sovereign";
 
@@ -116,6 +117,7 @@ export default function AppRouter() {
         <Route index         element={<KararGecmisi />} />
         <Route path="gecmis" element={<KararGecmisi />} />
         <Route path="hafiza" element={<ProjHafizasi />} />
+        <Route path="chat"   element={<ChatScreen />} />
         <Route path="baglan" element={<Baglan />} />
       </Route>
     </Routes>
