@@ -247,11 +247,20 @@ function GlobalStyle() {
       .nav-inner {
         max-width:1120px; margin:0 auto;
         height:60px; display:flex; align-items:center; justify-content:space-between;
+        gap:8px;
       }
       .nav-status { display:flex; }
+      .nav-cta { white-space:nowrap; flex-shrink:0; }
       @media (max-width:540px) {
         .nav-status { display:none; }
-        .nav-inner { gap:8px; }
+      }
+
+      /* Hero text overflow fix */
+      @media (max-width:640px) {
+        .hero-h1 { font-size: clamp(28px,8vw,48px) !important; }
+        .hero-desc { font-size:14px !important; max-width:100% !important; }
+        .hero-quote { max-width:100% !important; overflow:hidden; word-break:break-word; }
+        .hero-section { overflow:hidden; }
       }
 
       /* Hero layout */
@@ -622,7 +631,7 @@ function Nav() {
 
         {/* CTA — CHANGED: href="#waitlist" → href="/junior", "Get Access →" → "Open App →" */}
         <a href="/junior" style={{ textDecoration:"none" }}>
-          <button className="btn-primary" style={{ padding:"9px 18px", fontSize:13, animation:"none" }}>
+          <button className="btn-primary nav-cta" style={{ padding:"9px 18px", fontSize:13, animation:"none" }}>
             Open App →
           </button>
         </a>
@@ -634,7 +643,7 @@ function Nav() {
 // ── SECTION 1: HERO ────────────────────────────────────────────
 function HeroSection() {
   return (
-    <section style={{
+    <section className="hero-section" style={{
       minHeight:"100vh", display:"flex", alignItems:"center",
       position:"relative", overflow:"hidden",
       padding:"80px 24px 60px",
@@ -671,7 +680,7 @@ function HeroSection() {
             </div>
 
             {/* Headline */}
-            <h1 style={{
+            <h1 className="hero-h1" style={{
               fontFamily:"'Syne',sans-serif", fontWeight:900,
               fontSize:"clamp(40px,5vw,68px)", lineHeight:1.0,
               color:T.textPrimary, marginBottom:12,
@@ -682,7 +691,7 @@ function HeroSection() {
               <span className="accent-text">New Intelligence.</span>
             </h1>
 
-            <p style={{
+            <p className="hero-desc" style={{
               fontSize:"clamp(15px,1.6vw,18px)", color:T.textSecondary,
               lineHeight:1.7, maxWidth:440,
               marginBottom:36, animation:"fade-up .7s .35s both",
@@ -692,7 +701,7 @@ function HeroSection() {
             </p>
 
             {/* Single question */}
-            <div style={{
+            <div className="hero-quote" style={{
               padding:"14px 20px", borderRadius:10,
               background:`${T.accent}10`, border:`1px solid ${T.accent}30`,
               marginBottom:36, animation:"fade-up .7s .45s both",
