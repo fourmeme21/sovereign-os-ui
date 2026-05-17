@@ -28,6 +28,7 @@ function GlobalStyle() {
       *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
       html { scroll-behavior: smooth; }
       body { background:${T.bgPrimary}; color:${T.textPrimary}; font-family:'Inter',system-ui,sans-serif; overflow-x:hidden; }
+      * { font-style: normal; }
       ::-webkit-scrollbar { width:3px; }
       ::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
 
@@ -642,7 +643,7 @@ function Nav() {
           </span>
         </div>
 
-        {/* CTA — CHANGED: href="#waitlist" → href="/junior", "Get Access →" → "Open App →" */}
+        {/* CTA */}
         <a href="/junior" style={{ textDecoration:"none" }}>
           <button className="btn-primary nav-cta" style={{ padding:"9px 18px", fontSize:13, animation:"none" }}>
             Open App →
@@ -699,6 +700,7 @@ function HeroSection() {
               color:T.textPrimary, marginBottom:12,
               animation:"fade-up .7s .2s both",
               letterSpacing:"-.02em",
+              fontStyle:"normal",
             }}>
               Control is the<br />
               <span className="accent-text">New Intelligence.</span>
@@ -871,7 +873,7 @@ function ProblemSection() {
           <div style={{ fontSize:11, color:T.accent, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".18em", marginBottom:12 }}>
             THE PROBLEM
           </div>
-          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em" }}>
+          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em", fontStyle:"normal" }}>
             AI without control is<br />
             <span style={{ color:T.danger }}>a liability.</span>
           </h2>
@@ -889,28 +891,25 @@ function ProblemSection() {
               onMouseEnter={e => e.currentTarget.style.background = T.bgElevated}
               onMouseLeave={e => e.currentTarget.style.background = T.bgSurface}
             >
-              {/* Icon */}
               <div style={{
                 fontSize:28, color:p.color, marginBottom:20,
                 fontFamily:"'JetBrains Mono',monospace",
               }}>{p.icon}</div>
 
-              {/* Stat */}
               <div style={{
                 fontFamily:"'Syne',sans-serif", fontWeight:900,
                 fontSize:42, color:p.color, lineHeight:1, marginBottom:4,
-                opacity:.9,
+                opacity:.9, fontStyle:"normal",
               }}>{p.stat}</div>
               <div style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".1em", marginBottom:20 }}>
                 {p.statLabel}
               </div>
 
-              <h3 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:18, color:T.textPrimary, marginBottom:12 }}>
+              <h3 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:18, color:T.textPrimary, marginBottom:12, fontStyle:"normal" }}>
                 {p.title}
               </h3>
               <p style={{ fontSize:14, color:T.textSecondary, lineHeight:1.7 }}>{p.body}</p>
 
-              {/* Corner accent */}
               <div style={{
                 position:"absolute", top:0, right:0, width:60, height:60,
                 background:`radial-gradient(circle at 100% 0%, ${p.color}14, transparent 70%)`,
@@ -952,7 +951,7 @@ function FlowSection() {
           <div style={{ fontSize:11, color:T.accent, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".18em", marginBottom:12 }}>
             CORE FLOW
           </div>
-          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em" }}>
+          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em", fontStyle:"normal" }}>
             Explain less.<br />
             <span className="accent-text">Decide more.</span>
           </h2>
@@ -961,7 +960,6 @@ function FlowSection() {
           </p>
         </div>
 
-        {/* Flow visualization */}
         <div className="flow-viz" style={{
           display:"flex", alignItems:"center", justifyContent:"center", gap:0,
           padding:"40px 24px", borderRadius:16,
@@ -1016,7 +1014,6 @@ function FlowSection() {
           ))}
         </div>
 
-        {/* Hidden engine callout */}
         <div className="flow-callout" style={{
           marginTop:24, padding:"16px 20px", borderRadius:10,
           background:`${T.bgPrimary}`, border:`1px dashed ${T.border}`,
@@ -1071,7 +1068,7 @@ function FeaturesSection() {
           <div style={{ fontSize:11, color:T.accent, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".18em", marginBottom:12 }}>
             CAPABILITIES
           </div>
-          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em" }}>
+          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em", fontStyle:"normal" }}>
             Built for operators<br />who don't accept<br />
             <span style={{ color:T.warning }}>"trust me."</span>
           </h2>
@@ -1089,7 +1086,6 @@ function FeaturesSection() {
               onMouseEnter={e => e.currentTarget.style.background = T.bgElevated}
               onMouseLeave={e => e.currentTarget.style.background = T.bgSurface}
             >
-              {/* Tag */}
               <div style={{
                 fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace",
                 letterSpacing:".2em", fontWeight:700, marginBottom:24,
@@ -1109,12 +1105,11 @@ function FeaturesSection() {
                 </div>
               </div>
 
-              <h3 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:20, color:T.textPrimary, marginBottom:14 }}>
+              <h3 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:20, color:T.textPrimary, marginBottom:14, fontStyle:"normal" }}>
                 {f.title}
               </h3>
               <p style={{ fontSize:14, color:T.textSecondary, lineHeight:1.7 }}>{f.body}</p>
 
-              {/* Bottom border accent */}
               <div style={{
                 position:"absolute", bottom:0, left:0, right:0, height:3,
                 background:`linear-gradient(90deg, ${f.color}60, ${f.color}20, transparent)`,
@@ -1160,14 +1155,13 @@ function RiskTierSection() {
           <div style={{ fontSize:11, color:T.accent, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".18em", marginBottom:12 }}>
             RISK ARCHITECTURE
           </div>
-          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em" }}>
+          <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em", fontStyle:"normal" }}>
             Four tiers.<br />
             <span className="accent-text">No ambiguity.</span>
           </h2>
         </div>
 
         <div style={{ borderRadius:14, overflow:"hidden", border:`1px solid ${T.border}` }}>
-          {/* Header */}
           <div className="tier-row" style={{
             background:T.bgElevated, borderBottom:`1px solid ${T.border}`,
             padding:"12px 20px",
@@ -1180,26 +1174,23 @@ function RiskTierSection() {
 
           {TIERS.map((t, i) => (
             <div key={i} className="tier-row" style={{ background:T.bgSurface }}>
-              {/* Tier badge */}
               <div style={{
                 width:36, height:36, borderRadius:8,
                 background:`${t.color}14`, border:`1px solid ${t.color}30`,
                 display:"flex", alignItems:"center", justifyContent:"center",
                 fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:16, color:t.color,
+                fontStyle:"normal",
               }}>{t.tier}</div>
 
-              {/* Range */}
               <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:14, fontWeight:700, color:t.color }}>
                 {t.range}
               </div>
 
-              {/* Desc */}
               <div className="tier-desc">
                 <div style={{ fontSize:13, fontWeight:600, color:T.textPrimary, marginBottom:3 }}>{t.label}</div>
                 <div style={{ fontSize:12, color:T.textSecondary }}>{t.desc}</div>
               </div>
 
-              {/* Action */}
               <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
                 <div style={{
                   padding:"4px 10px", borderRadius:6,
@@ -1216,7 +1207,6 @@ function RiskTierSection() {
           ))}
         </div>
 
-        {/* Visual bar */}
         <div style={{ marginTop:20, display:"flex", height:6, borderRadius:4, overflow:"hidden", gap:2 }}>
           {TIERS.map(t => (
             <div key={t.tier} style={{
@@ -1252,7 +1242,6 @@ function WaitlistSection() {
 
   return (
     <section ref={ref} className="section-reveal" id="waitlist" style={{ padding:"100px 24px 120px", position:"relative", overflow:"hidden" }}>
-      {/* Background glow */}
       <div style={{
         position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)",
         width:800, height:400, pointerEvents:"none",
@@ -1276,6 +1265,7 @@ function WaitlistSection() {
           fontFamily:"'Syne',sans-serif", fontWeight:900,
           fontSize:"clamp(32px,5vw,56px)", color:T.textPrimary,
           lineHeight:1.05, letterSpacing:"-.02em", marginBottom:16,
+          fontStyle:"normal",
         }}>
           Your AI should work<br />
           <span className="accent-text">for you.</span><br />
@@ -1293,7 +1283,7 @@ function WaitlistSection() {
             animation:"stamp .4s cubic-bezier(.34,1.56,.64,1) both",
           }}>
             <div style={{ fontSize:22, marginBottom:8 }}>✅</div>
-            <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:18, color:T.success, marginBottom:4 }}>
+            <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:18, color:T.success, marginBottom:4, fontStyle:"normal" }}>
               You're on the list.
             </div>
             <div style={{ fontSize:13, color:T.textSecondary }}>
@@ -1391,3 +1381,4 @@ export default function App() {
     </div>
   );
 }
+
