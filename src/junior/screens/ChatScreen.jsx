@@ -4,12 +4,19 @@ import { T } from "../../tokens";
 const ENGINE_URL = import.meta.env.VITE_ENGINE_URL || "https://sovereign-engine-production-2e21.up.railway.app";
 const API_URL = "https://api.anthropic.com/v1/messages";
 
-// ── ŞİFRE KAPISI (Backend doğrulama) ─────────────────────────
+// -- SIFRE KAPISI ------------------------------------------------
 function PasswordGate({ onUnlock }) {
-  const [input, setInput]     = useState("");
-  const [error, setError]     = useState(false);
-  const [shake, setShake]     = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [input, setInput]       = useState("");
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [shake, setShake]       = useState(false);
+  const [loading, setLoading]   = useState(false);
+
+  const triggerError = (msg) => {
+    setErrorMsg(msg);
+    setShake(true);
+    setInput("");
+    setTimeout(() => { setErrorMsg(null); setShake(false); }, 2000);
+  };
 
   const handleCheck = async () => {
     if (!input || loading) return;
@@ -25,61 +32,49 @@ function PasswordGate({ onUnlock }) {
         const { token } = await res.json();
         sessionStorage.setItem("se_token", token);
         onUnlock();
-      } else {
-        setError(true);
-        setShake(true);
-        setInput("");
-        setTimeout(() => { setError(false); setShake(false); }, 1500);
+        return;
       }
+
+      triggerError(res.status === 401 ? "Hatali sifre" : `Sunucu hatasi (${res.status})`);
     } catch {
-      setError(true);
-      setShake(true);
-      setTimeout(() => { setError(false); setShake(false); }, 1500);
+      triggerError("Baglanti hatasi — Railway erisилemiyor");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "24px",
-    }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
       <div style={{
         width: "100%", maxWidth: 360,
         background: T.bgSurface, border: `1px solid ${T.border}`,
         borderRadius: 16, padding: "32px 24px",
         animation: shake ? "shake .4s ease" : "none",
       }}>
-        {/* Logo */}
         <div style={{
           width: 44, height: 44, borderRadius: 11,
           background: `linear-gradient(135deg,${T.accent},#9061F9)`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 20, color: "#fff", fontWeight: 800,
-          marginBottom: 20,
+          fontSize: 20, color: "#fff", fontWeight: 800, marginBottom: 20,
         }}>S</div>
 
         <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>
           Sovereign Engine
         </div>
-        <div style={{
-          fontSize: 12, color: T.textSecondary, marginBottom: 24,
-          fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6,
-        }}>
-          Erişim için şifre gerekli.
+        <div style={{ fontSize: 12, color: T.textSecondary, marginBottom: 24, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6 }}>
+          Erisim icin sifre gerekli.
         </div>
 
         <input
           type="password"
-          placeholder="Şifre"
+          placeholder="Sifre"
           value={input}
           autoFocus
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && handleCheck()}
           style={{
             width: "100%", background: T.bgPrimary,
-            border: `1px solid ${error ? T.danger : T.border}`,
+            border: `1px solid ${errorMsg ? T.danger : T.border}`,
             borderRadius: 9, padding: "12px 14px",
             color: T.textPrimary, fontSize: 14,
             fontFamily: "'JetBrains Mono',monospace",
@@ -89,13 +84,9 @@ function PasswordGate({ onUnlock }) {
           }}
         />
 
-        {error && (
-          <div style={{
-            fontSize: 11, color: T.danger,
-            fontFamily: "'JetBrains Mono',monospace",
-            marginBottom: 10,
-          }}>
-            ✗ Hatalı şifre
+        {errorMsg && (
+          <div style={{ fontSize: 11, color: T.danger, fontFamily: "'JetBrains Mono',monospace", marginBottom: 10 }}>
+            {errorMsg}
           </div>
         )}
 
@@ -103,8 +94,7 @@ function PasswordGate({ onUnlock }) {
           onClick={handleCheck}
           disabled={!input || loading}
           style={{
-            width: "100%", padding: "12px",
-            borderRadius: 9, border: "none",
+            width: "100%", padding: "12px", borderRadius: 9, border: "none",
             background: input && !loading ? T.accent : T.bgElevated,
             color: input && !loading ? "#fff" : T.textTertiary,
             fontSize: 13, fontWeight: 700,
@@ -112,7 +102,7 @@ function PasswordGate({ onUnlock }) {
             fontFamily: "inherit", transition: "all .15s",
           }}
         >
-          {loading ? "Doğrulanıyor..." : "Giriş →"}
+          {loading ? "Dogrulanıyor..." : "Giris"}
         </button>
       </div>
 
@@ -129,7 +119,7 @@ function PasswordGate({ onUnlock }) {
   );
 }
 
-// ── API KEY EKRANI ────────────────────────────────────────────
+// -- API KEY EKRANI -----------------------------------------------
 function ApiKeySetup({ onSave }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState(false);
@@ -146,32 +136,22 @@ function ApiKeySetup({ onSave }) {
   };
 
   return (
-    <div style={{
-      flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "24px",
-    }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
       <div style={{
         width: "100%", maxWidth: 400,
         background: T.bgSurface, border: `1px solid ${T.border}`,
         borderRadius: 16, padding: "32px 24px",
       }}>
-        {/* Logo */}
         <div style={{
           width: 44, height: 44, borderRadius: 11,
           background: `linear-gradient(135deg,${T.accent},#9061F9)`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 20, color: "#fff", fontWeight: 800,
-          marginBottom: 20,
+          fontSize: 20, color: "#fff", fontWeight: 800, marginBottom: 20,
         }}>S</div>
 
-        <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>
-          Anthropic API Key
-        </div>
-        <div style={{
-          fontSize: 12, color: T.textSecondary, marginBottom: 24,
-          fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6,
-        }}>
-          Key tarayıcında kalır, hiçbir yere gönderilmez.
+        <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>Anthropic API Key</div>
+        <div style={{ fontSize: 12, color: T.textSecondary, marginBottom: 24, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6 }}>
+          Key tarayicinda kalir, hicbir yere gonderilmez.
         </div>
 
         <input
@@ -194,12 +174,8 @@ function ApiKeySetup({ onSave }) {
         />
 
         {error && (
-          <div style={{
-            fontSize: 11, color: T.danger,
-            fontFamily: "'JetBrains Mono',monospace",
-            marginBottom: 10,
-          }}>
-            ✗ Geçersiz key — sk-ant- ile başlamalı
+          <div style={{ fontSize: 11, color: T.danger, fontFamily: "'JetBrains Mono',monospace", marginBottom: 10 }}>
+            Gecersiz key — sk-ant- ile baslamali
           </div>
         )}
 
@@ -207,8 +183,7 @@ function ApiKeySetup({ onSave }) {
           onClick={handleSave}
           disabled={!input}
           style={{
-            width: "100%", padding: "12px",
-            borderRadius: 9, border: "none",
+            width: "100%", padding: "12px", borderRadius: 9, border: "none",
             background: input ? T.accent : T.bgElevated,
             color: input ? "#fff" : T.textTertiary,
             fontSize: 13, fontWeight: 700,
@@ -216,13 +191,10 @@ function ApiKeySetup({ onSave }) {
             fontFamily: "inherit", transition: "all .15s",
           }}
         >
-          Bağlan →
+          Baglan
         </button>
 
-        <div style={{
-          marginTop: 16, fontSize: 11, color: T.textTertiary,
-          fontFamily: "'JetBrains Mono',monospace", textAlign: "center",
-        }}>
+        <div style={{ marginTop: 16, fontSize: 11, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace", textAlign: "center" }}>
           console.anthropic.com → API Keys
         </div>
       </div>
@@ -230,16 +202,14 @@ function ApiKeySetup({ onSave }) {
   );
 }
 
-// ── MESAJ BALONU ──────────────────────────────────────────────
+// -- MESAJ BALONU ------------------------------------------------
 function MessageBubble({ msg }) {
-  const isUser = msg.role === "user";
+  const isUser   = msg.role === "user";
   const isSystem = msg.role === "system";
 
   if (isSystem) {
     return (
-      <div style={{
-        textAlign: "center", padding: "6px 0",
-      }}>
+      <div style={{ textAlign: "center", padding: "6px 0" }}>
         <span style={{
           fontSize: 10, color: T.textTertiary,
           fontFamily: "'JetBrains Mono',monospace",
@@ -251,11 +221,7 @@ function MessageBubble({ msg }) {
   }
 
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: isUser ? "flex-end" : "flex-start",
-      marginBottom: 12,
-    }}>
+    <div style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 12 }}>
       {!isUser && (
         <div style={{
           width: 28, height: 28, borderRadius: 7, flexShrink: 0,
@@ -272,18 +238,11 @@ function MessageBubble({ msg }) {
         borderRadius: isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
         padding: "10px 14px",
       }}>
-        <div style={{
-          fontSize: 14, color: T.textPrimary,
-          lineHeight: 1.65, whiteSpace: "pre-wrap", wordBreak: "break-word",
-        }}>
+        <div style={{ fontSize: 14, color: T.textPrimary, lineHeight: 1.65, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
           {msg.content}
         </div>
         {msg.risk && (
-          <div style={{
-            marginTop: 8, paddingTop: 8,
-            borderTop: `1px solid ${T.border}`,
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 6 }}>
             <div style={{
               fontSize: 9, fontFamily: "'JetBrains Mono',monospace",
               color: msg.risk <= 3 ? T.success : msg.risk <= 6 ? T.warning : T.danger,
@@ -292,9 +251,7 @@ function MessageBubble({ msg }) {
             }}>
               RISK {msg.risk}/10
             </div>
-            <span style={{ fontSize: 9, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
-              engine intercepted
-            </span>
+            <span style={{ fontSize: 9, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>engine intercepted</span>
           </div>
         )}
       </div>
@@ -302,7 +259,7 @@ function MessageBubble({ msg }) {
   );
 }
 
-// ── YAZMA GÖSTERGESİ ─────────────────────────────────────────
+// -- TYPING INDICATOR --------------------------------------------
 function TypingIndicator() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
@@ -324,51 +281,31 @@ function TypingIndicator() {
           }} />
         ))}
       </div>
-      <style>{`
-        @keyframes dot-bounce {
-          0%,100%{transform:scale(1);opacity:.35;}
-          50%{transform:scale(1.6);opacity:1;}
-        }
-      `}</style>
+      <style>{`@keyframes dot-bounce{0%,100%{transform:scale(1);opacity:.35;}50%{transform:scale(1.6);opacity:1;}}`}</style>
     </div>
   );
 }
 
-// ── ANA CHAT EKRANI ───────────────────────────────────────────
+// -- ANA CHAT EKRANI ---------------------------------------------
 export default function ChatScreen() {
-  const [unlocked, setUnlocked] = useState(
-    () => !!sessionStorage.getItem("se_token")
-  );
-  const [apiKey, setApiKey] = useState(
-    () => localStorage.getItem("anthropic_api_key") ?? ""
-  );
-  const [messages, setMessages] = useState([
-    {
-      role: "system",
-      content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor",
-    },
+  const [unlocked, setUnlocked]   = useState(() => !!sessionStorage.getItem("se_token"));
+  const [apiKey, setApiKey]       = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
+  const [messages, setMessages]   = useState([
+    { role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" },
   ]);
-  const [input, setInput]     = useState("");
-  const [loading, setLoading] = useState(false);
+  const [input, setInput]         = useState("");
+  const [loading, setLoading]     = useState(false);
   const [engineLog, setEngineLog] = useState(null);
-  const bottomRef = useRef(null);
+  const bottomRef   = useRef(null);
   const textareaRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // ── Şifre kapısı ─────────────────────────────────────────
-  if (!unlocked) {
-    return <PasswordGate onUnlock={() => setUnlocked(true)} />;
-  }
+  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
+  if (!apiKey)   return <ApiKeySetup onSave={setApiKey} />;
 
-  // ── API Key kapısı ────────────────────────────────────────
-  if (!apiKey) {
-    return <ApiKeySetup onSave={setApiKey} />;
-  }
-
-  // ── Engine'e decision gönder ──────────────────────────────
   const logToEngine = async (userMsg, assistantMsg, riskScore) => {
     try {
       await fetch(`${ENGINE_URL}/api/decisions`, {
@@ -378,25 +315,20 @@ export default function ChatScreen() {
           action:      userMsg.slice(0, 80),
           policy:      "chat-interface",
           verdict:     riskScore <= 3 ? "PERMIT" : riskScore <= 6 ? "ASK_HUMAN" : "DENY",
-          criticality: riskScore <= 3 ? "LOW" : riskScore <= 6 ? "MEDIUM" : "HIGH",
+          criticality: riskScore <= 3 ? "LOW"    : riskScore <= 6 ? "MEDIUM"    : "HIGH",
           reason:      assistantMsg.slice(0, 200),
           latency:     Math.round(Math.random() * 400 + 100),
         }),
       });
-    } catch {
-      // Engine offline olsa da chat çalışmaya devam eder
-    }
+    } catch { /* engine offline - devam et */ }
   };
 
-  // ── Mesaj gönder ─────────────────────────────────────────
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || loading) return;
 
-    const userMsg = { role: "user", content: text };
     const history = messages.filter(m => m.role !== "system");
-
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => [...prev, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
     setEngineLog(null);
@@ -405,15 +337,15 @@ export default function ChatScreen() {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
-          "Content-Type":            "application/json",
-          "x-api-key":               apiKey,
-          "anthropic-version":       "2023-06-01",
+          "Content-Type":      "application/json",
+          "x-api-key":         apiKey,
+          "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
           model:      "claude-sonnet-4-20250514",
           max_tokens: 1024,
-          system:     "Sen Sovereign Engine'e bağlı bir AI asistanısın. Kısa ve net cevaplar ver. Her aksiyon risk değerlendirmesine tabi.",
+          system:     "Sen Sovereign Engine'e bagli bir AI asistaninsin. Kisa ve net cevaplar ver. Her aksiyon risk degerlendirmesine tabi.",
           messages:   [
             ...history.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: text },
@@ -426,67 +358,47 @@ export default function ChatScreen() {
         throw new Error(err.error?.message ?? `HTTP ${res.status}`);
       }
 
-      const data = await res.json();
+      const data  = await res.json();
       const reply = data.content?.[0]?.text ?? "";
 
-      // Risk skoru hesapla (basit heuristic)
-      const riskKeywords = ["sil", "kaldır", "deploy", "production", "token", "şifre", "delete", "remove"];
+      const riskKeywords = ["sil", "kaldir", "deploy", "production", "token", "sifre", "delete", "remove"];
       const risk = riskKeywords.some(k => text.toLowerCase().includes(k)) ? 7 : 2;
 
-      const assistantMsg = { role: "assistant", content: reply, risk };
-      setMessages(prev => [...prev, assistantMsg]);
-
-      // Engine'e logla
+      setMessages(prev => [...prev, { role: "assistant", content: reply, risk }]);
       logToEngine(text, reply, risk);
       setEngineLog({ risk, status: risk <= 3 ? "AUTO_APPROVED" : "PENDING_HUMAN" });
 
     } catch (err) {
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: `⚠ Hata: ${err.message}`,
-      }]);
+      setMessages(prev => [...prev, { role: "assistant", content: `Hata: ${err.message}` }]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   const clearKey = () => {
     localStorage.removeItem("anthropic_api_key");
     setApiKey("");
-    setMessages([{
-      role: "system",
-      content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor",
-    }]);
+    setMessages([{ role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" }]);
   };
 
   return (
-    <div style={{
-      display: "flex", flexDirection: "column",
-      height: "100%", overflow: "hidden",
-    }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
 
-      {/* Üst bar */}
+      {/* Ust bar */}
       <div style={{
-        padding: "12px 16px",
-        borderBottom: `1px solid ${T.border}`,
+        padding: "12px 16px", borderBottom: `1px solid ${T.border}`,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: T.bgSurface, flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{
-            width: 7, height: 7, borderRadius: "50%", background: T.success,
-          }} />
-          <span style={{
-            fontSize: 11, color: T.success,
-            fontFamily: "'JetBrains Mono',monospace", fontWeight: 600,
-          }}>ENGINE ACTIVE</span>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: T.success }} />
+          <span style={{ fontSize: 11, color: T.success, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>
+            ENGINE ACTIVE
+          </span>
         </div>
 
         {engineLog && (
@@ -501,37 +413,25 @@ export default function ChatScreen() {
           </div>
         )}
 
-        <button
-          onClick={clearKey}
-          style={{
-            fontSize: 10, color: T.textTertiary,
-            fontFamily: "'JetBrains Mono',monospace",
-            background: "transparent", border: "none",
-            cursor: "pointer", padding: "3px 8px",
-          }}
-        >
+        <button onClick={clearKey} style={{
+          fontSize: 10, color: T.textTertiary,
+          fontFamily: "'JetBrains Mono',monospace",
+          background: "transparent", border: "none",
+          cursor: "pointer", padding: "3px 8px",
+        }}>
           API Key ✕
         </button>
       </div>
 
       {/* Mesajlar */}
-      <div style={{
-        flex: 1, overflowY: "auto", padding: "16px",
-        display: "flex", flexDirection: "column",
-      }}>
-        {messages.map((msg, i) => (
-          <MessageBubble key={i} msg={msg} />
-        ))}
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column" }}>
+        {messages.map((msg, i) => <MessageBubble key={i} msg={msg} />)}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input alanı */}
-      <div style={{
-        padding: "12px 16px",
-        borderTop: `1px solid ${T.border}`,
-        background: T.bgSurface, flexShrink: 0,
-      }}>
+      {/* Input */}
+      <div style={{ padding: "12px 16px", borderTop: `1px solid ${T.border}`, background: T.bgSurface, flexShrink: 0 }}>
         <div style={{
           display: "flex", gap: 10, alignItems: "flex-end",
           background: T.bgPrimary, border: `1px solid ${T.border}`,
@@ -542,7 +442,7 @@ export default function ChatScreen() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Mesajını yaz... (Enter → gönder, Shift+Enter → satır)"
+            placeholder="Mesajini yaz... (Enter → gonder, Shift+Enter → satir)"
             rows={1}
             style={{
               flex: 1, background: "transparent", border: "none",
@@ -562,15 +462,10 @@ export default function ChatScreen() {
               fontSize: 16, display: "flex", alignItems: "center",
               justifyContent: "center", flexShrink: 0, transition: "all .15s",
             }}
-          >
-            ↑
-          </button>
+          >↑</button>
         </div>
-        <div style={{
-          marginTop: 6, fontSize: 10, color: T.textTertiary,
-          fontFamily: "'JetBrains Mono',monospace", textAlign: "center",
-        }}>
-          Her mesaj Sovereign Engine üzerinden geçiyor · Risk skorlanıyor
+        <div style={{ marginTop: 6, fontSize: 10, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace", textAlign: "center" }}>
+          Her mesaj Sovereign Engine uzerinden geciyor · Risk skorlanıyor
         </div>
       </div>
     </div>
