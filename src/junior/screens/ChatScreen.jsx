@@ -1,4 +1,4 @@
-import { supabase } from "../../../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import { useState, useRef, useEffect } from "react";
 import { T } from "../../tokens";
 
