@@ -18,9 +18,12 @@ export default function Baglan() {
   });
 
   const [githubToken,    setGithubToken]    = useState(() => localStorage.getItem("github_token") ?? "");
+  const [githubRepo,     setGithubRepo]     = useState(() => localStorage.getItem("github_repo")  ?? ""); // TASK 0.6
   const [githubInput,    setGithubInput]    = useState("");
+  const [githubRepoInput, setGithubRepoInput] = useState("");                                              // TASK 0.6
   const [githubFormOpen, setGithubFormOpen] = useState(false);
   const [githubSaved,    setGithubSaved]    = useState(false);
+  const [repoError,      setRepoError]      = useState("");                                                // TASK 0.6
 
   useEffect(() => {
     checkHealth();
@@ -57,18 +60,38 @@ export default function Baglan() {
       setHealth((h) => ({ ...h, memory: "error" }));
     }
 
-    // GitHub — localStorage token kontrolü
+    // GitHub — token VE repo zorunlu  (TASK 0.6: repo kontrolü eklendi)
     const token = localStorage.getItem("github_token");
-    setHealth((h) => ({ ...h, github: token ? "ok" : "error" }));
+    const repo  = localStorage.getItem("github_repo");
+    setHealth((h) => ({ ...h, github: token && repo ? "ok" : "error" }));
   };
 
-  const saveGithubToken = () => {
-    const trimmed = githubInput.trim();
-    if (!trimmed) return;
-    localStorage.setItem("github_token", trimmed);
-    setGithubToken(trimmed);
+  // TASK 0.6: saveGithubToken → saveGithubSettings (token + repo birlikte kaydedilir)
+  const saveGithubSettings = () => {
+    const trimmedToken = githubInput.trim();
+    const trimmedRepo  = githubRepoInput.trim();
+
+    if (!trimmedToken) return;
+
+    // Repo girilmişse format kontrolü
+    if (trimmedRepo && !trimmedRepo.includes("/")) {
+      setRepoError("Repo formatı hatalı — örnek: kullanici/repo-adi");
+      return;
+    }
+
+    setRepoError("");
+
+    localStorage.setItem("github_token", trimmedToken);
+    setGithubToken(trimmedToken);
+
+    if (trimmedRepo) {
+      localStorage.setItem("github_repo", trimmedRepo);
+      setGithubRepo(trimmedRepo);
+    }
+
     setHealth((h) => ({ ...h, github: "ok" }));
     setGithubInput("");
+    setGithubRepoInput("");
     setGithubFormOpen(false);
     setGithubSaved(true);
     setTimeout(() => setGithubSaved(false), 2500);
@@ -76,7 +99,9 @@ export default function Baglan() {
 
   const removeGithubToken = () => {
     localStorage.removeItem("github_token");
+    localStorage.removeItem("github_repo"); // TASK 0.6: repo da temizlenir
     setGithubToken("");
+    setGithubRepo("");
     setHealth((h) => ({ ...h, github: "error" }));
     setGithubFormOpen(false);
   };
@@ -104,7 +129,7 @@ export default function Baglan() {
 
       <div className="service-list">
         {SERVICES.map((s) => {
-          const status = health[s.key];
+          const status  = health[s.key];
           const isGithub = s.key === "github";
 
           return (
@@ -115,8 +140,11 @@ export default function Baglan() {
                 <div className="service-info">
                   <span className="service-label">{s.label}</span>
                   <span className="service-desc">
+                    {/* TASK 0.6: token varsa masked token, repo varsa repo adı gösterilir */}
                     {isGithub && githubToken
-                      ? `ghp_${"•".repeat(8)}${githubToken.slice(-4)}`
+                      ? githubRepo
+                        ? githubRepo
+                        : `ghp_${"•".repeat(8)}${githubToken.slice(-4)}`
                       : s.desc}
                   </span>
                 </div>
@@ -130,6 +158,8 @@ export default function Baglan() {
                       style={{ fontSize: 11, padding: "4px 10px" }}
                       onClick={() => {
                         setGithubInput("");
+                        setGithubRepoInput("");
+                        setRepoError("");
                         setGithubFormOpen((v) => !v);
                       }}
                     >
@@ -139,7 +169,7 @@ export default function Baglan() {
                 </div>
               </div>
 
-              {/* GitHub token formu */}
+              {/* GitHub formu — token + repo */}
               {isGithub && githubFormOpen && (
                 <div style={{
                   background: "var(--bg-elevated, #1a1a1a)",
@@ -152,6 +182,7 @@ export default function Baglan() {
                   gap: 10,
                   animation: "fade-in 0.2s ease",
                 }}>
+                  {/* Token alanı */}
                   <label style={{
                     fontSize: 10, fontWeight: 700, letterSpacing: ".12em",
                     color: "var(--text-tertiary, #555)",
@@ -164,12 +195,11 @@ export default function Baglan() {
                     placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
                     value={githubInput}
                     onChange={(e) => setGithubInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && saveGithubToken()}
+                    onKeyDown={(e) => e.key === "Enter" && saveGithubSettings()}
                     autoFocus
                     style={{
                       width: "100%", boxSizing: "border-box",
-                      padding: "9px 12px",
-                      borderRadius: 7,
+                      padding: "9px 12px", borderRadius: 7,
                       border: "1px solid var(--border, #2a2a2a)",
                       background: "var(--bg-primary, #0a0a0a)",
                       color: "var(--text-primary, #e5e5e5)",
@@ -179,16 +209,51 @@ export default function Baglan() {
                       caretColor: "var(--accent, #7C3AED)",
                     }}
                   />
+
+                  {/* TASK 0.6 — Repo alanı */}
+                  <label style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: ".12em",
+                    color: "var(--text-tertiary, #555)",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    marginTop: 4,
+                  }}>
+                    GITHUB REPO <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(opsiyonel)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="kullanici/repo-adi"
+                    value={githubRepoInput}
+                    onChange={(e) => { setGithubRepoInput(e.target.value); setRepoError(""); }}
+                    onKeyDown={(e) => e.key === "Enter" && saveGithubSettings()}
+                    style={{
+                      width: "100%", boxSizing: "border-box",
+                      padding: "9px 12px", borderRadius: 7,
+                      border: `1px solid ${repoError ? "var(--danger, #ef4444)" : "var(--border, #2a2a2a)"}`,
+                      background: "var(--bg-primary, #0a0a0a)",
+                      color: "var(--text-primary, #e5e5e5)",
+                      fontSize: 13,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      outline: "none",
+                      caretColor: "var(--accent, #7C3AED)",
+                    }}
+                  />
+                  {repoError && (
+                    <span style={{ fontSize: 11, color: "var(--danger, #ef4444)", marginTop: -4 }}>
+                      {repoError}
+                    </span>
+                  )}
+
                   <div style={{ fontSize: 11, color: "var(--text-tertiary, #555)", lineHeight: 1.5 }}>
                     GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens
                     <br />
                     <span style={{ color: "var(--accent, #7C3AED)" }}>repo</span> yetkisi yeterli.
                   </div>
+
                   <div style={{ display: "flex", gap: 8 }}>
                     <button
                       className="btn-primary"
                       disabled={!githubInput.trim()}
-                      onClick={saveGithubToken}
+                      onClick={saveGithubSettings}
                       style={{ flex: 1 }}
                     >
                       Kaydet
@@ -215,7 +280,7 @@ export default function Baglan() {
                   fontSize: 12, color: "var(--success, #2dd4bf)",
                   animation: "fade-in 0.2s ease",
                 }}>
-                  ✓ GitHub token kaydedildi
+                  ✓ GitHub ayarları kaydedildi
                 </div>
               )}
             </div>
