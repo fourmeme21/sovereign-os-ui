@@ -7,21 +7,21 @@ import { apiCall } from "../lib/apiClient";
 
 // ─── Tier config ──────────────────────────────────────────────────────────────
 
-const TIER_LABEL: Record<string, string> = {
+const TIER_LABEL = {
   free: "ÜCRETSİZ",
   solo: "SOLO",
   pro:  "PRO",
   team: "TEAM",
 };
 
-const TIER_COLOR: Record<string, string> = {
+const TIER_COLOR = {
   free: "#555",
   solo: "#2DD4BF",
   pro:  "#818CF8",
   team: "#F59E0B",
 };
 
-const TIER_LIMIT: Record<string, number | null> = {
+const TIER_LIMIT = {
   free: 50,
   solo: null,
   pro:  null,
@@ -40,7 +40,7 @@ export function SettingsScreen({ lang, onLangChange, onClear }) {
   const [threshold, setThreshold] = useState(7);
   const [cleared, setCleared]     = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
-  const [portalError, setPortalError]     = useState<string | null>(null);
+  const [portalError, setPortalError]     = useState(null);
 
   const handleClear = () => {
     onClear();
@@ -69,7 +69,6 @@ export function SettingsScreen({ lang, onLangChange, onClear }) {
   const usageColor =
     usagePct > 80 ? "#EF4444" : usagePct > 60 ? "#F59E0B" : "#2DD4BF";
 
-  // ─── Section wrapper (mevcut pattern) ─────────────────────────────────────
   const Section = ({ title, children }) => (
     <div style={{ marginBottom: 28 }}>
       <div style={{
@@ -83,15 +82,12 @@ export function SettingsScreen({ lang, onLangChange, onClear }) {
     </div>
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-
   return (
     <div style={{ animation: "fade-in .25s ease" }}>
 
       {/* ── Abonelik ── */}
       <Section title="ABONELİK">
 
-        {/* Plan badge */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
           <span style={{
             fontSize: 10, fontWeight: 700, letterSpacing: ".12em",
@@ -110,7 +106,6 @@ export function SettingsScreen({ lang, onLangChange, onClear }) {
           )}
         </div>
 
-        {/* Usage bar — sadece free */}
         {tier === "free" && (
           <div style={{ marginBottom: 16 }}>
             <div style={{
@@ -136,11 +131,10 @@ export function SettingsScreen({ lang, onLangChange, onClear }) {
           </div>
         )}
 
-        {/* Aksiyonlar */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {tier === "free" ? (
             <button
-              onClick={() => navigate("/fiyatlandirma")}
+              onClick={() => navigate("/junior/fiyatlandirma")}
               style={{
                 padding: "8px 18px", borderRadius: 8, border: "none",
                 background: "#2DD4BF", color: "#0D0D0D",
@@ -169,7 +163,7 @@ export function SettingsScreen({ lang, onLangChange, onClear }) {
                 {portalLoading ? "Açılıyor…" : "Aboneliği Yönet"}
               </button>
               <button
-                onClick={() => navigate("/fiyatlandirma")}
+                onClick={() => navigate("/junior/fiyatlandirma")}
                 style={{
                   padding: "8px 18px", borderRadius: 8,
                   border: `1px solid ${T.border}`,
