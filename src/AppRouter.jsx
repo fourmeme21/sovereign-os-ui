@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./screens/LandingPage";
 import WaitlistAdmin from "./screens/WaitlistAdmin";
+import LegalScreen from "./screens/LegalScreen";
 import JuniorLayout from "./junior/components/JuniorLayout";
 import KararGecmisi from "./junior/screens/KararGecmisi";
 import ProjHafizasi from "./junior/screens/ProjHafizasi";
@@ -106,8 +107,6 @@ function AdminGate({ children }) {
 }
 
 // -- AUTH GUARD — /junior rotaları için -------------------------
-// Giriş yapılmamışsa /junior/chat'e yönlendirir
-// Chat.jsx içindeki LoginGate devreye girer
 function AuthGuard({ children }) {
   const { user, loading } = useAuth();
 
@@ -122,7 +121,6 @@ function AuthGuard({ children }) {
     </div>
   );
 
-  // Giriş yapılmamışsa chat ekranına yönlendir — LoginGate orada çıkar
   if (!user) return <Navigate to="/junior/chat" replace />;
 
   return children;
@@ -133,6 +131,7 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/legal/:type" element={<LegalScreen />} />
 
       <Route
         path="/admin/waitlist"
@@ -144,10 +143,8 @@ export default function AppRouter() {
       />
 
       <Route path="/junior" element={<JuniorLayout />}>
-        {/* Chat — auth guard yok, LoginGate kendi içinde */}
         <Route path="chat"   element={<ChatScreen />} />
 
-        {/* Diğer sayfalar — auth zorunlu */}
         <Route index element={
           <AuthGuard><KararGecmisi /></AuthGuard>
         } />
