@@ -1,6 +1,6 @@
 // src/stores/authStore.ts
 import { create } from "zustand";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabaseClient";
 
 interface UserProfile {
   tier: "free" | "solo" | "pro" | "team";
