@@ -1,7 +1,7 @@
 // src/junior/screens/Chat.jsx
 // Phase C — Supabase Auth entegrasyonu
-// Değişiklik 1: PasswordGate kaldırıldı → Supabase email/password login
-// Değişiklik 2: logToEngine → Authorization: Bearer <jwt> eklendi
+// Değişiklik 1: LoginGate → Magic Link akışı (şifre formu kaldırıldı)
+// Değişiklik 2: logToEngine → Authorization: Bearer <jwt> korundu
 // NOT: Anthropic API çağrısı korundu — ileride browser agent'a geçilecek
 
 import { supabase } from "../../lib/supabaseClient";
@@ -14,34 +14,81 @@ const API_URL    = "https://api.anthropic.com/v1/messages";
 
 // -- LOGIN EKRANI ------------------------------------------------
 function LoginGate({ onLogin }) {
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [shake,    setShake]    = useState(false);
-  const [loading,  setLoading]  = useState(false);
+  const [email,     setEmail]     = useState("");
+  const [errorMsg,  setErrorMsg]  = useState(null);
+  const [shake,     setShake]     = useState(false);
+  const [loading,   setLoading]   = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
 
-  const { signIn } = useAuth();
+  const { signInWithOtp } = useAuth();
 
   const triggerError = (msg) => {
     setErrorMsg(msg);
     setShake(true);
-    setPassword("");
     setTimeout(() => { setErrorMsg(null); setShake(false); }, 2500);
   };
 
-  const handleLogin = async () => {
-    if (!email || !password || loading) return;
+  const handleMagicLink = async () => {
+    if (!email || loading) return;
     setLoading(true);
     try {
-      await signIn(email, password);
-      onLogin();
+      await signInWithOtp(email);
+      setMagicSent(true);
     } catch (err) {
-      triggerError(err.message ?? "Giriş başarısız");
+      triggerError(err.message ?? "Gönderilemedi");
     } finally {
       setLoading(false);
     }
   };
 
+  // Magic link gönderildi → "emailini kontrol et" ekranı
+  if (magicSent) {
+    return (
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+        <div style={{
+          width: "100%", maxWidth: 360,
+          background: T.bgSurface, border: `1px solid ${T.border}`,
+          borderRadius: 16, padding: "32px 24px", textAlign: "center",
+        }}>
+          <div style={{ fontSize: 38, marginBottom: 16, lineHeight: 1 }}>✉️</div>
+
+          <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 8 }}>
+            Emailini kontrol et
+          </div>
+          <div style={{
+            fontSize: 12, color: T.textSecondary,
+            fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.7,
+          }}>
+            <span style={{ color: T.accent }}>{email}</span>
+            {" "}adresine giriş linki gönderdik.{"\n"}Linke tıklayınca otomatik giriş yaparsın.
+          </div>
+          <div style={{
+            marginTop: 18, padding: "8px 12px",
+            background: `${T.success}10`, border: `1px solid ${T.success}30`,
+            borderRadius: 8,
+            fontSize: 10, color: T.textTertiary,
+            fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6,
+          }}>
+            Link 60 dk geçerli · Spam klasörünü de kontrol et
+          </div>
+
+          <button
+            onClick={() => { setMagicSent(false); setEmail(""); }}
+            style={{
+              marginTop: 20, fontSize: 11, color: T.textTertiary,
+              background: "transparent", border: "none",
+              cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
+              textDecoration: "underline",
+            }}
+          >
+            ← Farklı email kullan
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Normal giriş formu — email + magic link butonu
   return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
       <div style={{
@@ -60,8 +107,11 @@ function LoginGate({ onLogin }) {
         <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>
           Sovereign Engine
         </div>
-        <div style={{ fontSize: 12, color: T.textSecondary, marginBottom: 24, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6 }}>
-          Devam etmek için giriş yap.
+        <div style={{
+          fontSize: 12, color: T.textSecondary, marginBottom: 24,
+          fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6,
+        }}>
+          Email adresine magic link gönderiyoruz —{"\n"}şifre gerekmez.
         </div>
 
         <input
@@ -70,23 +120,7 @@ function LoginGate({ onLogin }) {
           value={email}
           autoFocus
           onChange={e => setEmail(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleLogin()}
-          style={{
-            width: "100%", background: T.bgPrimary,
-            border: `1px solid ${T.border}`, borderRadius: 9,
-            padding: "12px 14px", color: T.textPrimary, fontSize: 14,
-            fontFamily: "'JetBrains Mono',monospace", outline: "none",
-            marginBottom: 10, caretColor: T.accent, boxSizing: "border-box",
-            transition: "border-color .15s",
-          }}
-        />
-
-        <input
-          type="password"
-          placeholder="Şifre"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleLogin()}
+          onKeyDown={e => e.key === "Enter" && handleMagicLink()}
           style={{
             width: "100%", background: T.bgPrimary,
             border: `1px solid ${errorMsg ? T.danger : T.border}`, borderRadius: 9,
@@ -98,24 +132,27 @@ function LoginGate({ onLogin }) {
         />
 
         {errorMsg && (
-          <div style={{ fontSize: 11, color: T.danger, fontFamily: "'JetBrains Mono',monospace", marginBottom: 10 }}>
+          <div style={{
+            fontSize: 11, color: T.danger,
+            fontFamily: "'JetBrains Mono',monospace", marginBottom: 10,
+          }}>
             {errorMsg}
           </div>
         )}
 
         <button
-          onClick={handleLogin}
-          disabled={!email || !password || loading}
+          onClick={handleMagicLink}
+          disabled={!email || loading}
           style={{
             width: "100%", padding: "12px", borderRadius: 9, border: "none",
-            background: (email && password && !loading) ? T.accent : T.bgElevated,
-            color: (email && password && !loading) ? "#fff" : T.textTertiary,
+            background: (email && !loading) ? T.accent : T.bgElevated,
+            color: (email && !loading) ? "#fff" : T.textTertiary,
             fontSize: 13, fontWeight: 700,
-            cursor: (email && password && !loading) ? "pointer" : "not-allowed",
+            cursor: (email && !loading) ? "pointer" : "not-allowed",
             fontFamily: "inherit", transition: "all .15s",
           }}
         >
-          {loading ? "Giriş yapılıyor..." : "Giriş →"}
+          {loading ? "Gönderiliyor..." : "Magic Link Gönder →"}
         </button>
       </div>
 
@@ -326,7 +363,7 @@ export default function ChatScreen() {
     </div>
   );
 
-  // Giriş yapılmamışsa login ekranı
+  // Giriş yapılmamışsa Magic Link login ekranı
   if (!user) return <LoginGate onLogin={() => {}} />;
 
   // API key yoksa setup ekranı (geçici — ileride browser agent)
