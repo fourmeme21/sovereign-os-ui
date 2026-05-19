@@ -1,5 +1,5 @@
 // src/lib/apiClient.ts
-import { supabase } from "./supabase";
+import { supabase } from "./supabaseClient";
 
 const ENGINE_URL = import.meta.env.VITE_ENGINE_URL as string;
 
