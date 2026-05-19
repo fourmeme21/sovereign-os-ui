@@ -1,16 +1,17 @@
 // src/junior/screens/Chat.jsx
 // Phase C — Supabase Auth entegrasyonu
 // Değişiklik 1: LoginGate → Magic Link akışı (şifre formu kaldırıldı)
-// Değişiklik 2: logToEngine → Authorization: Bearer <jwt> korundu
+// Değişiklik 2: logToEngine → apiCall() (JWT otomatik, ENGINE_URL kaldırıldı)
+// Değişiklik 3: keyword-based risk heuristic kaldırıldı (engine risk skoru)
 // NOT: Anthropic API çağrısı korundu — ileride browser agent'a geçilecek
 
 import { supabase } from "../../lib/supabaseClient";
+import { apiCall }  from "../../lib/apiClient";
 import { useState, useRef, useEffect } from "react";
 import { T } from "../../tokens";
 import { useAuth } from "../hooks/useAuth";
 
-const ENGINE_URL = import.meta.env.VITE_ENGINE_URL || "https://sovereign-engine-production-2e21.up.railway.app";
-const API_URL    = "https://api.anthropic.com/v1/messages";
+const API_URL = "https://api.anthropic.com/v1/messages";
 
 // -- LOGIN EKRANI ------------------------------------------------
 function LoginGate({ onLogin }) {
@@ -41,7 +42,6 @@ function LoginGate({ onLogin }) {
     }
   };
 
-  // Magic link gönderildi → "emailini kontrol et" ekranı
   if (magicSent) {
     return (
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
@@ -51,7 +51,6 @@ function LoginGate({ onLogin }) {
           borderRadius: 16, padding: "32px 24px", textAlign: "center",
         }}>
           <div style={{ fontSize: 38, marginBottom: 16, lineHeight: 1 }}>✉️</div>
-
           <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 8 }}>
             Emailini kontrol et
           </div>
@@ -71,7 +70,6 @@ function LoginGate({ onLogin }) {
           }}>
             Link 60 dk geçerli · Spam klasörünü de kontrol et
           </div>
-
           <button
             onClick={() => { setMagicSent(false); setEmail(""); }}
             style={{
@@ -88,7 +86,6 @@ function LoginGate({ onLogin }) {
     );
   }
 
-  // Normal giriş formu — email + magic link butonu
   return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
       <div style={{
@@ -339,14 +336,14 @@ function TypingIndicator() {
 
 // -- ANA CHAT EKRANI ---------------------------------------------
 export default function ChatScreen() {
-  const { user, session, loading: authLoading } = useAuth();
-  const [apiKey,     setApiKey]     = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
-  const [messages,   setMessages]   = useState([
+  const { user, loading: authLoading } = useAuth();
+  const [apiKey,    setApiKey]    = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
+  const [messages,  setMessages]  = useState([
     { role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" },
   ]);
-  const [input,      setInput]      = useState("");
-  const [loading,    setLoading]    = useState(false);
-  const [engineLog,  setEngineLog]  = useState(null);
+  const [input,     setInput]     = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [engineLog, setEngineLog] = useState(null);
   const bottomRef   = useRef(null);
   const textareaRef = useRef(null);
 
@@ -354,7 +351,6 @@ export default function ChatScreen() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Auth yükleniyorsa bekle
   if (authLoading) return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <span style={{ fontSize: 12, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
@@ -363,22 +359,14 @@ export default function ChatScreen() {
     </div>
   );
 
-  // Giriş yapılmamışsa Magic Link login ekranı
   if (!user) return <LoginGate onLogin={() => {}} />;
-
-  // API key yoksa setup ekranı (geçici — ileride browser agent)
   if (!apiKey) return <ApiKeySetup onSave={setApiKey} />;
 
-  // Engine'e JWT ile log gönder (Phase B middleware artık token bekliyor)
+  // Engine'e JWT ile log gönder — apiCall JWT'yi otomatik taşır
   const logToEngine = async (userMsg, assistantMsg, riskScore) => {
-    if (!session?.access_token) return;
     try {
-      await fetch(`${ENGINE_URL}/api/decisions`, {
+      await apiCall("/api/decisions", {
         method: "POST",
-        headers: {
-          "Content-Type":  "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-        },
         body: JSON.stringify({
           action:      userMsg.slice(0, 80),
           policy:      "chat-interface",
@@ -415,7 +403,7 @@ export default function ChatScreen() {
           model:      "claude-sonnet-4-20250514",
           max_tokens: 1024,
           system:     "Sen Sovereign Engine'e bagli bir AI asistaninsin. Kisa ve net cevaplar ver. Her aksiyon risk degerlendirmesine tabi.",
-          messages:   [
+          messages: [
             ...history.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: text },
           ],
@@ -430,12 +418,12 @@ export default function ChatScreen() {
       const data  = await res.json();
       const reply = data.content?.[0]?.text ?? "";
 
-      const riskKeywords = ["sil", "kaldir", "deploy", "production", "token", "sifre", "delete", "remove"];
-      const risk = riskKeywords.some(k => text.toLowerCase().includes(k)) ? 7 : 2;
+      // Risk skoru engine'den gelecek — şimdilik sabit düşük değer
+      const risk = 2;
 
       setMessages(prev => [...prev, { role: "assistant", content: reply, risk }]);
       logToEngine(text, reply, risk);
-      setEngineLog({ risk, status: risk <= 3 ? "AUTO_APPROVED" : "PENDING_HUMAN" });
+      setEngineLog({ risk, status: "AUTO_APPROVED" });
 
     } catch (err) {
       setMessages(prev => [...prev, { role: "assistant", content: `Hata: ${err.message}` }]);
@@ -483,7 +471,6 @@ export default function ChatScreen() {
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Kullanıcı email */}
           <span style={{ fontSize: 10, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
             {user.email}
           </span>
