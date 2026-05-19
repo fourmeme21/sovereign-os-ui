@@ -1,44 +1,42 @@
+// src/junior/screens/Chat.jsx
+// Phase C — Supabase Auth entegrasyonu
+// Değişiklik 1: PasswordGate kaldırıldı → Supabase email/password login
+// Değişiklik 2: logToEngine → Authorization: Bearer <jwt> eklendi
+// NOT: Anthropic API çağrısı korundu — ileride browser agent'a geçilecek
+
 import { supabase } from "../../lib/supabaseClient";
 import { useState, useRef, useEffect } from "react";
 import { T } from "../../tokens";
+import { useAuth } from "../hooks/useAuth";
 
 const ENGINE_URL = import.meta.env.VITE_ENGINE_URL || "https://sovereign-engine-production-2e21.up.railway.app";
-const API_URL = "https://api.anthropic.com/v1/messages";
+const API_URL    = "https://api.anthropic.com/v1/messages";
 
-// -- SIFRE KAPISI ------------------------------------------------
-function PasswordGate({ onUnlock }) {
-  const [input, setInput]       = useState("");
+// -- LOGIN EKRANI ------------------------------------------------
+function LoginGate({ onLogin }) {
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState(null);
-  const [shake, setShake]       = useState(false);
-  const [loading, setLoading]   = useState(false);
+  const [shake,    setShake]    = useState(false);
+  const [loading,  setLoading]  = useState(false);
+
+  const { signIn } = useAuth();
 
   const triggerError = (msg) => {
     setErrorMsg(msg);
     setShake(true);
-    setInput("");
-    setTimeout(() => { setErrorMsg(null); setShake(false); }, 2000);
+    setPassword("");
+    setTimeout(() => { setErrorMsg(null); setShake(false); }, 2500);
   };
 
-  const handleCheck = async () => {
-    if (!input || loading) return;
+  const handleLogin = async () => {
+    if (!email || !password || loading) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('app_settings')
-        .select('value')
-        .eq('key', 'chat_password')
-        .single();
-
-      if (error || !data) throw new Error('settings_not_found');
-
-      if (input === data.value) {
-        sessionStorage.setItem('se_token', 'se_ok');
-        onUnlock();
-      } else {
-        triggerError('Hatali sifre');
-      }
-    } catch {
-      triggerError('Baglanti hatasi');
+      await signIn(email, password);
+      onLogin();
+    } catch (err) {
+      triggerError(err.message ?? "Giriş başarısız");
     } finally {
       setLoading(false);
     }
@@ -63,24 +61,38 @@ function PasswordGate({ onUnlock }) {
           Sovereign Engine
         </div>
         <div style={{ fontSize: 12, color: T.textSecondary, marginBottom: 24, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6 }}>
-          Erisim icin sifre gerekli.
+          Devam etmek için giriş yap.
         </div>
 
         <input
-          type="password"
-          placeholder="Sifre"
-          value={input}
+          type="email"
+          placeholder="E-posta"
+          value={email}
           autoFocus
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleCheck()}
+          onChange={e => setEmail(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && handleLogin()}
           style={{
             width: "100%", background: T.bgPrimary,
-            border: `1px solid ${errorMsg ? T.danger : T.border}`,
-            borderRadius: 9, padding: "12px 14px",
-            color: T.textPrimary, fontSize: 14,
-            fontFamily: "'JetBrains Mono',monospace",
-            outline: "none", marginBottom: 12,
-            caretColor: T.accent, boxSizing: "border-box",
+            border: `1px solid ${T.border}`, borderRadius: 9,
+            padding: "12px 14px", color: T.textPrimary, fontSize: 14,
+            fontFamily: "'JetBrains Mono',monospace", outline: "none",
+            marginBottom: 10, caretColor: T.accent, boxSizing: "border-box",
+            transition: "border-color .15s",
+          }}
+        />
+
+        <input
+          type="password"
+          placeholder="Şifre"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && handleLogin()}
+          style={{
+            width: "100%", background: T.bgPrimary,
+            border: `1px solid ${errorMsg ? T.danger : T.border}`, borderRadius: 9,
+            padding: "12px 14px", color: T.textPrimary, fontSize: 14,
+            fontFamily: "'JetBrains Mono',monospace", outline: "none",
+            marginBottom: 12, caretColor: T.accent, boxSizing: "border-box",
             transition: "border-color .15s",
           }}
         />
@@ -92,18 +104,18 @@ function PasswordGate({ onUnlock }) {
         )}
 
         <button
-          onClick={handleCheck}
-          disabled={!input || loading}
+          onClick={handleLogin}
+          disabled={!email || !password || loading}
           style={{
             width: "100%", padding: "12px", borderRadius: 9, border: "none",
-            background: input && !loading ? T.accent : T.bgElevated,
-            color: input && !loading ? "#fff" : T.textTertiary,
+            background: (email && password && !loading) ? T.accent : T.bgElevated,
+            color: (email && password && !loading) ? "#fff" : T.textTertiary,
             fontSize: 13, fontWeight: 700,
-            cursor: input && !loading ? "pointer" : "not-allowed",
+            cursor: (email && password && !loading) ? "pointer" : "not-allowed",
             fontFamily: "inherit", transition: "all .15s",
           }}
         >
-          {loading ? "Dogrulanıyor..." : "Giris"}
+          {loading ? "Giriş yapılıyor..." : "Giriş →"}
         </button>
       </div>
 
@@ -121,6 +133,7 @@ function PasswordGate({ onUnlock }) {
 }
 
 // -- API KEY EKRANI -----------------------------------------------
+// NOT: Bu ekran geçici — ileride browser agent'a geçilince kaldırılacak
 function ApiKeySetup({ onSave }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState(false);
@@ -289,14 +302,14 @@ function TypingIndicator() {
 
 // -- ANA CHAT EKRANI ---------------------------------------------
 export default function ChatScreen() {
-  const [unlocked, setUnlocked]   = useState(() => !!sessionStorage.getItem("se_token"));
-  const [apiKey, setApiKey]       = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
-  const [messages, setMessages]   = useState([
+  const { user, session, loading: authLoading } = useAuth();
+  const [apiKey,     setApiKey]     = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
+  const [messages,   setMessages]   = useState([
     { role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" },
   ]);
-  const [input, setInput]         = useState("");
-  const [loading, setLoading]     = useState(false);
-  const [engineLog, setEngineLog] = useState(null);
+  const [input,      setInput]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [engineLog,  setEngineLog]  = useState(null);
   const bottomRef   = useRef(null);
   const textareaRef = useRef(null);
 
@@ -304,14 +317,31 @@ export default function ChatScreen() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
-  if (!apiKey)   return <ApiKeySetup onSave={setApiKey} />;
+  // Auth yükleniyorsa bekle
+  if (authLoading) return (
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontSize: 12, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
+        Yükleniyor...
+      </span>
+    </div>
+  );
 
+  // Giriş yapılmamışsa login ekranı
+  if (!user) return <LoginGate onLogin={() => {}} />;
+
+  // API key yoksa setup ekranı (geçici — ileride browser agent)
+  if (!apiKey) return <ApiKeySetup onSave={setApiKey} />;
+
+  // Engine'e JWT ile log gönder (Phase B middleware artık token bekliyor)
   const logToEngine = async (userMsg, assistantMsg, riskScore) => {
+    if (!session?.access_token) return;
     try {
       await fetch(`${ENGINE_URL}/api/decisions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
           action:      userMsg.slice(0, 80),
           policy:      "chat-interface",
@@ -321,7 +351,7 @@ export default function ChatScreen() {
           latency:     Math.round(Math.random() * 400 + 100),
         }),
       });
-    } catch { /* engine offline - devam et */ }
+    } catch { /* engine offline — devam et */ }
   };
 
   const sendMessage = async () => {
@@ -335,6 +365,7 @@ export default function ChatScreen() {
     setEngineLog(null);
 
     try {
+      // Anthropic API — ileride browser agent ile değiştirilecek
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -389,7 +420,7 @@ export default function ChatScreen() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
 
-      {/* Ust bar */}
+      {/* Üst bar */}
       <div style={{
         padding: "12px 16px", borderBottom: `1px solid ${T.border}`,
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -414,14 +445,20 @@ export default function ChatScreen() {
           </div>
         )}
 
-        <button onClick={clearKey} style={{
-          fontSize: 10, color: T.textTertiary,
-          fontFamily: "'JetBrains Mono',monospace",
-          background: "transparent", border: "none",
-          cursor: "pointer", padding: "3px 8px",
-        }}>
-          API Key ✕
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Kullanıcı email */}
+          <span style={{ fontSize: 10, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
+            {user.email}
+          </span>
+          <button onClick={clearKey} style={{
+            fontSize: 10, color: T.textTertiary,
+            fontFamily: "'JetBrains Mono',monospace",
+            background: "transparent", border: "none",
+            cursor: "pointer", padding: "3px 8px",
+          }}>
+            API Key ✕
+          </button>
+        </div>
       </div>
 
       {/* Mesajlar */}
