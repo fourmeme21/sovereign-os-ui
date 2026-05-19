@@ -1,17 +1,21 @@
 // src/AppRouter.jsx
 // Phase C — /junior rotalarına auth guard eklendi
+// Phase D — fiyatlandirma + odeme-basarili + ayarlar rotaları eklendi
 
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "./screens/LandingPage";
-import WaitlistAdmin from "./screens/WaitlistAdmin";
-import LegalScreen from "./screens/LegalScreen";
-import JuniorLayout from "./junior/components/JuniorLayout";
-import KararGecmisi from "./junior/screens/KararGecmisi";
-import ProjHafizasi from "./junior/screens/ProjHafizasi";
-import Baglan from "./junior/screens/Baglan";
-import ChatScreen from "./junior/screens/ChatScreen";
-import { useAuth } from "./junior/hooks/useAuth";
+import LandingPage          from "./screens/LandingPage";
+import WaitlistAdmin        from "./screens/WaitlistAdmin";
+import LegalScreen          from "./screens/LegalScreen";
+import PricingScreen        from "./screens/PricingScreen";
+import { SettingsScreen }   from "./screens/SettingsScreen";
+import PaymentSuccessScreen from "./screens/PaymentSuccessScreen";
+import JuniorLayout         from "./junior/components/JuniorLayout";
+import KararGecmisi         from "./junior/screens/KararGecmisi";
+import ProjHafizasi         from "./junior/screens/ProjHafizasi";
+import Baglan               from "./junior/screens/Baglan";
+import ChatScreen           from "./junior/screens/ChatScreen";
+import { useAuth }          from "./junior/hooks/useAuth";
 
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD ?? "sovereign";
 
@@ -143,7 +147,7 @@ export default function AppRouter() {
       />
 
       <Route path="/junior" element={<JuniorLayout />}>
-        <Route path="chat"   element={<ChatScreen />} />
+        <Route path="chat" element={<ChatScreen />} />
 
         <Route index element={
           <AuthGuard><KararGecmisi /></AuthGuard>
@@ -156,6 +160,15 @@ export default function AppRouter() {
         } />
         <Route path="baglan" element={
           <AuthGuard><Baglan /></AuthGuard>
+        } />
+        <Route path="fiyatlandirma" element={<PricingScreen />} />
+        <Route path="odeme-basarili" element={
+          <AuthGuard><PaymentSuccessScreen /></AuthGuard>
+        } />
+        <Route path="ayarlar" element={
+          <AuthGuard>
+            <SettingsScreen lang="tr" onLangChange={() => {}} onClear={() => {}} />
+          </AuthGuard>
         } />
       </Route>
     </Routes>
