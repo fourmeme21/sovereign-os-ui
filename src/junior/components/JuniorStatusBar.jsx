@@ -1,5 +1,7 @@
 import { useJuniorStore } from "../stores/juniorStore";
 
+const ENGINE_URL = import.meta.env.VITE_ENGINE_URL;
+
 export default function JuniorStatusBar() {
   const pendingCount = useJuniorStore(
     (s) => s.decisions.filter((d) => d.status === "PENDING_HUMAN").length
@@ -15,6 +17,10 @@ export default function JuniorStatusBar() {
           🟡 {pendingCount} bekliyor
         </span>
       )}
+      {/* DEBUG — URL doğrulama, sonra kaldır */}
+      <span className="status-item" style={{ fontSize: 9, opacity: 0.5 }}>
+        {ENGINE_URL ?? "⚠️ URL YOK"}
+      </span>
     </div>
   );
 }
