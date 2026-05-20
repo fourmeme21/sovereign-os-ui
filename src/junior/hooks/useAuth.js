@@ -1,6 +1,7 @@
 // src/junior/hooks/useAuth.js
 // Phase C — Supabase Auth hook
 // Değişiklik: signInWithOtp eklendi (Magic Link — şifresiz giriş)
+// Değişiklik 2: 5sn timeout — bağlantı yoksa loading kapatılır
 // Kullanım: const { user, session, loading, signIn, signInWithOtp, signOut } = useAuth()
 
 import { useEffect, useState } from "react";
@@ -12,8 +13,14 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 5sn timeout — Supabase cevap vermezse loading'i kapat
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     // Mevcut session'ı al
     supabase.auth.getSession().then(({ data }) => {
+      clearTimeout(timeout);
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setLoading(false);
@@ -24,10 +31,13 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);  // ← Magic Link sonrası loading'i kapat
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Email + şifre girişi (mevcut — korundu)
