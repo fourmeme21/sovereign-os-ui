@@ -38,7 +38,7 @@ export async function apiCall<T = unknown>(
 
   if (res.status === 429) {
     // Quota aşıldı → fiyatlandırma sayfasına yönlendir
-    window.location.href = "/app/fiyatlandirma?reason=quota_exceeded";
+    window.location.href = "/junior/fiyatlandirma?reason=quota_exceeded";
     throw new Error("quota_exceeded");
   }
 
