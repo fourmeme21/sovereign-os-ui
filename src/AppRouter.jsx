@@ -16,6 +16,7 @@ import ProjHafizasi         from "./junior/screens/ProjHafizasi";
 import Baglan               from "./junior/screens/Baglan";
 import ChatScreen           from "./junior/screens/ChatScreen";
 import { useAuth }          from "./junior/hooks/useAuth";
+import { FeatureGate }      from "./components/FeatureGate";
 
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD ?? "sovereign";
 
@@ -156,7 +157,11 @@ export default function AppRouter() {
           <AuthGuard><KararGecmisi /></AuthGuard>
         } />
         <Route path="hafiza" element={
-          <AuthGuard><ProjHafizasi /></AuthGuard>
+          <AuthGuard>
+            <FeatureGate requiredTier="solo" feature="Sovereign Memory">
+              <ProjHafizasi />
+            </FeatureGate>
+          </AuthGuard>
         } />
         <Route path="baglan" element={
           <AuthGuard><Baglan /></AuthGuard>
