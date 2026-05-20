@@ -3,6 +3,7 @@ import JuniorNav from "./JuniorNav";
 import JuniorStatusBar from "./JuniorStatusBar";
 import { EngineOfflineBar } from "./ErrorStates";
 import { useEngineStatus } from "../hooks/useEngineStatus";
+import { UsageBar } from "../../components/UsageBar";
 import "./ekranlar.css";
 
 export default function JuniorLayout() {
@@ -15,6 +16,7 @@ export default function JuniorLayout() {
       <div className="junior-content">
         <Outlet />
       </div>
+      <UsageBar />
       <JuniorStatusBar />
     </div>
   );
