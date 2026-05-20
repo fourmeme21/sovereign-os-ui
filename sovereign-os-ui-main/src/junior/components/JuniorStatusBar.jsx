@@ -2,8 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useJuniorStore } from "../stores/juniorStore";
 import { useAuthStore } from "../../stores/authStore";
 
-const ENGINE_URL = import.meta.env.VITE_ENGINE_URL;
-
 const TIER_COLOR = {
   free: "#555",
   solo: "#2DD4BF",
@@ -39,7 +37,6 @@ export default function JuniorStatusBar() {
         </span>
       )}
 
-      {/* Tier badge → Ayarlar */}
       <span
         className="status-item"
         onClick={() => navigate("/junior/ayarlar")}
