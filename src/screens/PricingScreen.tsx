@@ -1,5 +1,5 @@
 // src/screens/PricingScreen.tsx
-// Route: /app/fiyatlandirma
+// Route: /junior/fiyatlandirma
 // Phase D.5 — Dodo Payments entegrasyonu
 
 import { useState } from "react";
@@ -77,7 +77,6 @@ export default function PricingScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // authStore'dan — email store'da yok, user.email üzerinden alıyoruz
   const { tier: currentTier, user } = useAuthStore();
   const userEmail = user?.email ?? "";
 
@@ -87,9 +86,14 @@ export default function PricingScreen() {
   const quotaExceeded = searchParams.get("reason") === "quota_exceeded";
 
   // ── Checkout ──────────────────────────────────────────────────────────────
-  // Engine'e tier gönderiyoruz — product ID mapping engine'de (Railway env)
   const handleCheckout = async (tier: PlanTier) => {
     if (tier === "free") return;
+
+    // Login kontrolü
+    if (!userEmail) {
+      navigate("/junior/baglan?redirect=/junior/fiyatlandirma");
+      return;
+    }
 
     setError(null);
     setLoadingTier(tier);
@@ -213,7 +217,7 @@ export default function PricingScreen() {
                 }}
                 disabled={getCtaDisabled(plan)}
                 onClick={() => {
-                  if (plan.tier === "free") navigate("/app/ayarlar");
+                  if (plan.tier === "free") navigate("/junior/ayarlar");
                   else handleCheckout(plan.tier);
                 }}
               >
@@ -262,8 +266,6 @@ function Spinner() {
 }
 
 // ─── Stiller ─────────────────────────────────────────────────────────────────
-// Renk sistemi: #2DD4BF | #EF4444 | #F59E0B | #818CF8
-// Arka plan: #0D0D0D | Kart: #161616 | Kenarlık: #252525
 
 const styles: Record<string, React.CSSProperties> = {
   root: {
@@ -471,6 +473,3 @@ const styles: Record<string, React.CSSProperties> = {
     animation: "spin 0.7s linear infinite",
   },
 };
-
-// index.css'e ekle:
-// @keyframes spin { to { transform: rotate(360deg); } }
