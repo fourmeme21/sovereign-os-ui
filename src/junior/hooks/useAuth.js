@@ -24,6 +24,7 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);  // ← Magic Link sonrası loading'i kapat
     });
 
     return () => subscription.unsubscribe();
@@ -37,13 +38,10 @@ export function useAuth() {
   };
 
   // Magic Link — şifresiz giriş
-  // Kullanıcı emailini girer → link gelir → linke tıklar → onAuthStateChange tetiklenir
   const signInWithOtp = async (email) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        // Magic link tıklandıktan sonra buraya yönlendirilir
-        // Supabase JS client URL hash'inden token'ı otomatik işler
         emailRedirectTo: `${window.location.origin}/junior/chat`,
       },
     });
