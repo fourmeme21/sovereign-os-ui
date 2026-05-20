@@ -337,7 +337,7 @@ function TypingIndicator() {
 
 // -- ANA CHAT EKRANI ---------------------------------------------
 export default function ChatScreen() {
-  const { user, loading: authLoading, connectionError } = useAuth();
+  const { user, loading: authLoading, connectionError, errorMessage } = useAuth();
   const [apiKey,    setApiKey]    = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
   const [messages,  setMessages]  = useState([
     { role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" },
@@ -386,7 +386,7 @@ export default function ChatScreen() {
           borderRadius: 6, padding: "8px 12px", marginBottom: 20,
           lineHeight: 1.6, textAlign: "left",
         }}>
-          Kaynak: Supabase Auth · getSession() timeout{"\n"}
+          {errorMessage ?? "getSession() timeout"}{"\n"}
           Durum: status.supabase.com
         </div>
         <button
