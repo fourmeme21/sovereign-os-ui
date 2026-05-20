@@ -2,45 +2,85 @@
 // Phase C — Supabase Auth hook
 // Değişiklik: signInWithOtp eklendi (Magic Link — şifresiz giriş)
 // Değişiklik 2: 5sn timeout + connectionError state
-// Kullanım: const { user, session, loading, connectionError, signIn, signInWithOtp, signOut } = useAuth()
+// Değişiklik 3: Modül-seviyesi cache — her sayfada tekrar getSession() çağrılmaz
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
+// Modül cache — tüm useAuth() çağrıları bunu paylaşır
+// undefined = henüz sorgulanmadı, null = sorgulandı, session yok
+let _cachedSession = undefined;
+let _listeners     = new Set();
+
+function notifyAll(session) {
+  _cachedSession = session;
+  _listeners.forEach((fn) => fn(session));
+}
+
+// Uygulama başında bir kez Supabase'i dinle
+let _initialized = false;
+function ensureInit() {
+  if (_initialized) return;
+  _initialized = true;
+
+  supabase.auth.getSession().then(({ data, error }) => {
+    if (!error) notifyAll(data.session ?? null);
+    else        notifyAll(null);
+  });
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    notifyAll(session ?? null);
+  });
+}
+
 export function useAuth() {
-  const [user,            setUser]            = useState(null);
-  const [session,         setSession]         = useState(null);
-  const [loading,         setLoading]         = useState(true);
+  ensureInit(); // İlk çağrıda başlatır, sonrakiler no-op
+
+  // Cache varsa hemen kullan — loading gösterme
+  const [session,         setSession]         = useState(() => _cachedSession ?? null);
+  const [user,            setUser]            = useState(() => _cachedSession?.user ?? null);
+  const [loading,         setLoading]         = useState(_cachedSession === undefined);
   const [connectionError, setConnectionError] = useState(false);
 
   useEffect(() => {
+    // Cache zaten doluysa loading gerek yok
+    if (_cachedSession !== undefined) {
+      setLoading(false);
+      return;
+    }
+
+    // 5 saniye timeout — Supabase cevap vermezse
     const timeout = setTimeout(() => {
       setConnectionError(true);
       setLoading(false);
     }, 5000);
 
-    supabase.auth.getSession().then(({ data, error }) => {
+    // Cache dolduğunda bu bileşeni güncelle
+    const handler = (newSession) => {
       clearTimeout(timeout);
-      if (error) {
-        setConnectionError(true);
-      } else {
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-      }
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setConnectionError(false);
-      setSession(session);
-      setUser(session?.user ?? null);
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
       setLoading(false);
-    });
+    };
 
+    _listeners.add(handler);
     return () => {
       clearTimeout(timeout);
-      subscription.unsubscribe();
+      _listeners.delete(handler);
     };
+  }, []);
+
+  // Auth state değişikliklerini dinle (login/logout/magic link)
+  useEffect(() => {
+    const handler = (newSession) => {
+      setConnectionError(false);
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      setLoading(false);
+    };
+    _listeners.add(handler);
+    return () => _listeners.delete(handler);
   }, []);
 
   const signIn = async (email, password) => {
@@ -61,6 +101,7 @@ export function useAuth() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    notifyAll(null);
   };
 
   return { user, session, loading, connectionError, signIn, signInWithOtp, signOut };
