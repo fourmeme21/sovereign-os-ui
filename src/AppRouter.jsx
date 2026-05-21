@@ -1,5 +1,6 @@
 // src/AppRouter.jsx
 // Phase C — /junior rotalarına auth guard eklendi
+// Phase C — /giris + /kayit rotaları eklendi, AuthGuard redirect güncellendi
 // Phase D — fiyatlandirma + odeme-basarili + ayarlar rotaları eklendi
 
 import { useState } from "react";
@@ -10,6 +11,8 @@ import LegalScreen          from "./screens/LegalScreen";
 import PricingScreen        from "./screens/PricingScreen";
 import { SettingsScreen }   from "./screens/SettingsScreen";
 import PaymentSuccessScreen from "./screens/PaymentSuccessScreen";
+import LoginScreen          from "./screens/Login";
+import RegisterScreen       from "./screens/Register";
 import JuniorLayout         from "./junior/components/JuniorLayout";
 import KararGecmisi         from "./junior/screens/KararGecmisi";
 import ProjHafizasi         from "./junior/screens/ProjHafizasi";
@@ -126,7 +129,7 @@ function AuthGuard({ children }) {
     </div>
   );
 
-  if (!user) return <Navigate to="/junior/chat" replace />;
+  if (!user) return <Navigate to="/giris" replace />;
 
   return children;
 }
@@ -136,6 +139,8 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/giris" element={<LoginScreen />} />
+      <Route path="/kayit" element={<RegisterScreen />} />
       <Route path="/legal/:type" element={<LegalScreen />} />
 
       <Route
