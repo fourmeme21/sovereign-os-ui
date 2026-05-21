@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
 
-const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const ENGINE_URL    = import.meta.env.VITE_ENGINE_URL;
+const ADMIN_PASS    = import.meta.env.VITE_ADMIN_PASSWORD ?? "sovereign";
+const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 const T = {
   bgPrimary:    "#0F0F0F",
@@ -32,8 +33,8 @@ async function fetchWaitlist() {
     `${SUPABASE_URL}/rest/v1/waitlist?select=*&order=created_at.desc`,
     {
       headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        apikey: SUPABASE_ANON,
+        Authorization: `Bearer ${SUPABASE_ANON}`,
       },
     }
   );
@@ -47,9 +48,7 @@ export default function WaitlistAdmin() {
   const [error,         setError]         = useState(null);
   const [search,        setSearch]        = useState("");
   const [copied,        setCopied]        = useState(false);
-  // Bu session'da magic link gönderilen emailler
-  const [invitedEmails, setInvitedEmails] = useState(new Set());
-  const [inviting,      setInviting]      = useState(null); // loading state: hangi email
+  const [inviting,      setInviting]      = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -57,7 +56,7 @@ export default function WaitlistAdmin() {
     try {
       const data = await fetchWaitlist();
       setRows(data);
-    } catch (e) {
+    } catch {
       setError("Supabase'den veri alınamadı. RLS policy'yi ve anon key'i kontrol et.");
     } finally {
       setLoading(false);
@@ -77,20 +76,25 @@ export default function WaitlistAdmin() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Magic Link gönder — supabase.auth.signInWithOtp
-  // Kullanıcı yoksa Supabase ilk girişte otomatik oluşturur
-  const sendMagicLink = async (email) => {
-    if (inviting || invitedEmails.has(email)) return;
+  // Engine /admin/invite → invited_at DB'ye yazılır
+  const sendInvite = async (email) => {
+    if (inviting) return;
     setInviting(email);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/junior/chat`,
+      const res = await fetch(`${ENGINE_URL}/admin/invite`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": ADMIN_PASS,
         },
+        body: JSON.stringify({ email }),
       });
-      if (error) throw error;
-      setInvitedEmails(prev => new Set([...prev, email]));
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? `HTTP ${res.status}`);
+      }
+      // Reload → DB'den güncel invited_at gelir
+      await load();
     } catch (e) {
       alert(`❌ Gönderilemedi: ${e.message}`);
     } finally {
@@ -101,9 +105,7 @@ export default function WaitlistAdmin() {
   const now   = Date.now();
   const today = rows.filter(r => now - new Date(r.created_at) < 86400000).length;
   const week  = rows.filter(r => now - new Date(r.created_at) < 604800000).length;
-
-  // Kaç davet gönderildi (bu session)
-  const invitedCount = invitedEmails.size;
+  const totalInvited = rows.filter(r => !!r.invited_at).length;
 
   return (
     <div style={{
@@ -144,10 +146,10 @@ export default function WaitlistAdmin() {
           border:`1px solid ${T.border}`, marginBottom:24,
         }}>
           {[
-            { label:"TOTAL",    value:rows.length,    color:T.textPrimary },
-            { label:"TODAY",    value:today,           color:T.success },
-            { label:"THIS WEEK",value:week,            color:T.accent },
-            { label:"INVITED",  value:invitedCount,    color:T.warning },
+            { label:"TOTAL",    value:rows.length,  color:T.textPrimary },
+            { label:"TODAY",    value:today,         color:T.success },
+            { label:"THIS WEEK",value:week,          color:T.accent },
+            { label:"INVITED",  value:totalInvited,  color:T.warning },
           ].map((s, i) => (
             <div key={i} style={{
               padding:"18px 20px", background:T.bgSurface,
@@ -203,12 +205,9 @@ export default function WaitlistAdmin() {
         </div>
 
         {/* Table */}
-        <div style={{
-          borderRadius:12, overflow:"hidden",
-          border:`1px solid ${T.border}`,
-        }}>
+        <div style={{ borderRadius:12, overflow:"hidden", border:`1px solid ${T.border}` }}>
 
-          {/* Table header */}
+          {/* Header */}
           <div style={{
             display:"grid", gridTemplateColumns:"40px 1fr 160px 80px 130px",
             padding:"10px 20px", background:T.bgElevated,
@@ -251,7 +250,7 @@ export default function WaitlistAdmin() {
             </div>
           ) : (
             filtered.map((r, i) => {
-              const alreadyInvited = invitedEmails.has(r.email) || !!r.invited_at;
+              const alreadyInvited = !!r.invited_at;
               const isSending      = inviting === r.email;
 
               return (
@@ -263,8 +262,7 @@ export default function WaitlistAdmin() {
                     padding:"12px 20px", background:T.bgSurface,
                     borderBottom: i < filtered.length - 1 ? `1px solid ${T.borderSubtle}` : "none",
                     animation:`fade-in .2s ${i * 0.02}s both`,
-                    transition:"background .15s",
-                    alignItems:"center",
+                    transition:"background .15s", alignItems:"center",
                   }}
                 >
                   <span style={{ fontSize:11, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
@@ -283,10 +281,9 @@ export default function WaitlistAdmin() {
                     {timeAgo(r.created_at)}
                   </span>
 
-                  {/* Magic Link Butonu */}
                   <button
                     className="invite-btn"
-                    onClick={() => sendMagicLink(r.email)}
+                    onClick={() => sendInvite(r.email)}
                     disabled={alreadyInvited || !!inviting}
                     style={{
                       padding:"5px 10px", borderRadius:6, border:"none",
@@ -300,10 +297,12 @@ export default function WaitlistAdmin() {
                       fontFamily:"'JetBrains Mono',monospace",
                       cursor: alreadyInvited || !!inviting ? "default" : "pointer",
                       transition:"all .15s", whiteSpace:"nowrap",
-                      border: `1px solid ${alreadyInvited ? T.success+"44" : T.accent+"33"}`,
+                      border:`1px solid ${alreadyInvited ? T.success+"44" : T.accent+"33"}`,
                     }}
                   >
-                    {alreadyInvited ? "✅ Gönderildi" : isSending ? "..." : "Magic Link →"}
+                    {alreadyInvited
+                      ? `✅ ${new Date(r.invited_at).toLocaleDateString("tr-TR", { day:"2-digit", month:"short" })}`
+                      : isSending ? "..." : "Davet Gönder →"}
                   </button>
                 </div>
               );
@@ -311,11 +310,11 @@ export default function WaitlistAdmin() {
           )}
         </div>
 
-        {/* Footer count */}
+        {/* Footer */}
         {!loading && !error && (
           <div style={{ marginTop:12, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
             <span style={{ fontSize:11, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
-              {invitedCount > 0 && `${invitedCount} davet gönderildi bu session`}
+              {totalInvited > 0 && `${totalInvited} davet gönderildi`}
             </span>
             <span style={{ fontSize:11, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
               {filtered.length} / {rows.length} kayıt gösteriliyor
