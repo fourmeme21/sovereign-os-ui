@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase }        from "./lib/supabaseClient";
+import { useAuthStore }    from "./stores/authStore";
 import { T } from "./tokens";
 import { LANG } from "./lang";
 import { INIT_CARDS, NAV_ICONS } from "./data";
@@ -56,6 +58,19 @@ export default function SovereignApp() {
   const { isMobile, isDesktop } = useBreakpoint();
   const L          = LANG[lang];
   const canAnalyze = !!input.trim() && !analyzing;
+
+  // ── Session persist (Phase C.4) ──
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      useAuthStore.getState().setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      useAuthStore.getState().setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // ── Junior store senkronizasyonu ──
   useEffect(() => {
