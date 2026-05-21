@@ -1,16 +1,12 @@
 // src/junior/screens/Chat.jsx
-// Phase C — Supabase Auth entegrasyonu
-// Değişiklik 1: LoginGate → Magic Link akışı
-// Değişiklik 2: logToEngine → apiCall() (JWT otomatik)
-// Değişiklik 3: connectionError ekranı eklendi
+// Phase B.2 — aiProxy refactor
+// Değişiklik: anthropic.com doğrudan çağrısı → /api/ai/chat proxy üzerinden
+// Kaldırılanlar: API_URL, ApiKeySetup, apiKey state, localStorage key akışı
 
-import { supabase } from "../../lib/supabaseClient";
 import { apiCall }  from "../../lib/apiClient";
 import { useState, useRef, useEffect } from "react";
 import { T } from "../../tokens";
 import { useAuth } from "../hooks/useAuth";
-
-const API_URL = "https://api.anthropic.com/v1/messages";
 
 // -- LOGIN EKRANI ------------------------------------------------
 function LoginGate({ onLogin }) {
@@ -168,89 +164,6 @@ function LoginGate({ onLogin }) {
   );
 }
 
-// -- API KEY EKRANI -----------------------------------------------
-function ApiKeySetup({ onSave }) {
-  const [input, setInput] = useState("");
-  const [error, setError] = useState(false);
-
-  const handleSave = () => {
-    const key = input.trim();
-    if (!key.startsWith("sk-ant-")) {
-      setError(true);
-      setTimeout(() => setError(false), 2000);
-      return;
-    }
-    localStorage.setItem("anthropic_api_key", key);
-    onSave(key);
-  };
-
-  return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-      <div style={{
-        width: "100%", maxWidth: 400,
-        background: T.bgSurface, border: `1px solid ${T.border}`,
-        borderRadius: 16, padding: "32px 24px",
-      }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 11,
-          background: `linear-gradient(135deg,${T.accent},#9061F9)`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 20, color: "#fff", fontWeight: 800, marginBottom: 20,
-        }}>S</div>
-
-        <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>Anthropic API Key</div>
-        <div style={{ fontSize: 12, color: T.textSecondary, marginBottom: 24, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6 }}>
-          Key tarayicinda kalir, hicbir yere gonderilmez.
-        </div>
-
-        <input
-          type="password"
-          placeholder="sk-ant-..."
-          value={input}
-          autoFocus
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleSave()}
-          style={{
-            width: "100%", background: T.bgPrimary,
-            border: `1px solid ${error ? T.danger : T.border}`,
-            borderRadius: 9, padding: "12px 14px",
-            color: T.textPrimary, fontSize: 14,
-            fontFamily: "'JetBrains Mono',monospace",
-            outline: "none", marginBottom: 12,
-            caretColor: T.accent, boxSizing: "border-box",
-            transition: "border-color .15s",
-          }}
-        />
-
-        {error && (
-          <div style={{ fontSize: 11, color: T.danger, fontFamily: "'JetBrains Mono',monospace", marginBottom: 10 }}>
-            Gecersiz key — sk-ant- ile baslamali
-          </div>
-        )}
-
-        <button
-          onClick={handleSave}
-          disabled={!input}
-          style={{
-            width: "100%", padding: "12px", borderRadius: 9, border: "none",
-            background: input ? T.accent : T.bgElevated,
-            color: input ? "#fff" : T.textTertiary,
-            fontSize: 13, fontWeight: 700,
-            cursor: input ? "pointer" : "not-allowed",
-            fontFamily: "inherit", transition: "all .15s",
-          }}
-        >
-          Baglan
-        </button>
-
-        <div style={{ marginTop: 16, fontSize: 11, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace", textAlign: "center" }}>
-          console.anthropic.com → API Keys
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // -- MESAJ BALONU ------------------------------------------------
 function MessageBubble({ msg }) {
   const isUser   = msg.role === "user";
@@ -337,8 +250,7 @@ function TypingIndicator() {
 
 // -- ANA CHAT EKRANI ---------------------------------------------
 export default function ChatScreen() {
-  const { user, loading: authLoading, connectionError, errorMessage } = useAuth();
-  const [apiKey,    setApiKey]    = useState(() => localStorage.getItem("anthropic_api_key") ?? "");
+  const { user, loading: authLoading } = useAuth();
   const [messages,  setMessages]  = useState([
     { role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" },
   ]);
@@ -370,7 +282,6 @@ export default function ChatScreen() {
   );
 
   if (!user) return <LoginGate onLogin={() => {}} />;
-  if (!apiKey) return <ApiKeySetup onSave={setApiKey} />;
 
   const logToEngine = async (userMsg, assistantMsg, riskScore) => {
     try {
@@ -399,31 +310,19 @@ export default function ChatScreen() {
     setEngineLog(null);
 
     try {
-      const res = await fetch(API_URL, {
+      // Browser → Engine proxy → Anthropic (API key browser'da yok)
+      const data = await apiCall("/api/ai/chat", {
         method: "POST",
-        headers: {
-          "Content-Type":      "application/json",
-          "x-api-key":         apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
         body: JSON.stringify({
-          model:      "claude-sonnet-4-20250514",
-          max_tokens: 1024,
-          system:     "Sen Sovereign Engine'e bagli bir AI asistaninsin. Kisa ve net cevaplar ver. Her aksiyon risk degerlendirmesine tabi.",
+          system: "Sen Sovereign Engine'e bagli bir AI asistaninsin. Kisa ve net cevaplar ver. Her aksiyon risk degerlendirmesine tabi.",
           messages: [
             ...history.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: text },
           ],
+          max_tokens: 1024,
         }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message ?? `HTTP ${res.status}`);
-      }
-
-      const data  = await res.json();
       const reply = data.content?.[0]?.text ?? "";
       const risk  = 2;
 
@@ -440,12 +339,6 @@ export default function ChatScreen() {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
-  const clearKey = () => {
-    localStorage.removeItem("anthropic_api_key");
-    setApiKey("");
-    setMessages([{ role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" }]);
   };
 
   return (
@@ -476,19 +369,9 @@ export default function ChatScreen() {
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 10, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
-            {user.email}
-          </span>
-          <button onClick={clearKey} style={{
-            fontSize: 10, color: T.textTertiary,
-            fontFamily: "'JetBrains Mono',monospace",
-            background: "transparent", border: "none",
-            cursor: "pointer", padding: "3px 8px",
-          }}>
-            API Key ✕
-          </button>
-        </div>
+        <span style={{ fontSize: 10, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
+          {user.email}
+        </span>
       </div>
 
       {/* Mesajlar */}
