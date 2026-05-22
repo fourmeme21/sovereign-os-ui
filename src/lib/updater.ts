@@ -1,11 +1,12 @@
-import { check } from '@tauri-apps/plugin-updater'
-import { relaunch } from '@tauri-apps/plugin-process'
 import { isDesktop } from './platform'
 
 export async function checkForUpdates(silent = true) {
   if (!isDesktop()) return
 
   try {
+    const { check } = await import('@tauri-apps/plugin-updater')
+    const { relaunch } = await import('@tauri-apps/plugin-process')
+
     const update = await check()
 
     if (!update?.available) {
