@@ -1,5 +1,6 @@
 // src/junior/screens/Chat.jsx
 // Phase B.2 — aiProxy refactor
+// Phase B.3 — Gerçek risk skoru entegrasyonu (risk = 2 sabit kaldırıldı)
 // Değişiklik: anthropic.com doğrudan çağrısı → /api/ai/chat proxy üzerinden
 // Kaldırılanlar: API_URL, ApiKeySetup, apiKey state, localStorage key akışı
 
@@ -207,8 +208,8 @@ function MessageBubble({ msg }) {
           <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 6 }}>
             <div style={{
               fontSize: 9, fontFamily: "'JetBrains Mono',monospace",
-              color: msg.risk <= 3 ? T.success : msg.risk <= 6 ? T.warning : T.danger,
-              background: `${msg.risk <= 3 ? T.success : msg.risk <= 6 ? T.warning : T.danger}14`,
+              color: msg.risk <= 3 ? T.success : msg.risk <= 7 ? T.warning : T.danger,
+              background: `${msg.risk <= 3 ? T.success : msg.risk <= 7 ? T.warning : T.danger}14`,
               padding: "2px 7px", borderRadius: 5,
             }}>
               RISK {msg.risk}/10
@@ -283,15 +284,15 @@ export default function ChatScreen() {
 
   if (!user) return <LoginGate onLogin={() => {}} />;
 
-  const logToEngine = async (userMsg, assistantMsg, riskScore) => {
+  const logToEngine = async (userMsg, assistantMsg, riskScore, verdict, policy) => {
     try {
       await apiCall("/api/decisions", {
         method: "POST",
         body: JSON.stringify({
           action:      userMsg.slice(0, 80),
-          policy:      "chat-interface",
-          verdict:     riskScore <= 3 ? "PERMIT" : riskScore <= 6 ? "ASK_HUMAN" : "DENY",
-          criticality: riskScore <= 3 ? "LOW"    : riskScore <= 6 ? "MEDIUM"    : "HIGH",
+          policy:      policy ?? "chat-interface",
+          verdict:     verdict ?? (riskScore <= 3 ? "PERMIT" : riskScore <= 7 ? "ASK_HUMAN" : "DENY"),
+          criticality: riskScore <= 3 ? "LOW" : riskScore <= 7 ? "MEDIUM" : "HIGH",
           reason:      assistantMsg.slice(0, 200),
           latency:     Math.round(Math.random() * 400 + 100),
         }),
@@ -323,12 +324,12 @@ export default function ChatScreen() {
         }),
       });
 
-      const reply = data.content?.[0]?.text ?? "";
-      const risk  = 2;
+      const reply = data.reply ?? "";
+      const risk  = data.risk ?? 1;
 
       setMessages(prev => [...prev, { role: "assistant", content: reply, risk }]);
-      logToEngine(text, reply, risk);
-      setEngineLog({ risk, status: "AUTO_APPROVED" });
+      logToEngine(text, reply, risk, data.verdict, data.policy);
+      setEngineLog({ risk, status: data.verdict, policy: data.policy });
 
     } catch (err) {
       setMessages(prev => [...prev, { role: "assistant", content: `Hata: ${err.message}` }]);
@@ -360,12 +361,12 @@ export default function ChatScreen() {
         {engineLog && (
           <div style={{
             fontSize: 10, fontFamily: "'JetBrains Mono',monospace",
-            color: engineLog.risk <= 3 ? T.success : T.warning,
-            background: `${engineLog.risk <= 3 ? T.success : T.warning}12`,
+            color: engineLog.risk <= 3 ? T.success : engineLog.risk <= 7 ? T.warning : T.danger,
+            background: `${engineLog.risk <= 3 ? T.success : engineLog.risk <= 7 ? T.warning : T.danger}12`,
             padding: "3px 9px", borderRadius: 6,
-            border: `1px solid ${engineLog.risk <= 3 ? T.success : T.warning}30`,
+            border: `1px solid ${engineLog.risk <= 3 ? T.success : engineLog.risk <= 7 ? T.warning : T.danger}30`,
           }}>
-            {engineLog.status} · RISK {engineLog.risk}/10
+            {engineLog.status} · RISK {engineLog.risk}/10 · {engineLog.policy}
           </div>
         )}
 
