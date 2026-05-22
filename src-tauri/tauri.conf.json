@@ -35,7 +35,7 @@
     "updater": {
       "pubkey": "W50cnVzdGVkIGNvbW1lbnQ6IGNyeXB0IHNlY3JldCBrZXkKdWluSHB1YmxpYyBrZXkKZGVmYXVsdAo=",
       "endpoints": [
-        "https://sovereign-os.com/releases/latest.json"
+        "https://github.com/fourmeme21/sovereign-os-ui/releases/latest/download/latest.json"
       ]
     }
   }
