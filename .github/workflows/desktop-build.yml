@@ -49,6 +49,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
+          githubToken: ${{ secrets.GH_PAT }}
           tagName: ${{ github.ref_name }}
           releaseName: 'Sovereign OS ${{ github.ref_name }}'
           releaseBody: 'See release notes.'
