@@ -57,6 +57,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
+          githubToken: ${{ github.token }}
           releaseId: ${{ steps.create_release.outputs.id }}
           args: ${{ matrix.args }}
 
