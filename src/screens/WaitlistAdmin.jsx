@@ -76,7 +76,6 @@ export default function WaitlistAdmin() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Engine /admin/invite → invited_at DB'ye yazılır
   const sendInvite = async (email) => {
     if (inviting) return;
     setInviting(email);
@@ -93,7 +92,6 @@ export default function WaitlistAdmin() {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error ?? `HTTP ${res.status}`);
       }
-      // Reload → DB'den güncel invited_at gelir
       await load();
     } catch (e) {
       alert(`❌ Gönderilemedi: ${e.message}`);
@@ -286,7 +284,7 @@ export default function WaitlistAdmin() {
                     onClick={() => sendInvite(r.email)}
                     disabled={alreadyInvited || !!inviting}
                     style={{
-                      padding:"5px 10px", borderRadius:6, border:"none",
+                      padding:"5px 10px", borderRadius:6,
                       background: alreadyInvited
                         ? `${T.success}18`
                         : isSending
