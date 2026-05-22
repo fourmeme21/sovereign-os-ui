@@ -10,12 +10,12 @@ const SERVICES = [
 ];
 
 // GitHub token'ı gerçek API ile doğrula
-async function verifyGithubToken(token: string): Promise<boolean> {
+async function verifyGithubToken(token) {
   try {
     const res = await fetch("https://api.github.com/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return res.ok; // 401 → false, 200 → true
+    return res.ok;
   } catch {
     return false;
   }
@@ -74,7 +74,7 @@ export default function Baglan() {
       setHealth((h) => ({ ...h, memory: "error" }));
     }
 
-    // GitHub — gerçek API doğrulaması
+    // GitHub
     const token = localStorage.getItem("github_token");
     const repo  = localStorage.getItem("github_repo");
 
@@ -86,7 +86,6 @@ export default function Baglan() {
     }
   };
 
-  // Token + repo kaydetmeden önce GitHub API'yi doğrula
   const saveGithubSettings = async () => {
     const trimmedToken = githubInput.trim();
     const trimmedRepo  = githubRepoInput.trim();
@@ -102,7 +101,6 @@ export default function Baglan() {
     setTokenError("");
     setGithubVerifying(true);
 
-    // Gerçek GitHub API kontrolü
     const valid = await verifyGithubToken(trimmedToken);
     setGithubVerifying(false);
 
@@ -198,7 +196,6 @@ export default function Baglan() {
                 </div>
               </div>
 
-              {/* GitHub formu */}
               {isGithub && githubFormOpen && (
                 <div style={{
                   background: "var(--bg-elevated, #1a1a1a)",
