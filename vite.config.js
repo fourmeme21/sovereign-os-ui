@@ -18,5 +18,8 @@ export default defineConfig({
     target: ["es2021", "chrome105", "safari15"],
     minify: !process.env.TAURI_ENV_DEBUG ? "esbuild" : false,
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
+    rollupOptions: {
+      external: (id) => id.startsWith("@tauri-apps/"),
+    },
   },
 });
