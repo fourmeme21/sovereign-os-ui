@@ -1,4 +1,4 @@
-limport { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // ── DESIGN TOKENS (from tokens.js) ─────────────────────────────
 const T = {
