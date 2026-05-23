@@ -1,8 +1,16 @@
 {
-  "title":    "Plan wählen",
-  "subtitle": "Kostenlos starten. Upgraden wenn bereit.",
+  "eyebrow":         "PREISE",
+  "headline":        "Wähle deinen",
+  "headline_accent": "Plan",
+  "subtitle":        "Kostenlos starten. Upgraden wenn bereit.",
+  "current_plan":    "Aktueller Plan",
+  "downgrade":       "Downgrade",
   "banner": {
     "quota_exceeded": "Monatliches Entscheidungslimit erreicht. Bitte upgraden um fortzufahren."
+  },
+  "badge": {
+    "popular": "BELIEBT",
+    "active":  "AKTUELL"
   },
   "plans": {
     "free": {
@@ -36,5 +44,6 @@
   },
   "manage":      "Abo verwalten (Dodo Portal) →",
   "view_plans":  "Pläne ansehen →",
-  "portal_error":"Portal konnte nicht geöffnet werden."
+  "portal_error":"Portal konnte nicht geöffnet werden.",
+  "footer":      "Alle Preise in USD.\nJederzeit kündbar."
 }
