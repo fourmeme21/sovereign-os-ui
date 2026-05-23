@@ -1,0 +1,27 @@
+{
+  "nav": {
+    "history": "History",
+    "memory": "Memory",
+    "chat": "Chat",
+    "connect": "Connect",
+    "settings": "Settings",
+    "home": "Home"
+  },
+  "status": {
+    "engine_active": "Engine: 🟢 ACTIVE",
+    "memory_ok": "Memory: ✓",
+    "github": "GitHub: main",
+    "pending": "{{count}} pending",
+    "usage": "This month: {{used}}/{{limit}} decisions"
+  },
+  "actions": {
+    "upgrade": "Upgrade →",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "← Back",
+    "loading": "Loading...",
+    "connecting": "Connecting..."
+  },
+  "tier": { "free": "FREE", "solo": "SOLO", "pro": "PRO", "team": "TEAM" }
+}

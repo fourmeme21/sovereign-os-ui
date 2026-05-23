@@ -1,0 +1,9 @@
+{
+  "title": "Hafıza",
+  "empty": "Henüz hafıza snapshot'ı yok.",
+  "snapshot": "Snapshot",
+  "sync": "Senkronize Et",
+  "query": "Sorgula",
+  "last_synced": "Son senkron: {{time}}",
+  "project": "Proje"
+}

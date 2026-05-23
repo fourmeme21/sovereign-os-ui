@@ -1,0 +1,12 @@
+{
+  "placeholder": "Describe your task...",
+  "send": "Send",
+  "thinking": "Thinking...",
+  "decision": "Decision",
+  "approve": "Approve",
+  "reject": "Reject",
+  "risk": "Risk Score",
+  "auto_approved": "Auto-approved",
+  "pending_review": "Pending review",
+  "no_decisions": "No decisions yet."
+}

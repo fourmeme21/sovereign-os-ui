@@ -1,0 +1,27 @@
+{
+  "nav": {
+    "history": "Geçmiş",
+    "memory": "Hafıza",
+    "chat": "Chat",
+    "connect": "Bağlan",
+    "settings": "Ayarlar",
+    "home": "Ana Ekran"
+  },
+  "status": {
+    "engine_active": "Engine: 🟢 AKTİF",
+    "memory_ok": "Hafıza: ✓",
+    "github": "GitHub: main",
+    "pending": "{{count}} bekliyor",
+    "usage": "Bu ay: {{used}}/{{limit}} karar"
+  },
+  "actions": {
+    "upgrade": "Yükselt →",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "back": "← Geri",
+    "loading": "Yükleniyor...",
+    "connecting": "Bağlanıyor..."
+  },
+  "tier": { "free": "FREE", "solo": "SOLO", "pro": "PRO", "team": "TEAM" }
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Planını Seç",
+  "subtitle": "Ücretsiz başla. Hazır olunca yükselt.",
+  "banner": { "quota_exceeded": "Aylık karar limitine ulaştın. Devam etmek için yükselt." },
+  "plans": {
+    "free":  { "name": "Free",  "price": "$0",   "period": "/ay", "cta": "Mevcut Plan" },
+    "solo":  { "name": "Solo",  "price": "$29",  "period": "/ay", "cta": "Solo'ya Geç →" },
+    "pro":   { "name": "Pro",   "price": "$79",  "period": "/ay", "cta": "Pro'ya Geç →" },
+    "team":  { "name": "Team",  "price": "$199", "period": "/ay", "cta": "Team'e Geç →" }
+  },
+  "manage": "Aboneliği Yönet →",
+  "view_plans": "Planları Gör →"
+}
