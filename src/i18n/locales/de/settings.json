@@ -1,17 +1,18 @@
 {
   "sections": {
-    "subscription": "Abonnement",
-    "language":     "Sprache",
-    "risk":         "Risikoschwelle",
-    "clear":        "Daten löschen"
+    "subscription": "ABO",
+    "language":     "SPRACHE",
+    "risk":         "RISIKOSCHWELLE",
+    "clear":        "DATEN LÖSCHEN"
   },
-  "free_plan":    "Kostenloser Plan",
-  "usage_full":   "{{pct}}% verwendet",
+  "free_plan":    "Kostenloser Plan · 50 Entscheidungen/Monat",
+  "usage_full":   "{{pct}}% genutzt",
+  "manage_portal":"Abo verwalten →",
   "opening":      "Wird geöffnet...",
-  "manage_portal":"Plan verwalten",
-  "risk_note":    "Entscheidungen mit einem Risikoscore über diesem Schwellenwert werden automatisch markiert.",
-  "clear_note":   "Löscht den gesamten lokalen Gesprächsverlauf und ausstehende Entscheidungen. Diese Aktion kann nicht rückgängig gemacht werden.",
-  "clear_btn":    "Daten löschen",
-  "cleared":      "✓ Gelöscht",
+  "portal_error": "Portal konnte nicht geöffnet werden. Bitte erneut versuchen.",
+  "risk_note":    "Entscheidungen über diesem Schwellenwert werden vor der Ausführung markiert.",
+  "clear_note":   "Löscht den gesamten lokalen Entscheidungsverlauf. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "clear_btn":    "Verlauf löschen",
+  "cleared":      "Gelöscht ✓",
   "version_label":"Version"
 }
