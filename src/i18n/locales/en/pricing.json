@@ -1,0 +1,13 @@
+{
+  "title": "Choose Your Plan",
+  "subtitle": "Start free. Upgrade when you're ready.",
+  "banner": { "quota_exceeded": "You've reached your monthly decision limit. Upgrade to continue." },
+  "plans": {
+    "free":  { "name": "Free",  "price": "$0",   "period": "/month", "cta": "Current Plan" },
+    "solo":  { "name": "Solo",  "price": "$29",  "period": "/month", "cta": "Get Solo →" },
+    "pro":   { "name": "Pro",   "price": "$79",  "period": "/month", "cta": "Get Pro →" },
+    "team":  { "name": "Team",  "price": "$199", "period": "/month", "cta": "Get Team →" }
+  },
+  "manage": "Manage Subscription →",
+  "view_plans": "View Plans →"
+}

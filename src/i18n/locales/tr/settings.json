@@ -1,0 +1,12 @@
+{
+  "title": "Ayarlar",
+  "language": "Dil",
+  "theme": "Tema",
+  "account": "Hesap",
+  "logout": "Çıkış yap",
+  "danger_zone": "Tehlikeli Bölge",
+  "delete_account": "Hesabı sil",
+  "saved": "Kaydedildi.",
+  "github_token": "GitHub Token",
+  "engine_url": "Engine URL"
+}

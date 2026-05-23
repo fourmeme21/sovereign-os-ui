@@ -1,0 +1,9 @@
+{
+  "engine_offline": "Engine offline. Reconnecting...",
+  "quota_exceeded": "Monthly limit reached. Upgrade to continue.",
+  "auth_required": "Please sign in to continue.",
+  "feature_locked": "This feature requires {{tier}} plan.",
+  "upgrade_prompt": "Upgrade Plan →",
+  "network_error": "Network error. Check your connection.",
+  "unknown": "Something went wrong. Please try again."
+}

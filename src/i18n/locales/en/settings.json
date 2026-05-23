@@ -1,0 +1,12 @@
+{
+  "title": "Settings",
+  "language": "Language",
+  "theme": "Theme",
+  "account": "Account",
+  "logout": "Log out",
+  "danger_zone": "Danger Zone",
+  "delete_account": "Delete account",
+  "saved": "Saved.",
+  "github_token": "GitHub Token",
+  "engine_url": "Engine URL"
+}

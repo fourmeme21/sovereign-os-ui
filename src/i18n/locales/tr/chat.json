@@ -1,0 +1,12 @@
+{
+  "placeholder": "Görevinizi açıklayın...",
+  "send": "Gönder",
+  "thinking": "Düşünüyor...",
+  "decision": "Karar",
+  "approve": "Onayla",
+  "reject": "Reddet",
+  "risk": "Risk Skoru",
+  "auto_approved": "Otomatik onaylandı",
+  "pending_review": "İnceleme bekliyor",
+  "no_decisions": "Henüz karar yok."
+}

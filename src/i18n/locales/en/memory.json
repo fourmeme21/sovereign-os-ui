@@ -1,0 +1,9 @@
+{
+  "title": "Memory",
+  "empty": "No memory snapshots yet.",
+  "snapshot": "Snapshot",
+  "sync": "Sync",
+  "query": "Query",
+  "last_synced": "Last synced: {{time}}",
+  "project": "Project"
+}

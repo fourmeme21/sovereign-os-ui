@@ -1,0 +1,9 @@
+{
+  "engine_offline": "Engine çevrimdışı. Yeniden bağlanıyor...",
+  "quota_exceeded": "Aylık limite ulaşıldı. Devam etmek için yükselt.",
+  "auth_required": "Devam etmek için giriş yap.",
+  "feature_locked": "Bu özellik {{tier}} planı gerektiriyor.",
+  "upgrade_prompt": "Planı Yükselt →",
+  "network_error": "Ağ hatası. Bağlantını kontrol et.",
+  "unknown": "Bir şeyler ters gitti. Tekrar dene."
+}
