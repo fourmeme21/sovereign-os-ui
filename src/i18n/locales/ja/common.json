@@ -8,7 +8,7 @@
     "home":     "ホーム"
   },
   "status": {
-    "engine_active": "Engine: 🟢 稼働中",
+    "engine_active": "エンジン: 🟢 稼働中",
     "memory_ok":     "メモリ: ✓",
     "github":        "GitHub: main",
     "pending":       "{{count}} 件保留中",
