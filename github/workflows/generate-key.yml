@@ -7,27 +7,15 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2.0" --locked
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Generate keypair & set secrets
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+      - name: Generate keypair
         run: |
-          npx tauri signer generate -w /tmp/tauri.key --password ""
-
-          gh secret set TAURI_PRIVATE_KEY < /tmp/tauri.key
-          gh secret set TAURI_KEY_PASSWORD --body ""
-
-          echo "===== tauri.conf.json pubkey ====="
-          tail -1 /tmp/tauri.key.pub
-          echo "=================================="
+          cargo tauri signer generate -w /tmp/tauri.key --password ""
+          echo "===== PUBLIC KEY ====="
+          cat /tmp/tauri.key.pub
+          echo "====================="
 
       - name: Upload public key
         uses: actions/upload-artifact@v4
