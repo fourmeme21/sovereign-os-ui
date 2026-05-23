@@ -1,10 +1,12 @@
 // src/components/UsageBar.tsx
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/authStore";
 
 export function UsageBar() {
   const { tier, decisionCount } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation("common");
 
   if (tier !== "free") return null;
 
@@ -21,14 +23,14 @@ export function UsageBar() {
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
         <span style={{ fontSize: 11, color: "#555550", fontFamily: "'JetBrains Mono',monospace" }}>
-          Bu ay: {decisionCount}/{limit} karar
+          {t("status.usage", { used: decisionCount, limit })}
         </span>
         {isWarning && (
           <span
             onClick={() => navigate("/junior/fiyatlandirma")}
             style={{ fontSize: 11, color: "#2DD4BF", cursor: "pointer", fontWeight: 600 }}
           >
-            Yükselt →
+            {t("actions.upgrade")}
           </span>
         )}
       </div>
