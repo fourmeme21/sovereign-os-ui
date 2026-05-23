@@ -4,67 +4,17 @@
 
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/authStore";
 import { apiCall } from "../lib/apiClient";
 
-// ─── Plan Tanımları ───────────────────────────────────────────────────────────
+// ─── Plan Yapısı ──────────────────────────────────────────────────────────────
 
 const PLANS = [
-  {
-    tier: "free",
-    name: "Ücretsiz",
-    price: 0,
-    highlight: false,
-    badge: null,
-    features: ["50 karar/ay", "1 proje", "Temel destek"],
-    cta: "Mevcut Plan",
-  },
-  {
-    tier: "solo",
-    name: "Solo",
-    price: 29,
-    highlight: true,
-    badge: "Popüler",
-    features: [
-      "Sınırsız karar",
-      "3 proje",
-      "Sovereign Memory (pgvector)",
-      "MCP köprüsü",
-      "GitHub entegrasyonu",
-      "Email destek",
-    ],
-    cta: "Solo'ya Geç",
-  },
-  {
-    tier: "pro",
-    name: "Pro",
-    price: 79,
-    highlight: false,
-    badge: null,
-    features: [
-      "Her şey Solo'da +",
-      "Sınırsız proje",
-      "2 koltuk",
-      "Audit export (CSV/JSON)",
-      "Öncelikli destek",
-    ],
-    cta: "Pro'ya Geç",
-  },
-  {
-    tier: "team",
-    name: "Team",
-    price: 199,
-    highlight: false,
-    badge: null,
-    features: [
-      "Her şey Pro'da +",
-      "10 koltuk",
-      "SSO",
-      "SLA garantisi",
-      "Özel adapter şablonları",
-    ],
-    cta: "Team'e Geç",
-  },
+  { tier: "free",  priceNum: 0,   highlight: false, badgeKey: null      },
+  { tier: "solo",  priceNum: 29,  highlight: true,  badgeKey: "popular" },
+  { tier: "pro",   priceNum: 79,  highlight: false, badgeKey: null      },
+  { tier: "team",  priceNum: 199, highlight: false, badgeKey: null      },
 ] as const;
 
 type PlanTier = (typeof PLANS)[number]["tier"];
@@ -80,8 +30,11 @@ export default function PricingScreen() {
   const { tier: currentTier, user } = useAuthStore();
   const userEmail = user?.email ?? "";
 
+  const { t }          = useTranslation("pricing");
+  const { t: tErrors } = useTranslation("errors");
+
   const [loadingTier, setLoadingTier] = useState<PlanTier | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]             = useState<string | null>(null);
 
   const quotaExceeded = searchParams.get("reason") === "quota_exceeded";
 
@@ -104,7 +57,7 @@ export default function PricingScreen() {
       });
       window.location.href = data.checkoutUrl;
     } catch (e: any) {
-      setError(e.message ?? "Bir hata oluştu. Lütfen tekrar dene.");
+      setError(e.message ?? tErrors("unknown"));
       setLoadingTier(null);
     }
   };
@@ -118,7 +71,7 @@ export default function PricingScreen() {
       );
       window.location.href = data.portalUrl;
     } catch {
-      setError("Portal açılamadı. Lütfen tekrar dene.");
+      setError(t("portal_error"));
     }
   };
 
@@ -126,9 +79,9 @@ export default function PricingScreen() {
   const isCurrentPlan = (tier: PlanTier) => currentTier === tier;
 
   const getCtaLabel = (plan: (typeof PLANS)[number]) => {
-    if (isCurrentPlan(plan.tier)) return "Mevcut Plan";
-    if (plan.tier === "free" && TIER_ORDER[currentTier] > 0) return "Downgrade";
-    return plan.cta;
+    if (isCurrentPlan(plan.tier)) return t("current_plan");
+    if (plan.tier === "free" && TIER_ORDER[currentTier] > 0) return t("downgrade");
+    return t(`plans.${plan.tier}.cta`);
   };
 
   const getCtaDisabled = (plan: (typeof PLANS)[number]) =>
@@ -143,16 +96,14 @@ export default function PricingScreen() {
       <div style={styles.header}>
         {quotaExceeded && (
           <div style={styles.quotaBanner}>
-            ⚡ Bu ay kotanı doldurdun — devam etmek için planını yükselt.
+            ⚡ {t("banner.quota_exceeded")}
           </div>
         )}
-        <p style={styles.eyebrow}>Fiyatlandırma</p>
+        <p style={styles.eyebrow}>{t("eyebrow")}</p>
         <h1 style={styles.title}>
-          Kararlarını <span style={styles.titleAccent}>ölçeklendir</span>
+          {t("headline")} <span style={styles.titleAccent}>{t("headline_accent")}</span>
         </h1>
-        <p style={styles.subtitle}>
-          İptal garantisi. Dodo Payments güvencesiyle. Her ay yenilenir.
-        </p>
+        <p style={styles.subtitle}>{t("subtitle")}</p>
       </div>
 
       {/* ── Hata ── */}
@@ -162,6 +113,7 @@ export default function PricingScreen() {
       <div style={styles.grid}>
         {PLANS.map((plan) => {
           const isCurrent = isCurrentPlan(plan.tier);
+          const features  = t(`plans.${plan.tier}.features`, { returnObjects: true }) as string[];
 
           return (
             <div
@@ -173,31 +125,29 @@ export default function PricingScreen() {
               }}
             >
               {/* Badge */}
-              {plan.badge && (
-                <div style={styles.badge}>{plan.badge}</div>
+              {plan.badgeKey && (
+                <div style={styles.badge}>{t(`badge.${plan.badgeKey}`)}</div>
               )}
-              {isCurrent && !plan.badge && (
+              {isCurrent && !plan.badgeKey && (
                 <div style={{ ...styles.badge, ...styles.badgeCurrent }}>
-                  Aktif
+                  {t("badge.active")}
                 </div>
               )}
 
               {/* İsim & Fiyat */}
               <div style={styles.cardHeader}>
-                <span style={styles.planName}>{plan.name}</span>
+                <span style={styles.planName}>{t(`plans.${plan.tier}.name`)}</span>
                 <div style={styles.priceRow}>
-                  <span style={styles.price}>
-                    {plan.price === 0 ? "Ücretsiz" : `$${plan.price}`}
-                  </span>
-                  {plan.price > 0 && (
-                    <span style={styles.priceUnit}>/ay</span>
+                  <span style={styles.price}>{t(`plans.${plan.tier}.price`)}</span>
+                  {plan.priceNum > 0 && (
+                    <span style={styles.priceUnit}>{t(`plans.${plan.tier}.period`)}</span>
                   )}
                 </div>
               </div>
 
               {/* Özellikler */}
               <ul style={styles.featureList}>
-                {plan.features.map((f) => (
+                {features.map((f) => (
                   <li key={f} style={styles.featureItem}>
                     <CheckIcon color={plan.tier !== "free" ? "#2DD4BF" : "#555"} />
                     <span style={styles.featureText}>{f}</span>
@@ -227,20 +177,20 @@ export default function PricingScreen() {
         })}
       </div>
 
-      {/* ── Portal Linki — sadece ücretli planlarda ── */}
+      {/* ── Portal Linki ── */}
       {currentTier !== "free" && (
         <div style={styles.portalRow}>
           <button style={styles.portalBtn} onClick={handlePortal}>
-            Aboneliği Yönet (Dodo Portal) →
+            {t("manage")}
           </button>
         </div>
       )}
 
       {/* ── Alt Not ── */}
       <p style={styles.footerNote}>
-        Tüm planlar aylık faturalandırılır. İstediğin zaman iptal edebilirsin.
-        <br />
-        Ödeme altyapısı Dodo Payments tarafından sağlanmaktadır.
+        {t("footer").split("\n").map((line, i) => (
+          <span key={i}>{line}{i === 0 && <br />}</span>
+        ))}
       </p>
 
     </div>
