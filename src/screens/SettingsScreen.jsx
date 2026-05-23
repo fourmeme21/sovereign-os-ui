@@ -2,10 +2,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import i18n from "../i18n";
 import { T, getRiskColor } from "../tokens";
 import { useAuthStore } from "../stores/authStore";
 import { apiCall } from "../lib/apiClient";
+import { LanguageSelector } from "../i18n/LanguageSelector";
 
 // ─── Tier config ──────────────────────────────────────────────────────────────
 
@@ -27,28 +27,22 @@ const TIER_LIMIT = {
 
 export function SettingsScreen({ onClear }) {
   const navigate = useNavigate();
-  const { t }              = useTranslation("settings");
-  const { t: tCommon }     = useTranslation("common");
-  const { t: tPricing }    = useTranslation("pricing");
+  const { t }           = useTranslation("settings");
+  const { t: tCommon }  = useTranslation("common");
+  const { t: tPricing } = useTranslation("pricing");
 
   const { tier, decisionCount, user } = useAuthStore();
   const userEmail = user?.email ?? "";
 
-  const [threshold, setThreshold]         = useState(7);
-  const [cleared, setCleared]             = useState(false);
+  const [threshold,     setThreshold]     = useState(7);
+  const [cleared,       setCleared]       = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
-  const [portalError, setPortalError]     = useState(null);
-  const [currentLang, setCurrentLang]     = useState(i18n.language);
+  const [portalError,   setPortalError]   = useState(null);
 
   const handleClear = () => {
     onClear();
     setCleared(true);
     setTimeout(() => setCleared(false), 2000);
-  };
-
-  const handleLangChange = (code) => {
-    i18n.changeLanguage(code);
-    setCurrentLang(code);
   };
 
   const handlePortal = async () => {
@@ -67,8 +61,8 @@ export function SettingsScreen({ onClear }) {
     }
   };
 
-  const limit     = TIER_LIMIT[tier];
-  const usagePct  = limit ? Math.min((decisionCount / limit) * 100, 100) : 0;
+  const limit      = TIER_LIMIT[tier];
+  const usagePct   = limit ? Math.min((decisionCount / limit) * 100, 100) : 0;
   const usageColor = usagePct > 80 ? "#EF4444" : usagePct > 60 ? "#F59E0B" : "#2DD4BF";
 
   const Section = ({ title, children }) => (
@@ -89,7 +83,6 @@ export function SettingsScreen({ onClear }) {
 
       {/* ── Abonelik ── */}
       <Section title={t("sections.subscription")}>
-
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
           <span style={{
             fontSize: 10, fontWeight: 700, letterSpacing: ".12em",
@@ -187,27 +180,7 @@ export function SettingsScreen({ onClear }) {
 
       {/* ── Dil ── */}
       <Section title={t("sections.language")}>
-        <div style={{
-          display: "flex", background: T.bgSurface,
-          border: `1px solid ${T.border}`, borderRadius: 8,
-          padding: 3, gap: 2, width: "fit-content",
-        }}>
-          {["tr", "en"].map(l => (
-            <button
-              key={l}
-              onClick={() => handleLangChange(l)}
-              style={{
-                padding: "7px 20px", borderRadius: 6, border: "none",
-                background: "transparent", cursor: "pointer",
-                fontSize: 12, fontWeight: 600, letterSpacing: ".04em",
-                color: currentLang === l ? T.accent : T.textTertiary,
-                fontFamily: "'JetBrains Mono',monospace",
-              }}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        <LanguageSelector />
       </Section>
 
       {/* ── Risk eşiği ── */}
@@ -255,7 +228,6 @@ export function SettingsScreen({ onClear }) {
       }}>
         {t("version_label")} · sovereign.os v0.1.0-alpha
       </div>
-
     </div>
   );
 }
