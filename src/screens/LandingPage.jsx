@@ -182,7 +182,7 @@ function GlobalStyle() {
 
       .scan-active::after {
         content:''; position:absolute; left:0; right:0; height:2px;
-        background:linear-gradient(90deg,transparent,${T.accent}60,transparent);
+        background:linear-gradient(90deg, transparent, ${T.accent}60, transparent);
         animation:scan-line 1.8s linear infinite;
         pointer-events:none;
       }
@@ -430,7 +430,7 @@ const DEMO_DECISIONS = [
 
 function LiveDecisionCard() {
   const [idx, setIdx] = useState(0);
-  const [phase, setPhase] = useState("show"); // show | deciding | done
+  const [phase, setPhase] = useState("show");
   const [decision, setDecision] = useState(null);
   const [sweep, setSweep] = useState(true);
   const d = DEMO_DECISIONS[idx];
@@ -473,7 +473,6 @@ function LiveDecisionCard() {
       transition:"background .5s ease",
       maxWidth:480, width:"100%",
     }}>
-      {/* Scan line */}
       {phase === "deciding" && (
         <div style={{
           position:"absolute", left:0, right:0, height:2,
@@ -482,7 +481,6 @@ function LiveDecisionCard() {
         }} />
       )}
 
-      {/* Sweep */}
       {sweep && (
         <div style={{
           position:"absolute", inset:0, zIndex:2, pointerEvents:"none",
@@ -491,10 +489,8 @@ function LiveDecisionCard() {
         }} />
       )}
 
-      {/* Header row */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          {/* Risk circle */}
           <div style={{
             width:48, height:48, borderRadius:"50%",
             border:`2px solid ${rc}`,
@@ -537,12 +533,10 @@ function LiveDecisionCard() {
         </div>
       </div>
 
-      {/* Reason */}
       <p style={{ fontSize:13, color:T.textSecondary, lineHeight:1.7, marginBottom:16 }}>
         {d.reason}
       </p>
 
-      {/* Actions or result */}
       {phase === "show" && d.status !== "auto" && (
         <div style={{ display:"flex", gap:8 }}>
           <button style={{
@@ -646,12 +640,19 @@ function Nav() {
           </span>
         </div>
 
-        {/* CTA */}
-        <a href="/junior" style={{ textDecoration:"none" }}>
-          <button className="btn-primary nav-cta" style={{ padding:"9px 18px", fontSize:13, animation:"none" }}>
-            Open App →
-          </button>
-        </a>
+        {/* CTA group */}
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <a href="#download" style={{ textDecoration:"none" }}>
+            <button className="btn-ghost" style={{ padding:"8px 16px", fontSize:13 }}>
+              Download
+            </button>
+          </a>
+          <a href="/junior" style={{ textDecoration:"none" }}>
+            <button className="btn-primary nav-cta" style={{ padding:"9px 18px", fontSize:13, animation:"none" }}>
+              Open App →
+            </button>
+          </a>
+        </div>
       </div>
     </nav>
   );
@@ -665,12 +666,8 @@ function HeroSection() {
       position:"relative", overflow:"hidden",
       padding:"80px 24px 60px",
     }}>
-      {/* Grid bg */}
-      <div className="hero-grid" style={{
-        position:"absolute", inset:0, pointerEvents:"none",
-      }} />
+      <div className="hero-grid" style={{ position:"absolute", inset:0, pointerEvents:"none" }} />
 
-      {/* Radial glow */}
       <div style={{
         position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)",
         width:600, height:600, borderRadius:"50%",
@@ -681,9 +678,7 @@ function HeroSection() {
       <div style={{ maxWidth:1120, margin:"0 auto", width:"100%", position:"relative", zIndex:1 }}>
         <div className="hero-layout">
 
-          {/* Left: Copy */}
           <div>
-            {/* Pre-badge */}
             <div style={{
               display:"inline-flex", alignItems:"center", gap:8,
               padding:"6px 14px", borderRadius:20,
@@ -696,7 +691,6 @@ function HeroSection() {
               </span>
             </div>
 
-            {/* Headline */}
             <h1 className="hero-h1" style={{
               fontFamily:"'Outfit',sans-serif", fontWeight:900,
               fontSize:"clamp(40px,5vw,68px)", lineHeight:1.0,
@@ -714,11 +708,10 @@ function HeroSection() {
               lineHeight:1.7, maxWidth:440,
               marginBottom:36, animation:"fade-up .7s .35s both",
             }}>
-              Every AI action intercepted. Every risk scored. Low-risk auto-approved. 
+              Every AI action intercepted. Every risk scored. Low-risk auto-approved.
               High-risk escalated to you. Permanent memory. Zero context loss.
             </p>
 
-            {/* Single question */}
             <div className="hero-quote" style={{
               padding:"14px 20px", borderRadius:10,
               background:`${T.accent}10`, border:`1px solid ${T.accent}30`,
@@ -739,7 +732,6 @@ function HeroSection() {
               </a>
             </div>
 
-            {/* Stats row */}
             <div className="hero-stats" style={{ animation:"fade-up .7s .65s both" }}>
               {[
                 { num:1422, label:"decisions guarded" },
@@ -758,9 +750,7 @@ function HeroSection() {
             </div>
           </div>
 
-          {/* Right: Live demo card */}
           <div className="hero-card-col">
-            {/* Terminal header */}
             <div style={{
               display:"flex", alignItems:"center", gap:8,
               padding:"10px 16px",
@@ -782,7 +772,6 @@ function HeroSection() {
               </div>
             </div>
 
-            {/* Engine hint */}
             <div style={{
               padding:"12px 16px",
               background:T.bgSurface, border:`1px solid ${T.borderSubtle}`,
@@ -894,29 +883,12 @@ function ProblemSection() {
               onMouseEnter={e => e.currentTarget.style.background = T.bgElevated}
               onMouseLeave={e => e.currentTarget.style.background = T.bgSurface}
             >
-              <div style={{
-                fontSize:28, color:p.color, marginBottom:20,
-                fontFamily:"'JetBrains Mono',monospace",
-              }}>{p.icon}</div>
-
-              <div style={{
-                fontFamily:"'Outfit',sans-serif", fontWeight:900,
-                fontSize:42, color:p.color, lineHeight:1, marginBottom:4,
-                opacity:.9, fontStyle:"normal",
-              }}>{p.stat}</div>
-              <div style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".1em", marginBottom:20 }}>
-                {p.statLabel}
-              </div>
-
-              <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:18, color:T.textPrimary, marginBottom:12, fontStyle:"normal" }}>
-                {p.title}
-              </h3>
+              <div style={{ fontSize:28, color:p.color, marginBottom:20, fontFamily:"'JetBrains Mono',monospace" }}>{p.icon}</div>
+              <div style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:42, color:p.color, lineHeight:1, marginBottom:4, opacity:.9, fontStyle:"normal" }}>{p.stat}</div>
+              <div style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".1em", marginBottom:20 }}>{p.statLabel}</div>
+              <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:18, color:T.textPrimary, marginBottom:12, fontStyle:"normal" }}>{p.title}</h3>
               <p style={{ fontSize:14, color:T.textSecondary, lineHeight:1.7 }}>{p.body}</p>
-
-              <div style={{
-                position:"absolute", top:0, right:0, width:60, height:60,
-                background:`radial-gradient(circle at 100% 0%, ${p.color}14, transparent 70%)`,
-              }} />
+              <div style={{ position:"absolute", top:0, right:0, width:60, height:60, background:`radial-gradient(circle at 100% 0%, ${p.color}14, transparent 70%)` }} />
             </div>
           ))}
         </div>
@@ -971,47 +943,24 @@ function FlowSection() {
         }}>
           {nodes.map((n, i) => (
             <>
-              <div key={n.id} className="flow-node" style={{
-                opacity: step >= n.id ? 1 : .25,
-                transition:"opacity .4s ease",
-                minWidth:80,
-              }}>
+              <div key={n.id} className="flow-node" style={{ opacity: step >= n.id ? 1 : .25, transition:"opacity .4s ease", minWidth:80 }}>
                 <div style={{
                   width:52, height:52, borderRadius:12,
-                  background: step >= n.id
-                    ? n.hidden ? `${T.textTertiary}14` : `${T.accent}18`
-                    : T.bgSurface,
+                  background: step >= n.id ? n.hidden ? `${T.textTertiary}14` : `${T.accent}18` : T.bgSurface,
                   border:`2px solid ${step >= n.id ? (n.hidden ? T.textTertiary : T.accent) : T.border}`,
                   display:"flex", alignItems:"center", justifyContent:"center",
-                  fontSize:20, transition:"all .4s ease",
-                  position:"relative",
+                  fontSize:20, transition:"all .4s ease", position:"relative",
                 }}>
-                  {n.hidden ? (
-                    <span style={{ fontSize:13, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>???</span>
-                  ) : (
-                    <span>{n.icon}</span>
-                  )}
+                  {n.hidden ? <span style={{ fontSize:13, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>???</span> : <span>{n.icon}</span>}
                   {step === n.id && (
-                    <div style={{
-                      position:"absolute", inset:-6, borderRadius:16,
-                      border:`1px solid ${T.accent}40`,
-                      animation:"halo-pulse 1.2s ease-in-out infinite",
-                    }} />
+                    <div style={{ position:"absolute", inset:-6, borderRadius:16, border:`1px solid ${T.accent}40`, animation:"halo-pulse 1.2s ease-in-out infinite" }} />
                   )}
                 </div>
-                <span style={{ fontSize:12, fontWeight:700, color:step >= n.id ? T.textPrimary : T.textTertiary, transition:"color .4s" }}>
-                  {n.label}
-                </span>
-                <span style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
-                  {n.sub}
-                </span>
+                <span style={{ fontSize:12, fontWeight:700, color:step >= n.id ? T.textPrimary : T.textTertiary, transition:"color .4s" }}>{n.label}</span>
+                <span style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>{n.sub}</span>
               </div>
               {i < nodes.length - 1 && (
-                <div key={`c-${i}`} className="flow-connector" style={{
-                  width:40, flexShrink:0,
-                  opacity: step > i ? 1 : .15,
-                  transition:"opacity .4s ease",
-                }} />
+                <div key={`c-${i}`} className="flow-connector" style={{ width:40, flexShrink:0, opacity: step > i ? 1 : .15, transition:"opacity .4s ease" }} />
               )}
             </>
           ))}
@@ -1040,25 +989,16 @@ function FlowSection() {
 // ── SECTION 5: FEATURES ───────────────────────────────────────
 const FEATURES = [
   {
-    tag:"01",
-    title:"Interception Overlay",
+    tag:"01", title:"Interception Overlay", color:T.danger, metric:"< 8ms", metricLabel:"interception latency",
     body:"Wraps every AI action before execution. No changes to your existing workflow. Runs as a transparent middleware layer — your AI doesn't even know it's there.",
-    color:T.danger,
-    metric:"< 8ms", metricLabel:"interception latency",
   },
   {
-    tag:"02",
-    title:"Persistent Memory",
+    tag:"02", title:"Persistent Memory", color:T.accent, metric:"247", metricLabel:"memory snapshots",
     body:"Hot, warm, cold memory tiers. Every decision, every context, every pattern — remembered permanently. The engine knows your codebase better than your team does.",
-    color:T.accent,
-    metric:"247", metricLabel:"memory snapshots",
   },
   {
-    tag:"03",
-    title:"GitHub Auto-Commit",
+    tag:"03", title:"GitHub Auto-Commit", color:T.success, metric:"100%", metricLabel:"audit coverage",
     body:"Every approved change is automatically committed with full audit trail. Rejected actions are logged with reasoning. Complete decision history, zero manual work.",
-    color:T.success,
-    metric:"100%", metricLabel:"audit coverage",
   },
 ];
 
@@ -1080,43 +1020,23 @@ function FeaturesSection() {
         <div className="features-grid">
           {FEATURES.map((f, i) => (
             <div key={i} style={{
-              padding:"36px 28px",
-              background:T.bgSurface,
+              padding:"36px 28px", background:T.bgSurface,
               borderRight: i < 2 ? `1px solid ${T.border}` : "none",
-              position:"relative", overflow:"hidden",
-              transition:"background .2s",
+              position:"relative", overflow:"hidden", transition:"background .2s",
             }}
               onMouseEnter={e => e.currentTarget.style.background = T.bgElevated}
               onMouseLeave={e => e.currentTarget.style.background = T.bgSurface}
             >
-              <div style={{
-                fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace",
-                letterSpacing:".2em", fontWeight:700, marginBottom:24,
-                display:"flex", alignItems:"center", justifyContent:"space-between",
-              }}>
+              <div style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".2em", fontWeight:700, marginBottom:24, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
                 <span>{f.tag}</span>
-                <div style={{
-                  padding:"4px 10px", borderRadius:6,
-                  background:`${f.color}14`, border:`1px solid ${f.color}30`,
-                }}>
-                  <span style={{ fontSize:12, fontWeight:800, color:f.color, fontFamily:"'Outfit',sans-serif" }}>
-                    {f.metric}
-                  </span>
-                  <span style={{ fontSize:9, color:T.textTertiary, marginLeft:4 }}>
-                    {f.metricLabel}
-                  </span>
+                <div style={{ padding:"4px 10px", borderRadius:6, background:`${f.color}14`, border:`1px solid ${f.color}30` }}>
+                  <span style={{ fontSize:12, fontWeight:800, color:f.color, fontFamily:"'Outfit',sans-serif" }}>{f.metric}</span>
+                  <span style={{ fontSize:9, color:T.textTertiary, marginLeft:4 }}>{f.metricLabel}</span>
                 </div>
               </div>
-
-              <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:20, color:T.textPrimary, marginBottom:14, fontStyle:"normal" }}>
-                {f.title}
-              </h3>
+              <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:20, color:T.textPrimary, marginBottom:14, fontStyle:"normal" }}>{f.title}</h3>
               <p style={{ fontSize:14, color:T.textSecondary, lineHeight:1.7 }}>{f.body}</p>
-
-              <div style={{
-                position:"absolute", bottom:0, left:0, right:0, height:3,
-                background:`linear-gradient(90deg, ${f.color}60, ${f.color}20, transparent)`,
-              }} />
+              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:3, background:`linear-gradient(90deg, ${f.color}60, ${f.color}20, transparent)` }} />
             </div>
           ))}
         </div>
@@ -1127,26 +1047,10 @@ function FeaturesSection() {
 
 // ── SECTION 6: RISK TIER TABLE ────────────────────────────────
 const TIERS = [
-  {
-    tier:0, range:"0–3", label:"Low Risk", color:T.success,
-    desc:"Auto-approved. No human required. Engine continues.",
-    action:"AUTO_APPROVED", count:1339,
-  },
-  {
-    tier:1, range:"4–5", label:"Medium Risk", color:T.warning,
-    desc:"Logged with reasoning. Human review optional.",
-    action:"REVIEW_OPTIONAL", count:62,
-  },
-  {
-    tier:2, range:"6–7", label:"High Risk", color:"#F97316",
-    desc:"Requires explicit human approval before execution.",
-    action:"PENDING_HUMAN", count:18,
-  },
-  {
-    tier:3, range:"8–10", label:"Critical Risk", color:T.danger,
-    desc:"Hard lock. Execution blocked. Immediate escalation.",
-    action:"HARD_BLOCK", count:3,
-  },
+  { tier:0, range:"0–3", label:"Low Risk", color:T.success, desc:"Auto-approved. No human required. Engine continues.", action:"AUTO_APPROVED", count:1339 },
+  { tier:1, range:"4–5", label:"Medium Risk", color:T.warning, desc:"Logged with reasoning. Human review optional.", action:"REVIEW_OPTIONAL", count:62 },
+  { tier:2, range:"6–7", label:"High Risk", color:"#F97316", desc:"Requires explicit human approval before execution.", action:"PENDING_HUMAN", count:18 },
+  { tier:3, range:"8–10", label:"Critical Risk", color:T.danger, desc:"Hard lock. Execution blocked. Immediate escalation.", action:"HARD_BLOCK", count:3 },
 ];
 
 function RiskTierSection() {
@@ -1165,10 +1069,7 @@ function RiskTierSection() {
         </div>
 
         <div style={{ borderRadius:14, overflow:"hidden", border:`1px solid ${T.border}` }}>
-          <div className="tier-row" style={{
-            background:T.bgElevated, borderBottom:`1px solid ${T.border}`,
-            padding:"12px 20px",
-          }}>
+          <div className="tier-row" style={{ background:T.bgElevated, borderBottom:`1px solid ${T.border}`, padding:"12px 20px" }}>
             <span style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".14em" }}>TIER</span>
             <span style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".14em" }}>SCORE</span>
             <span style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".14em" }}>DESCRIPTION</span>
@@ -1177,34 +1078,15 @@ function RiskTierSection() {
 
           {TIERS.map((t, i) => (
             <div key={i} className="tier-row" style={{ background:T.bgSurface }}>
-              <div style={{
-                width:36, height:36, borderRadius:8,
-                background:`${t.color}14`, border:`1px solid ${t.color}30`,
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:16, color:t.color,
-                fontStyle:"normal",
-              }}>{t.tier}</div>
-
-              <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:14, fontWeight:700, color:t.color }}>
-                {t.range}
-              </div>
-
+              <div style={{ width:36, height:36, borderRadius:8, background:`${t.color}14`, border:`1px solid ${t.color}30`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:16, color:t.color, fontStyle:"normal" }}>{t.tier}</div>
+              <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:14, fontWeight:700, color:t.color }}>{t.range}</div>
               <div className="tier-desc">
                 <div style={{ fontSize:13, fontWeight:600, color:T.textPrimary, marginBottom:3 }}>{t.label}</div>
                 <div style={{ fontSize:12, color:T.textSecondary }}>{t.desc}</div>
               </div>
-
               <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                <div style={{
-                  padding:"4px 10px", borderRadius:6,
-                  background:`${t.color}12`, border:`1px solid ${t.color}25`,
-                  fontSize:10, fontWeight:700, color:t.color,
-                  fontFamily:"'JetBrains Mono',monospace", letterSpacing:".08em",
-                  whiteSpace:"nowrap",
-                }}>{t.action}</div>
-                <div style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", paddingLeft:2 }}>
-                  {t.count} decisions
-                </div>
+                <div style={{ padding:"4px 10px", borderRadius:6, background:`${t.color}12`, border:`1px solid ${t.color}25`, fontSize:10, fontWeight:700, color:t.color, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".08em", whiteSpace:"nowrap" }}>{t.action}</div>
+                <div style={{ fontSize:10, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", paddingLeft:2 }}>{t.count} decisions</div>
               </div>
             </div>
           ))}
@@ -1212,18 +1094,12 @@ function RiskTierSection() {
 
         <div style={{ marginTop:20, display:"flex", height:6, borderRadius:4, overflow:"hidden", gap:2 }}>
           {TIERS.map(t => (
-            <div key={t.tier} style={{
-              flex:t.count, background:t.color,
-              opacity:.7, borderRadius:2,
-              transition:"flex .6s ease",
-            }} />
+            <div key={t.tier} style={{ flex:t.count, background:t.color, opacity:.7, borderRadius:2, transition:"flex .6s ease" }} />
           ))}
         </div>
         <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
           {TIERS.map(t => (
-            <span key={t.tier} style={{ fontSize:9, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
-              {t.count}
-            </span>
+            <span key={t.tier} style={{ fontSize:9, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>{t.count}</span>
           ))}
         </div>
       </div>
@@ -1231,11 +1107,81 @@ function RiskTierSection() {
   );
 }
 
-// ── SECTION 7: CTA / WAITLIST ─────────────────────────────────
+// ── SECTION 7: DOWNLOAD ────────────────────────────────────────
+function DownloadSection() {
+  const ref = useReveal();
+
+  const links = {
+    exe: "https://github.com/fourmeme21/sovereign-os-ui/releases/download/v0.4.4/sovereign-os_0.1.7_x64-setup.exe",
+    msi: "https://github.com/fourmeme21/sovereign-os-ui/releases/download/v0.4.4/sovereign-os_0.1.7_x64_en-US.msi",
+  };
+
+  return (
+    <section ref={ref} className="section-reveal" id="download" style={{ padding:"80px 24px", background:T.bgPrimary }}>
+      <div style={{ maxWidth:720, margin:"0 auto", textAlign:"center" }}>
+        <div style={{ fontSize:11, color:T.accent, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".18em", marginBottom:12 }}>
+          DOWNLOAD
+        </div>
+        <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em", marginBottom:16, fontStyle:"normal" }}>
+          Take control.<br />
+          <span className="accent-text">Own your desktop.</span>
+        </h2>
+        <p style={{ fontSize:15, color:T.textSecondary, lineHeight:1.7, marginBottom:48 }}>
+          Native desktop app for Windows. Your AI decisions, locally guarded.
+        </p>
+
+        <div style={{ display:"flex", flexDirection:"column", gap:12, alignItems:"center" }}>
+          {/* Primary: EXE */}
+          <a href={links.exe} style={{ textDecoration:"none", width:"100%", maxWidth:400 }}>
+            <button style={{
+              width:"100%", padding:"18px 28px",
+              background:T.accent, border:"none", borderRadius:12,
+              color:"#fff", fontSize:15, fontWeight:700,
+              cursor:"pointer", fontFamily:"'Inter',sans-serif",
+              display:"flex", alignItems:"center", justifyContent:"center", gap:10,
+              animation:"glow-pulse 3s ease-in-out infinite",
+              transition:"transform .12s",
+            }}
+              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+            >
+              <span style={{ fontSize:18 }}>⬇</span>
+              Download for Windows
+              <span style={{ fontSize:11, opacity:.7, fontFamily:"'JetBrains Mono',monospace" }}>v0.4.4 · .exe</span>
+            </button>
+          </a>
+
+          {/* Secondary: MSI */}
+          <a href={links.msi} style={{ textDecoration:"none" }}>
+            <span style={{ fontSize:12, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace", cursor:"pointer", textDecoration:"underline", textDecorationColor:T.border }}>
+              Download .msi (enterprise installer)
+            </span>
+          </a>
+        </div>
+
+        {/* Info row */}
+        <div style={{ marginTop:40, display:"flex", justifyContent:"center", gap:32, flexWrap:"wrap" }}>
+          {[
+            { icon:"🪟", label:"Windows 10/11" },
+            { icon:"⚡", label:"1.68 MB" },
+            { icon:"🔓", label:"No account required" },
+          ].map(item => (
+            <div key={item.label} style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <span>{item.icon}</span>
+              <span style={{ fontSize:12, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── SECTION 8: CTA / WAITLIST ─────────────────────────────────
 function WaitlistSection() {
   const ref = useReveal();
   const [email, setEmail] = useState("");
-  const [state, setState] = useState("idle"); // idle | loading | done
+  const [state, setState] = useState("idle");
 
   const handleSubmit = async () => {
     if (!email.includes("@")) return;
@@ -1347,34 +1293,17 @@ function WaitlistSection() {
 // ── FOOTER ─────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer style={{
-      borderTop:`1px solid ${T.border}`,
-      padding:"24px",
-    }}>
-      <div className="footer-inner" style={{
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        flexWrap:"wrap", gap:12,
-      }}>
-      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        <div style={{
-          width:20, height:20, borderRadius:5,
-          background:`linear-gradient(135deg,${T.accent},#9061F9)`,
-          display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:10, fontWeight:800, color:"#fff", fontFamily:"'Outfit',sans-serif",
-        }}>S</div>
-        <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:T.textTertiary }}>
-          Sovereign Engine OS · v3.0 Unified
-        </span>
-      </div>
-      <div style={{ fontSize:11, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>
-        "Control is the New Intelligence."
-      </div>
-      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-        <div className="live-dot" style={{width:5,height:5}} />
-        <span style={{ fontSize:11, color:T.success, fontFamily:"'JetBrains Mono',monospace" }}>
-          All systems operational
-        </span>
-      </div>
+    <footer style={{ borderTop:`1px solid ${T.border}`, padding:"24px" }}>
+      <div className="footer-inner" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <div style={{ width:20, height:20, borderRadius:5, background:`linear-gradient(135deg,${T.accent},#9061F9)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color:"#fff", fontFamily:"'Outfit',sans-serif" }}>S</div>
+          <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:T.textTertiary }}>Sovereign Engine OS · v3.0 Unified</span>
+        </div>
+        <div style={{ fontSize:11, color:T.textTertiary, fontFamily:"'JetBrains Mono',monospace" }}>"Control is the New Intelligence."</div>
+        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <div className="live-dot" style={{width:5,height:5}} />
+          <span style={{ fontSize:11, color:T.success, fontFamily:"'JetBrains Mono',monospace" }}>All systems operational</span>
+        </div>
       </div>
     </footer>
   );
@@ -1394,6 +1323,7 @@ export default function App() {
         <FlowSection />
         <FeaturesSection />
         <RiskTierSection />
+        <DownloadSection />
         <WaitlistSection />
       </main>
       <Footer />
