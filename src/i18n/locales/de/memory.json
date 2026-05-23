@@ -1,0 +1,11 @@
+{
+  "title":             "Speicher",
+  "empty":             "Kein gespeicherter Verlauf",
+  "sync":              "Synchronisieren",
+  "syncing":           "Synchronisierung...",
+  "sync_success":      "Synchronisierung abgeschlossen",
+  "sync_error":        "Synchronisierung fehlgeschlagen",
+  "query":             "Speicher durchsuchen",
+  "query_placeholder": "Bsp: Was wurde letzte Woche gemacht?",
+  "last_synced":       "Zuletzt synchronisiert: {{time}}"
+}
