@@ -63,6 +63,7 @@ jobs:
           $tag     = "${{ github.ref_name }}"
           $version = $tag -replace "^v", ""
           $repo    = "${{ github.repository }}"
+          Get-ChildItem "src-tauri/target/release/bundle" -Recurse | ForEach-Object { Write-Host $_.FullName }
           $sigFile = Get-ChildItem "src-tauri/target/release/bundle" -Recurse -Filter "*.sig" -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $sigFile) { Write-Error "Hic .sig dosyasi bulunamadi"; exit 1 }
           $signature   = (Get-Content $sigFile.FullName -Raw).Trim()
