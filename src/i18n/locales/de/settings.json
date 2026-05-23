@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "subscription": "Abonnement",
+    "language":     "Sprache",
+    "risk":         "Risikoschwelle",
+    "clear":        "Daten löschen"
+  },
+  "free_plan":    "Kostenloser Plan",
+  "usage_full":   "{{pct}}% verwendet",
+  "opening":      "Wird geöffnet...",
+  "manage_portal":"Plan verwalten",
+  "risk_note":    "Entscheidungen mit einem Risikoscore über diesem Schwellenwert werden automatisch markiert.",
+  "clear_note":   "Löscht den gesamten lokalen Gesprächsverlauf und ausstehende Entscheidungen. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "clear_btn":    "Daten löschen",
+  "cleared":      "✓ Gelöscht",
+  "version_label":"Version"
+}
