@@ -1,0 +1,28 @@
+{
+  "title":   "Connections",
+  "refresh": "Refresh",
+  "status": {
+    "checking": "Checking...",
+    "ok":       "✓ Connected",
+    "error":    "✗ Not connected"
+  },
+  "services": {
+    "engine": { "label": "Sovereign Engine", "desc": "Running on Railway"   },
+    "memory": { "label": "Sovereign Memory", "desc": "pgvector + Voyage AI" },
+    "mcp":    { "label": "MCP Server",       "desc": "Claude bridge"        },
+    "github": { "label": "GitHub",           "desc": "Repo connection"      }
+  },
+  "github": {
+    "connect":          "Connect",
+    "change":           "Change",
+    "cancel":           "Cancel",
+    "save":             "Save",
+    "remove":           "Remove",
+    "verifying":        "Verifying...",
+    "optional":         "optional",
+    "help":             "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. repo permission is sufficient.",
+    "repo_format_error":"Invalid repo format — example: username/repo-name",
+    "token_invalid":    "Token is invalid or unauthorized — get a new token from GitHub.",
+    "saved_success":    "✓ GitHub token verified and saved"
+  }
+}
