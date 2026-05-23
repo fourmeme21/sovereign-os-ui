@@ -1,12 +1,18 @@
 {
-  "title": "Settings",
-  "language": "Language",
-  "theme": "Theme",
-  "account": "Account",
-  "logout": "Log out",
-  "danger_zone": "Danger Zone",
-  "delete_account": "Delete account",
-  "saved": "Saved.",
-  "github_token": "GitHub Token",
-  "engine_url": "Engine URL"
+  "sections": {
+    "subscription": "SUBSCRIPTION",
+    "language":     "LANGUAGE",
+    "risk":         "RISK THRESHOLD",
+    "clear":        "CLEAR DATA"
+  },
+  "free_plan":    "Free plan · 50 decisions/month",
+  "usage_full":   "{{pct}}% used",
+  "manage_portal":"Manage Subscription →",
+  "opening":      "Opening...",
+  "portal_error": "Could not open portal. Try again.",
+  "risk_note":    "Decisions above this threshold will be flagged before execution.",
+  "clear_note":   "Clears all local decision history. This action cannot be undone.",
+  "clear_btn":    "Clear History",
+  "cleared":      "Cleared ✓",
+  "version_label":"Version"
 }
