@@ -13,10 +13,10 @@ const NAV_ITEMS = [
 ];
 
 const LANGUAGES = [
-  { code: "en", flag: "🇬🇧" },
-  { code: "tr", flag: "🇹🇷" },
-  { code: "ja", flag: "🇯🇵" },
-  { code: "de", flag: "🇩🇪" },
+  { code: "en", flag: "🇬🇧", label: "EN" },
+  { code: "tr", flag: "🇹🇷", label: "TR" },
+  { code: "ja", flag: "🇯🇵", label: "JA" },
+  { code: "de", flag: "🇩🇪", label: "DE" },
 ];
 
 export default function JuniorNav() {
@@ -30,37 +30,38 @@ export default function JuniorNav() {
   };
 
   return (
-    <div className="junior-nav">
-      <button className="junior-back" onClick={() => navigate("/")}>
-        ← {t("nav.home")}
-      </button>
+    <div style={{ display: "flex", flexDirection: "column" }}>
 
-      <div className="junior-nav-items">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `junior-nav-item${isActive ? " junior-nav-active" : ""}`
-            }
-          >
-            <span className="junior-nav-icon">{item.icon}</span>
-            <span className="junior-nav-label">{t(`nav.${item.key}`)}</span>
-          </NavLink>
-        ))}
+      {/* ── Ana Nav ── */}
+      <div className="junior-nav">
+        <button className="junior-back" onClick={() => navigate("/")}>
+          ← {t("nav.home")}
+        </button>
+        <div className="junior-nav-items">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `junior-nav-item${isActive ? " junior-nav-active" : ""}`
+              }
+            >
+              <span className="junior-nav-icon">{item.icon}</span>
+              <span className="junior-nav-label">{t(`nav.${item.key}`)}</span>
+            </NavLink>
+          ))}
+        </div>
       </div>
 
-      {/* ── Dil Seçici ── */}
+      {/* ── Dil Şeridi ── */}
       <div style={{
         display: "flex",
+        justifyContent: "flex-end",
         alignItems: "center",
-        gap: 2,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: 20,
-        padding: "3px 4px",
-        marginLeft: "auto",
-        flexShrink: 0,
+        gap: 4,
+        padding: "4px 12px",
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "rgba(0,0,0,0.2)",
       }}>
         {LANGUAGES.map((lang) => {
           const isActive = current === lang.code;
@@ -68,34 +69,34 @@ export default function JuniorNav() {
             <button
               key={lang.code}
               onClick={() => changeLang(lang.code)}
-              title={lang.code.toUpperCase()}
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                width: 28,
-                height: 28,
-                borderRadius: 16,
-                border: "none",
+                gap: 4,
+                padding: "2px 8px",
+                borderRadius: 10,
+                border: isActive
+                  ? "1px solid rgba(45,212,191,0.35)"
+                  : "1px solid transparent",
                 background: isActive
-                  ? "rgba(45,212,191,0.15)"
+                  ? "rgba(45,212,191,0.08)"
                   : "transparent",
-                boxShadow: isActive
-                  ? "inset 0 0 0 1px rgba(45,212,191,0.4)"
-                  : "none",
                 cursor: "pointer",
-                fontSize: 16,
-                lineHeight: 1,
-                opacity: isActive ? 1 : 0.45,
+                fontSize: 11,
+                fontWeight: isActive ? 700 : 400,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.06em",
+                color: isActive ? "#2DD4BF" : "rgba(255,255,255,0.3)",
                 transition: "all .15s",
-                padding: 0,
               }}
             >
-              {lang.flag}
+              <span style={{ fontSize: 13 }}>{lang.flag}</span>
+              <span>{lang.label}</span>
             </button>
           );
         })}
       </div>
+
     </div>
   );
 }
