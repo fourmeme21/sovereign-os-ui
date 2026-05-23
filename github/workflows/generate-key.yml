@@ -1,0 +1,36 @@
+name: Generate Signing Key
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Generate keypair & set secrets
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          npx tauri signer generate -w /tmp/tauri.key --password ""
+
+          gh secret set TAURI_PRIVATE_KEY < /tmp/tauri.key
+          gh secret set TAURI_KEY_PASSWORD --body ""
+
+          echo "===== tauri.conf.json pubkey ====="
+          tail -1 /tmp/tauri.key.pub
+          echo "=================================="
+
+      - name: Upload public key
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-pubkey
+          path: /tmp/tauri.key.pub
