@@ -1,5 +1,5 @@
 // src/junior/components/JuniorNav.jsx
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./ekranlar.css";
 
@@ -11,14 +11,10 @@ const NAV_ITEMS = [
 ];
 
 export default function JuniorNav() {
-  const navigate = useNavigate();
   const { t } = useTranslation("common");
 
   return (
     <div className="junior-nav">
-      <button className="junior-back" onClick={() => navigate("/")}>
-        ← {t("nav.home")}
-      </button>
       <div className="junior-nav-items">
         {NAV_ITEMS.map((item) => (
           <NavLink
