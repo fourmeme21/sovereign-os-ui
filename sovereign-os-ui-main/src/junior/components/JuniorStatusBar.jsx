@@ -1,4 +1,6 @@
+// src/junior/components/JuniorStatusBar.jsx
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useJuniorStore } from "../stores/juniorStore";
 import { useAuthStore } from "../../stores/authStore";
 
@@ -9,15 +11,9 @@ const TIER_COLOR = {
   team: "#F59E0B",
 };
 
-const TIER_LABEL = {
-  free: "FREE",
-  solo: "SOLO",
-  pro:  "PRO",
-  team: "TEAM",
-};
-
 export default function JuniorStatusBar() {
   const navigate = useNavigate();
+  const { t } = useTranslation("common");
 
   const pendingCount = useJuniorStore(
     (s) => s.decisions.filter((d) => d.status === "PENDING_HUMAN").length
@@ -27,13 +23,13 @@ export default function JuniorStatusBar() {
 
   return (
     <div className="junior-status-bar">
-      <span className="status-item">Engine: 🟢 AKTİF</span>
-      <span className="status-item">Hafıza: ✓</span>
-      <span className="status-item">GitHub: main</span>
+      <span className="status-item">{t("status.engine_active")}</span>
+      <span className="status-item">{t("status.memory_ok")}</span>
+      <span className="status-item">{t("status.github")}</span>
 
       {pendingCount > 0 && (
         <span className="status-item status-pending">
-          🟡 {pendingCount} bekliyor
+          🟡 {t("status.pending", { count: pendingCount })}
         </span>
       )}
 
@@ -49,9 +45,9 @@ export default function JuniorStatusBar() {
           paddingLeft: 10,
           marginLeft: 4,
         }}
-        title="Ayarlar & Plan"
+        title={t("nav.settings")}
       >
-        {TIER_LABEL[tier]} ⚙️
+        {t(`tier.${tier}`)} ⚙️
       </span>
     </div>
   );
