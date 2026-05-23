@@ -1,16 +1,19 @@
 // src/junior/screens/Chat.jsx
 // Phase B.2 — aiProxy refactor
-// Phase B.3 — Gerçek risk skoru entegrasyonu (risk = 2 sabit kaldırıldı)
-// Değişiklik: anthropic.com doğrudan çağrısı → /api/ai/chat proxy üzerinden
-// Kaldırılanlar: API_URL, ApiKeySetup, apiKey state, localStorage key akışı
+// Phase B.3 — Gerçek risk skoru entegrasyonu
+// i18n — Faz 3 güncelleme
 
 import { apiCall }  from "../../lib/apiClient";
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { T } from "../../tokens";
 import { useAuth } from "../hooks/useAuth";
 
 // -- LOGIN EKRANI ------------------------------------------------
 function LoginGate({ onLogin }) {
+  const { t }        = useTranslation("chat");
+  const { t: tErr }  = useTranslation("errors");
+
   const [email,     setEmail]     = useState("");
   const [errorMsg,  setErrorMsg]  = useState(null);
   const [shake,     setShake]     = useState(false);
@@ -32,7 +35,7 @@ function LoginGate({ onLogin }) {
       await signInWithOtp(email);
       setMagicSent(true);
     } catch (err) {
-      triggerError(err.message ?? "Gönderilemedi");
+      triggerError(err.message ?? t("login.error_fallback"));
     } finally {
       setLoading(false);
     }
@@ -48,14 +51,15 @@ function LoginGate({ onLogin }) {
         }}>
           <div style={{ fontSize: 38, marginBottom: 16, lineHeight: 1 }}>✉️</div>
           <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 8 }}>
-            Emailini kontrol et
+            {t("login.check_email")}
           </div>
           <div style={{
             fontSize: 12, color: T.textSecondary,
             fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.7,
           }}>
+            {t("login.magic_sent_before")}
             <span style={{ color: T.accent }}>{email}</span>
-            {" "}adresine giriş linki gönderdik.{"\n"}Linke tıklayınca otomatik giriş yaparsın.
+            {t("login.magic_sent_after")}
           </div>
           <div style={{
             marginTop: 18, padding: "8px 12px",
@@ -64,7 +68,7 @@ function LoginGate({ onLogin }) {
             fontSize: 10, color: T.textTertiary,
             fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6,
           }}>
-            Link 60 dk geçerli · Spam klasörünü de kontrol et
+            {t("login.link_note")}
           </div>
           <button
             onClick={() => { setMagicSent(false); setEmail(""); }}
@@ -75,7 +79,7 @@ function LoginGate({ onLogin }) {
               textDecoration: "underline",
             }}
           >
-            ← Farklı email kullan
+            {t("login.use_different")}
           </button>
         </div>
       </div>
@@ -98,18 +102,18 @@ function LoginGate({ onLogin }) {
         }}>S</div>
 
         <div style={{ fontSize: 17, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>
-          Sovereign Engine
+          {t("login.title")}
         </div>
         <div style={{
           fontSize: 12, color: T.textSecondary, marginBottom: 24,
           fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6,
         }}>
-          Email adresine magic link gönderiyoruz —{"\n"}şifre gerekmez.
+          {t("login.subtitle")}
         </div>
 
         <input
           type="email"
-          placeholder="E-posta"
+          placeholder={t("login.email_placeholder")}
           value={email}
           autoFocus
           onChange={e => setEmail(e.target.value)}
@@ -145,7 +149,7 @@ function LoginGate({ onLogin }) {
             fontFamily: "inherit", transition: "all .15s",
           }}
         >
-          {loading ? "Gönderiliyor..." : "Magic Link Gönder →"}
+          {loading ? t("login.sending") : t("login.send_btn")}
         </button>
       </div>
 
@@ -167,6 +171,7 @@ function LoginGate({ onLogin }) {
 
 // -- MESAJ BALONU ------------------------------------------------
 function MessageBubble({ msg }) {
+  const { t }  = useTranslation("chat");
   const isUser   = msg.role === "user";
   const isSystem = msg.role === "system";
 
@@ -214,7 +219,9 @@ function MessageBubble({ msg }) {
             }}>
               RISK {msg.risk}/10
             </div>
-            <span style={{ fontSize: 9, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>engine intercepted</span>
+            <span style={{ fontSize: 9, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace" }}>
+              {t("risk.intercepted")}
+            </span>
           </div>
         )}
       </div>
@@ -251,9 +258,12 @@ function TypingIndicator() {
 
 // -- ANA CHAT EKRANI ---------------------------------------------
 export default function ChatScreen() {
+  const { t }  = useTranslation("chat");
+  const { t: tCommon } = useTranslation("common");
+
   const { user, loading: authLoading } = useAuth();
   const [messages,  setMessages]  = useState([
-    { role: "system", content: "Sovereign Engine aktif · Her mesaj risk skorlanıyor" },
+    { role: "system", content: t("system.active") },
   ]);
   const [input,     setInput]     = useState("");
   const [loading,   setLoading]   = useState(false);
@@ -276,7 +286,9 @@ export default function ChatScreen() {
           animation: "spin 0.8s linear infinite",
           margin: "0 auto 12px",
         }} />
-        <span style={{ fontSize: 11, color: T.textTertiary }}>Bağlanıyor...</span>
+        <span style={{ fontSize: 11, color: T.textTertiary }}>
+          {tCommon("actions.connecting")}
+        </span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
@@ -297,7 +309,7 @@ export default function ChatScreen() {
           latency:     Math.round(Math.random() * 400 + 100),
         }),
       });
-    } catch { /* engine offline — devam et */ }
+    } catch { /* engine offline — continue */ }
   };
 
   const sendMessage = async () => {
@@ -311,11 +323,10 @@ export default function ChatScreen() {
     setEngineLog(null);
 
     try {
-      // Browser → Engine proxy → Anthropic (API key browser'da yok)
       const data = await apiCall("/api/ai/chat", {
         method: "POST",
         body: JSON.stringify({
-          system: "Sen Sovereign Engine'e bagli bir AI asistaninsin. Kisa ve net cevaplar ver. Her aksiyon risk degerlendirmesine tabi.",
+          system: "You are an AI assistant connected to the Sovereign Engine. Give short and clear answers. Every action is subject to risk assessment.",
           messages: [
             ...history.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: text },
@@ -332,7 +343,7 @@ export default function ChatScreen() {
       setEngineLog({ risk, status: data.verdict, policy: data.policy });
 
     } catch (err) {
-      setMessages(prev => [...prev, { role: "assistant", content: `Hata: ${err.message}` }]);
+      setMessages(prev => [...prev, { role: "assistant", content: `${t("error_prefix")}${err.message}` }]);
     } finally {
       setLoading(false);
     }
@@ -354,7 +365,7 @@ export default function ChatScreen() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: T.success }} />
           <span style={{ fontSize: 11, color: T.success, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>
-            ENGINE ACTIVE
+            {t("header.engine_active")}
           </span>
         </div>
 
@@ -394,7 +405,7 @@ export default function ChatScreen() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Mesajini yaz... (Enter → gonder, Shift+Enter → satir)"
+            placeholder={t("input.placeholder")}
             rows={1}
             style={{
               flex: 1, background: "transparent", border: "none",
@@ -417,7 +428,7 @@ export default function ChatScreen() {
           >↑</button>
         </div>
         <div style={{ marginTop: 6, fontSize: 10, color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace", textAlign: "center" }}>
-          Her mesaj Sovereign Engine uzerinden geciyor · Risk skorlanıyor
+          {t("footer.note")}
         </div>
       </div>
     </div>
