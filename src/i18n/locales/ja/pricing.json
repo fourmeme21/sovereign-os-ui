@@ -1,8 +1,16 @@
 {
-  "title":    "プランを選択",
-  "subtitle": "無料で始めて、準備ができたらアップグレード。",
+  "eyebrow":         "料金プラン",
+  "headline":        "プランを",
+  "headline_accent": "選択",
+  "subtitle":        "無料で始めて、準備ができたらアップグレード。",
+  "current_plan":    "現在のプラン",
+  "downgrade":       "ダウングレード",
   "banner": {
     "quota_exceeded": "月間の判断数の上限に達しました。継続するにはアップグレードしてください。"
+  },
+  "badge": {
+    "popular": "人気",
+    "active":  "現在"
   },
   "plans": {
     "free": {
@@ -36,5 +44,6 @@
   },
   "manage":      "サブスクリプション管理 (Dodoポータル) →",
   "view_plans":  "プランを見る →",
-  "portal_error":"ポータルを開けませんでした。"
+  "portal_error":"ポータルを開けませんでした。",
+  "footer":      "料金はすべてUSD表示。\nいつでもキャンセル可能。"
 }
