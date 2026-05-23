@@ -1,6 +1,18 @@
 {
-  "title": "Choose Your Plan",
+  "eyebrow": "PRICING",
+  "headline": "Choose Your",
+  "headline_accent": "Plan",
   "subtitle": "Start free. Upgrade when you're ready.",
+  "badge": {
+    "active": "CURRENT",
+    "popular": "POPULAR"
+  },
+  "current_plan": "Current Plan",
+  "downgrade": "Downgrade",
+  "footer": "Payments secured by Dodo Payments\nCancel anytime.",
+  "portal_error": "Could not open portal. Try again.",
+  "manage": "Manage Subscription →",
+  "view_plans": "View Plans →",
   "banner": {
     "quota_exceeded": "You've reached your monthly decision limit. Upgrade to continue."
   },
@@ -55,8 +67,5 @@
         "Dedicated support"
       ]
     }
-  },
-  "manage": "Manage Subscription →",
-  "view_plans": "View Plans →",
-  "portal_error": "Could not open portal. Try again."
+  }
 }
