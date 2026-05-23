@@ -40,8 +40,11 @@ jobs:
       - name: Generate signing key
         shell: pwsh
         run: |
-          npx @tauri-apps/cli@latest signer generate -w C:\tauri.key --password ""
-          $key = Get-Content 'C:\tauri.key' -Raw
+          $env:PATH = "C:\Users\runneradmin\.cargo\bin;$env:PATH"
+          cargo tauri signer generate -w $env:TEMP\tauri.key --password ""
+          $key = Get-Content "$env:TEMP\tauri.key" -Raw
+          $pub = Get-Content "$env:TEMP\tauri.key.pub" -Raw
+          echo "PUBLIC KEY: $pub"
           echo "TAURI_SIGNING_PRIVATE_KEY=$key" >> $env:GITHUB_ENV
           echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=" >> $env:GITHUB_ENV
 
