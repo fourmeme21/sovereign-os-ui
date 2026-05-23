@@ -53,6 +53,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
+          tag_name: ${{ github.ref_name }}
           draft: true
           name: 'Sovereign OS ${{ github.ref_name }}'
           body: 'See release notes.'
