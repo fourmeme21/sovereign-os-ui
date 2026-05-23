@@ -1,5 +1,5 @@
 // src/junior/components/JuniorNav.jsx
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import i18n from "../../i18n/index";
@@ -20,7 +20,6 @@ const LANGUAGES = [
 ];
 
 export default function JuniorNav() {
-  const navigate = useNavigate();
   const { t } = useTranslation("common");
   const [current, setCurrent] = useState(i18n.language?.slice(0, 2) ?? "en");
 
@@ -34,9 +33,6 @@ export default function JuniorNav() {
 
       {/* ── Ana Nav ── */}
       <div className="junior-nav">
-        <button className="junior-back" onClick={() => navigate("/")}>
-          ← {t("nav.home")}
-        </button>
         <div className="junior-nav-items">
           {NAV_ITEMS.map((item) => (
             <NavLink
