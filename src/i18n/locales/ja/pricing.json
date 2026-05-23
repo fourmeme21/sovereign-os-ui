@@ -1,62 +1,40 @@
 {
   "title":    "プランを選択",
-  "subtitle": "無料ではじめて、準備ができたらアップグレード。",
+  "subtitle": "無料で始めて、準備ができたらアップグレード。",
   "banner": {
-    "quota_exceeded": "月間の決定件数上限に達しました。続けるにはアップグレードしてください。"
+    "quota_exceeded": "月間の判断数の上限に達しました。継続するにはアップグレードしてください。"
   },
   "plans": {
     "free": {
-      "name":     "無料",
+      "name":     "Free",
       "price":    "$0",
       "period":   "/月",
       "cta":      "現在のプラン",
-      "features": [
-        "50件/月",
-        "1プロジェクト",
-        "コミュニティサポート"
-      ]
+      "features": ["月50回の判断", "1プロジェクト", "コミュニティサポート"]
     },
     "solo": {
       "name":     "Solo",
       "price":    "$29",
       "period":   "/月",
-      "cta":      "Soloにする →",
-      "features": [
-        "500件/月",
-        "3プロジェクト",
-        "Sovereign Memory",
-        "MCP Bridge",
-        "GitHub連携"
-      ]
+      "cta":      "Soloを始める →",
+      "features": ["月500回の判断", "3プロジェクト", "Sovereign Memory", "MCPブリッジ", "GitHub連携"]
     },
     "pro": {
       "name":     "Pro",
       "price":    "$79",
       "period":   "/月",
-      "cta":      "Proにする →",
-      "features": [
-        "800件/月",
-        "2シート",
-        "無制限プロジェクト",
-        "監査エクスポート",
-        "優先サポート"
-      ]
+      "cta":      "Proを始める →",
+      "features": ["月800回の判断", "2シート", "無制限プロジェクト", "監査エクスポート", "優先サポート"]
     },
     "team": {
       "name":     "Team",
       "price":    "$199",
       "period":   "/月",
-      "cta":      "Teamにする →",
-      "features": [
-        "2000件/月",
-        "10シート",
-        "SSO",
-        "SLA保証",
-        "専用サポート"
-      ]
+      "cta":      "Teamを始める →",
+      "features": ["月2000回の判断", "10シート", "SSO", "SLA保証", "専任サポート"]
     }
   },
-  "manage":      "サブスクリプションを管理する (Dodo Portal) →",
+  "manage":      "サブスクリプション管理 (Dodoポータル) →",
   "view_plans":  "プランを見る →",
-  "portal_error": "ポータルを開けませんでした。もう一度お試しください。"
+  "portal_error":"ポータルを開けませんでした。"
 }
