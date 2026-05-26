@@ -27,7 +27,7 @@ jobs:
           release_name: Sovereign OS ${{ github.ref_name }}
           body: |
             Sovereign Engine OS desktop release.
-            Windows (.msi) ve macOS (.dmg) installer aşağıdadır.
+            Windows (.msi) ve macOS (.dmg) installer asagidadir.
           draft: false
           prerelease: false
 
