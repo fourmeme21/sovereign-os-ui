@@ -1,13 +1,71 @@
 {
-  "title": "Choose Your Plan",
+  "eyebrow": "PRICING",
+  "headline": "Choose Your",
+  "headline_accent": "Plan",
   "subtitle": "Start free. Upgrade when you're ready.",
-  "banner": { "quota_exceeded": "You've reached your monthly decision limit. Upgrade to continue." },
-  "plans": {
-    "free":  { "name": "Free",  "price": "$0",   "period": "/month", "cta": "Current Plan" },
-    "solo":  { "name": "Solo",  "price": "$29",  "period": "/month", "cta": "Get Solo →" },
-    "pro":   { "name": "Pro",   "price": "$79",  "period": "/month", "cta": "Get Pro →" },
-    "team":  { "name": "Team",  "price": "$199", "period": "/month", "cta": "Get Team →" }
+  "badge": {
+    "active": "CURRENT",
+    "popular": "POPULAR"
   },
+  "current_plan": "Current Plan",
+  "downgrade": "Downgrade",
+  "footer": "Payments secured by Dodo Payments\nCancel anytime.",
+  "portal_error": "Could not open portal. Try again.",
   "manage": "Manage Subscription →",
-  "view_plans": "View Plans →"
+  "view_plans": "View Plans →",
+  "banner": {
+    "quota_exceeded": "You've reached your monthly decision limit. Upgrade to continue."
+  },
+  "plans": {
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "/month",
+      "cta": "Current Plan",
+      "features": [
+        "50 decisions/month",
+        "1 project",
+        "Community support"
+      ]
+    },
+    "solo": {
+      "name": "Solo",
+      "price": "$29",
+      "period": "/month",
+      "cta": "Get Solo →",
+      "features": [
+        "500 decisions/month",
+        "3 projects",
+        "Sovereign Memory",
+        "MCP Bridge",
+        "GitHub integration"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$79",
+      "period": "/month",
+      "cta": "Get Pro →",
+      "features": [
+        "800 decisions/month",
+        "2 seats",
+        "Unlimited projects",
+        "Audit export",
+        "Priority support"
+      ]
+    },
+    "team": {
+      "name": "Team",
+      "price": "$199",
+      "period": "/month",
+      "cta": "Get Team →",
+      "features": [
+        "2000 decisions/month",
+        "10 seats",
+        "SSO",
+        "SLA guarantee",
+        "Dedicated support"
+      ]
+    }
+  }
 }

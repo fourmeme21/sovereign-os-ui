@@ -3,6 +3,12 @@
   "description": "Default capabilities",
   "permissions": [
     "core:default",
-    "opener:default"
+    "opener:default",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "fs:allow-mkdir",
+    "fs:allow-exists",
+    "fs:allow-read-dir",
+    "fs:allow-remove-file"
   ]
 }

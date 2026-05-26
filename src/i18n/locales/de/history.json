@@ -1,0 +1,23 @@
+{
+  "title":            "Entscheidungsverlauf",
+  "count_suffix":     "Entscheidungen",
+  "search_placeholder": "Entscheidungen suchen...",
+  "risk_prefix":      "Risiko",
+  "filter": {
+    "all":      "Alle",
+    "approved": "🟢 Bestanden",
+    "pending":  "🟡 Ausstehend",
+    "blocked":  "🔴 Blockiert"
+  },
+  "status": {
+    "auto_approved": "Automatisch genehmigt",
+    "pending":       "Warte auf Genehmigung",
+    "approved":      "Genehmigt",
+    "rejected":      "Abgelehnt",
+    "blocked":       "Blockiert"
+  },
+  "empty": {
+    "no_decisions": "Noch keine Entscheidungen. Analyse vom Startbildschirm starten.",
+    "no_results":   "Keine passenden Entscheidungen gefunden."
+  }
+}

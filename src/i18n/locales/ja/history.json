@@ -1,0 +1,23 @@
+{
+  "title":            "判断履歴",
+  "count_suffix":     "件",
+  "search_placeholder": "判断を検索...",
+  "risk_prefix":      "リスク",
+  "filter": {
+    "all":      "すべて",
+    "approved": "🟢 承認済み",
+    "pending":  "🟡 保留中",
+    "blocked":  "🔴 ブロック"
+  },
+  "status": {
+    "auto_approved": "自動承認",
+    "pending":       "承認待ち",
+    "approved":      "承認済み",
+    "rejected":      "却下",
+    "blocked":       "ブロック済み"
+  },
+  "empty": {
+    "no_decisions": "まだ判断がありません。ホーム画面から分析を開始してください。",
+    "no_results":   "一致する判断が見つかりませんでした。"
+  }
+}

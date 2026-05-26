@@ -1,12 +1,31 @@
 {
-  "placeholder": "Görevinizi açıklayın...",
-  "send": "Gönder",
-  "thinking": "Düşünüyor...",
-  "decision": "Karar",
-  "approve": "Onayla",
-  "reject": "Reddet",
-  "risk": "Risk Skoru",
-  "auto_approved": "Otomatik onaylandı",
-  "pending_review": "İnceleme bekliyor",
-  "no_decisions": "Henüz karar yok."
+  "login": {
+    "check_email":       "Emailini kontrol et",
+    "magic_sent_before": "",
+    "magic_sent_after":  " adresine giriş linki gönderdik.\nLinke tıklayınca otomatik giriş yaparsın.",
+    "link_note":         "Link 60 dk geçerli · Spam klasörünü de kontrol et",
+    "use_different":     "← Farklı email kullan",
+    "title":             "Sovereign Engine",
+    "subtitle":          "Email adresine magic link gönderiyoruz —\nşifre gerekmez.",
+    "email_placeholder": "E-posta",
+    "send_btn":          "Magic Link Gönder →",
+    "sending":           "Gönderiliyor...",
+    "error_fallback":    "Gönderilemedi"
+  },
+  "system": {
+    "active": "Sovereign Engine aktif · Her mesaj risk skorlanıyor"
+  },
+  "header": {
+    "engine_active": "ENGINE ACTIVE"
+  },
+  "risk": {
+    "intercepted": "engine intercepted"
+  },
+  "input": {
+    "placeholder": "Mesajını yaz... (Enter → gönder, Shift+Enter → satır)"
+  },
+  "footer": {
+    "note": "Her mesaj Sovereign Engine üzerinden geçiyor · Risk skorlanıyor"
+  },
+  "error_prefix": "Hata: "
 }

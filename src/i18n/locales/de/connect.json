@@ -1,0 +1,28 @@
+{
+  "title":   "Verbindungen",
+  "refresh": "Aktualisieren",
+  "status": {
+    "checking": "Wird geprüft...",
+    "ok":       "✓ Verbunden",
+    "error":    "✗ Nicht verbunden"
+  },
+  "services": {
+    "engine": { "label": "Sovereign Engine", "desc": "Läuft auf Railway"    },
+    "memory": { "label": "Sovereign Memory", "desc": "pgvector + Voyage AI"  },
+    "mcp":    { "label": "MCP-Server",       "desc": "Claude-Brücke"         },
+    "github": { "label": "GitHub",           "desc": "Repo-Verbindung"       }
+  },
+  "github": {
+    "connect":          "Verbinden",
+    "change":           "Ändern",
+    "cancel":           "Abbrechen",
+    "save":             "Speichern",
+    "remove":           "Entfernen",
+    "verifying":        "Wird verifiziert...",
+    "optional":         "optional",
+    "help":             "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. repo-Berechtigung reicht aus.",
+    "repo_format_error":"Ungültiges Repo-Format — Beispiel: benutzername/repo-name",
+    "token_invalid":    "Token ungültig oder nicht autorisiert — neuen Token von GitHub holen.",
+    "saved_success":    "✓ GitHub-Token verifiziert und gespeichert"
+  }
+}

@@ -1,31 +1,17 @@
 {
+  "placeholder":    "Anweisung eingeben...",
+  "send":           "Senden",
+  "thinking":       "Denke nach...",
+  "risk_label":     "Risiko",
+  "decision_saved": "Entscheidung gespeichert",
+  "error_generic":  "Fehler aufgetreten. Bitte erneut versuchen.",
   "login": {
-    "check_email":        "E-Mail überprüfen",
-    "magic_sent_before":  "Wir haben einen Anmeldelink an ",
-    "magic_sent_after":   " gesendet.\nKlicke auf den Link, um dich automatisch anzumelden.",
-    "link_note":          "Link gültig 60 Min · Spam-Ordner prüfen",
-    "use_different":      "← Andere E-Mail verwenden",
-    "title":              "Sovereign Engine",
-    "subtitle":           "Wir senden einen Magic Link an deine E-Mail —\nkein Passwort erforderlich.",
-    "email_placeholder":  "E-Mail-Adresse",
-    "send_btn":           "Magic Link senden →",
-    "sending":            "Senden...",
-    "error_fallback":     "Konnte nicht gesendet werden"
-  },
-  "system": {
-    "active": "Sovereign Engine aktiv · Jede Nachricht wird risikobewert"
-  },
-  "header": {
-    "engine_active": "ENGINE ACTIVE"
-  },
-  "risk": {
-    "intercepted": "engine intercepted"
-  },
-  "input": {
-    "placeholder": "Nachricht eingeben... (Enter → senden, Shift+Enter → Zeilenumbruch)"
-  },
-  "footer": {
-    "note": "Jede Nachricht läuft durch Sovereign Engine · Risikobewertung"
-  },
-  "error_prefix": "Fehler: "
+    "title":             "Anmeldung erforderlich",
+    "email_placeholder": "E-Mail-Adresse",
+    "send_link":         "Magic Link senden",
+    "sending":           "Wird gesendet...",
+    "magic_sent_before": "Link wurde an ",
+    "magic_sent_email":  "{{email}}",
+    "magic_sent_after":  " gesendet. Bitte E-Mail prüfen."
+  }
 }
