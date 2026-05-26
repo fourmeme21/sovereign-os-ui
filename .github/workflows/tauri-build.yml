@@ -2,7 +2,8 @@ name: Tauri Build
 
 on:
   push:
-    branches: [main]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -51,8 +52,8 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         with:
-          tagName: v__VERSION__
-          releaseName: Sovereign OS v__VERSION__
+          tagName: ${{ github.ref_name }}
+          releaseName: Sovereign OS ${{ github.ref_name }}
           releaseBody: |
             Sovereign Engine OS desktop release.
             Windows (.msi) ve macOS (.dmg) installer aşağıdadır.
