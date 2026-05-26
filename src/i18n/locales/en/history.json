@@ -1,0 +1,23 @@
+{
+  "title":            "Decision History",
+  "count_suffix":     "decisions",
+  "search_placeholder": "Search decisions...",
+  "risk_prefix":      "Risk",
+  "filter": {
+    "all":      "All",
+    "approved": "🟢 Passed",
+    "pending":  "🟡 Pending",
+    "blocked":  "🔴 Blocked"
+  },
+  "status": {
+    "auto_approved": "Auto-approved",
+    "pending":       "Awaiting approval",
+    "approved":      "Approved",
+    "rejected":      "Rejected",
+    "blocked":       "Blocked"
+  },
+  "empty": {
+    "no_decisions": "No decisions yet. Start an analysis from the home screen.",
+    "no_results":   "No matching decisions found."
+  }
+}

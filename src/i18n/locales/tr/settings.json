@@ -1,12 +1,18 @@
 {
-  "title": "Ayarlar",
-  "language": "Dil",
-  "theme": "Tema",
-  "account": "Hesap",
-  "logout": "Çıkış yap",
-  "danger_zone": "Tehlikeli Bölge",
-  "delete_account": "Hesabı sil",
-  "saved": "Kaydedildi.",
-  "github_token": "GitHub Token",
-  "engine_url": "Engine URL"
+  "sections": {
+    "subscription": "ABONELİK",
+    "language":     "DİL",
+    "risk":         "RİSK EŞİĞİ",
+    "clear":        "VERİ TEMİZLE"
+  },
+  "free_plan":    "Ücretsiz plan · Ayda 50 karar",
+  "usage_full":   "%{{pct}} kullanıldı",
+  "manage_portal":"Aboneliği Yönet →",
+  "opening":      "Açılıyor...",
+  "portal_error": "Portal açılamadı. Tekrar dene.",
+  "risk_note":    "Bu eşiğin üzerindeki kararlar çalıştırılmadan önce işaretlenir.",
+  "clear_note":   "Tüm yerel karar geçmişini siler. Bu işlem geri alınamaz.",
+  "clear_btn":    "Geçmişi Temizle",
+  "cleared":      "Temizlendi ✓",
+  "version_label":"Versiyon"
 }

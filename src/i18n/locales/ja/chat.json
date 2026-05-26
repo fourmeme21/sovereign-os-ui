@@ -1,31 +1,17 @@
 {
+  "placeholder":    "指示を入力してください...",
+  "send":           "送信",
+  "thinking":       "考え中...",
+  "risk_label":     "リスク",
+  "decision_saved": "判断を保存しました",
+  "error_generic":  "エラーが発生しました。再試行してください。",
   "login": {
-    "check_email":        "メールを確認してください",
-    "magic_sent_before":  "",
-    "magic_sent_after":   " にログインリンクを送信しました。\nリンクをクリックして自動的にサインインします。",
-    "link_note":          "リンクの有効期限: 60分 · スパムフォルダも確認してください",
-    "use_different":      "← 別のメールアドレスを使う",
-    "title":              "Sovereign Engine",
-    "subtitle":           "メールアドレスにマジックリンクを送ります —\nパスワード不要。",
-    "email_placeholder":  "メールアドレス",
-    "send_btn":           "マジックリンクを送る →",
-    "sending":            "送信中...",
-    "error_fallback":     "送信できませんでした"
-  },
-  "system": {
-    "active": "Sovereign Engine 稼働中 · 全メッセージにリスクスコアを付与"
-  },
-  "header": {
-    "engine_active": "ENGINE ACTIVE"
-  },
-  "risk": {
-    "intercepted": "engine intercepted"
-  },
-  "input": {
-    "placeholder": "メッセージを入力... (Enter → 送信、Shift+Enter → 改行)"
-  },
-  "footer": {
-    "note": "全メッセージはSovereign Engineを通過します · リスクスコア付与"
-  },
-  "error_prefix": "エラー: "
+    "title":             "サインインが必要です",
+    "email_placeholder": "メールアドレス",
+    "send_link":         "マジックリンクを送信",
+    "sending":           "送信中...",
+    "magic_sent_before": "",
+    "magic_sent_email":  "{{email}}",
+    "magic_sent_after":  " にリンクを送信しました。メールを確認してください。"
+  }
 }

@@ -27,37 +27,30 @@
   border-bottom: 1px solid var(--border, #2a2a2a);
   background: var(--bg-surface, #111);
   flex-shrink: 0;
+  overflow: hidden;
 }
-
-.junior-back {
-  background: transparent;
-  border: 1px solid var(--border, #2a2a2a);
-  border-radius: 6px;
-  color: var(--text-secondary, #888);
-  font-size: 11px;
-  padding: 5px 10px;
-  cursor: pointer;
-  margin-right: 12px;
-  transition: color 0.15s;
-}
-.junior-back:hover { color: var(--text-primary, #e5e5e5); }
 
 .junior-nav-items {
   display: flex;
   gap: 2px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .junior-nav-item {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 14px;
+  flex: 1;
+  padding: 6px 8px;
   border-radius: 6px;
   text-decoration: none;
   color: var(--text-tertiary, #666);
   font-size: 12px;
   font-weight: 500;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 .junior-nav-item:hover { color: var(--text-primary, #e5e5e5); background: var(--bg-elevated, #1a1a1a); }
 .junior-nav-active {
@@ -67,6 +60,47 @@
 
 .junior-nav-icon  { font-size: 13px; }
 .junior-nav-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+
+/* ─── DİL ŞERİDİ ─────────────────────────────────────────── */
+.junior-lang-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 12px;
+  background: rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+
+.junior-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.28);
+  transition: all .15s;
+}
+
+.junior-lang-btn:hover {
+  color: rgba(255,255,255,0.6);
+}
+
+.junior-lang-btn.active {
+  border-color: rgba(45,212,191,0.35);
+  background: rgba(45,212,191,0.08);
+  color: #2DD4BF;
+}
+
+.junior-lang-flag { font-size: 12px; line-height: 1; }
 
 /* ─── STATUS BAR ─────────────────────────────────────────── */
 .junior-status-bar {
@@ -414,21 +448,18 @@
 
 /* ─── MOBİL UYUMU (@media max-width: 480px) ─────────────── */
 @media (max-width: 480px) {
-
-  /* Nav: "← Ana Ekran" kısalt, item padding küçült */
   .junior-nav { padding: 8px 10px; gap: 2px; }
-  .junior-back { font-size: 10px; padding: 4px 8px; margin-right: 4px; }
-  .junior-nav-item { padding: 5px 8px; }
+  .junior-nav-item { padding: 5px 4px; gap: 4px; }
   .junior-nav-label { font-size: 10px; }
   .junior-nav-icon { font-size: 12px; }
 
-  /* Content padding */
-  .junior-content { padding: 14px 12px; }
+  .junior-lang-bar { padding: 3px 8px; }
+  .junior-lang-btn { padding: 2px 5px; font-size: 9px; }
+  .junior-lang-flag { font-size: 11px; }
 
-  /* Screen header */
+  .junior-content { padding: 14px 12px; }
   .screen-title { font-size: 15px; }
 
-  /* Status bar: wrap + küçük font */
   .junior-status-bar {
     gap: 8px;
     flex-wrap: wrap;
@@ -436,7 +467,6 @@
     font-size: 9px;
   }
 
-  /* Onboarding modal: padding azalt, tam genişlik */
   .onboarding-modal {
     padding: 20px 16px;
     margin: 12px;
@@ -446,25 +476,20 @@
   .onboarding-title { font-size: 17px; }
   .onboarding-desc  { font-size: 13px; }
 
-  /* Service row: gap ve padding küçült */
   .service-row  { gap: 10px; padding: 12px; }
   .service-label { font-size: 12px; }
   .service-desc  { font-size: 10px; }
   .service-status { font-size: 10px; }
 
-  /* Filter butonları */
   .filter-btn { padding: 4px 10px; font-size: 10px; }
 
-  /* Query row: dikey diz */
   .query-row { flex-direction: column; }
   .query-row .btn-primary { width: 100%; }
 
-  /* Gecmis: meta sütununu biraz sıkıştır */
   .gecmis-score  { font-size: 9px; }
   .gecmis-status { font-size: 9px; }
   .gecmis-time   { font-size: 9px; }
 
-  /* Onboarding actions */
   .onboarding-actions { flex-direction: column-reverse; gap: 8px; }
   .btn-skip, .onboarding-actions .btn-primary { width: 100%; text-align: center; }
 }

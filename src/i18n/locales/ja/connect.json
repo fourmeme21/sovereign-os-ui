@@ -1,0 +1,28 @@
+{
+  "title":   "接続",
+  "refresh": "更新",
+  "status": {
+    "checking": "確認中...",
+    "ok":       "✓ 接続済み",
+    "error":    "✗ 未接続"
+  },
+  "services": {
+    "engine": { "label": "Sovereign Engine", "desc": "Railwayで稼働中"       },
+    "memory": { "label": "Sovereign Memory", "desc": "pgvector + Voyage AI"  },
+    "mcp":    { "label": "MCPサーバー",      "desc": "Claudeブリッジ"         },
+    "github": { "label": "GitHub",           "desc": "リポジトリ接続"         }
+  },
+  "github": {
+    "connect":          "接続",
+    "change":           "変更",
+    "cancel":           "キャンセル",
+    "save":             "保存",
+    "remove":           "削除",
+    "verifying":        "確認中...",
+    "optional":         "任意",
+    "help":             "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens。repo権限があれば十分です。",
+    "repo_format_error":"リポジトリ形式が無効です — 例: ユーザー名/リポジトリ名",
+    "token_invalid":    "トークンが無効または未承認です — GitHubから新しいトークンを取得してください。",
+    "saved_success":    "✓ GitHubトークンが確認・保存されました"
+  }
+}

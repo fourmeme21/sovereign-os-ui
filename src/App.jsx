@@ -17,6 +17,7 @@ import { respondDecision } from "./api/decisionsApi";
 import { StatusBar } from "./components/StatusBar";
 import { useJuniorStore } from "./junior/stores/juniorStore";
 import KararAkisiPanel from "./junior/components/KararAkisiPanel";
+import { MemoryPanel } from "./memory/MemoryPanel";
 
 const rand  = (min, max) => Math.random() * (max - min) + min;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -183,6 +184,25 @@ export default function SovereignApp() {
             );
           })}
 
+          {/* Memory butonu */}
+          <button
+            key="mem"
+            className={`nb${nav === "mem" ? " on" : ""}`}
+            onClick={() => setNav("mem")}
+            style={{
+              width:"100%", minHeight:44,
+              display:"flex", flexDirection:"column",
+              alignItems:"center", justifyContent:"center", gap:3,
+              background:"transparent", border:"none",
+              borderLeft:"4px solid transparent",
+              color: T.textTertiary, cursor:"pointer", padding:"6px 0",
+            }}>
+            <span style={{ fontSize:15, lineHeight:1 }}>🧠</span>
+            <span style={{ fontSize:9, fontWeight:600, letterSpacing:".06em", fontFamily:"'JetBrains Mono',monospace", lineHeight:1 }}>
+              MEMORY
+            </span>
+          </button>
+
           {/* Junior butonu */}
           <button
             onClick={() => navigate("/junior")}
@@ -321,6 +341,10 @@ export default function SovereignApp() {
 
             {nav === "set" && (
               <SettingsScreen lang={lang} onLangChange={setLang} onClear={clearAll} />
+            )}
+
+            {nav === "mem" && (
+              <MemoryPanel />
             )}
 
           </div>

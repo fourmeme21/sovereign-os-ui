@@ -1,9 +1,9 @@
 {
   "engine_offline":  "Engine offline. Verbindung wird wiederhergestellt...",
-  "quota_exceeded":  "Monatliches Limit erreicht. Upgrade um fortzufahren.",
+  "quota_exceeded":  "Monatslimit erreicht. Bitte upgraden um fortzufahren.",
   "auth_required":   "Bitte anmelden um fortzufahren.",
   "feature_locked":  "Diese Funktion erfordert den {{tier}}-Plan.",
   "upgrade_prompt":  "Plan upgraden →",
   "network_error":   "Netzwerkfehler. Verbindung prüfen.",
-  "unknown":         "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+  "unknown":         "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
 }

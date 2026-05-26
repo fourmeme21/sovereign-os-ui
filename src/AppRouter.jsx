@@ -177,7 +177,7 @@ export default function AppRouter() {
         } />
         <Route path="ayarlar" element={
           <AuthGuard>
-            <SettingsScreen lang="tr" onLangChange={() => {}} onClear={() => {}} />
+            <SettingsScreen onClear={() => localStorage.clear()} />
           </AuthGuard>
         } />
       </Route>

@@ -1,0 +1,28 @@
+{
+  "title":   "Bağlantılar",
+  "refresh": "Yenile",
+  "status": {
+    "checking": "Kontrol ediliyor...",
+    "ok":       "✓ Bağlı",
+    "error":    "✗ Bağlantı yok"
+  },
+  "services": {
+    "engine": { "label": "Sovereign Engine", "desc": "Railway'de çalışıyor" },
+    "memory": { "label": "Sovereign Memory", "desc": "pgvector + Voyage AI"  },
+    "mcp":    { "label": "MCP Sunucusu",     "desc": "Claude köprüsü"        },
+    "github": { "label": "GitHub",           "desc": "Repo bağlantısı"       }
+  },
+  "github": {
+    "connect":          "Bağla",
+    "change":           "Değiştir",
+    "cancel":           "İptal",
+    "save":             "Kaydet",
+    "remove":           "Kaldır",
+    "verifying":        "Doğrulanıyor...",
+    "optional":         "opsiyonel",
+    "help":             "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. repo yetkisi yeterli.",
+    "repo_format_error":"Repo formatı hatalı — örnek: kullanici/repo-adi",
+    "token_invalid":    "Token geçersiz veya yetkisiz — GitHub'dan yeni token al.",
+    "saved_success":    "✓ GitHub token doğrulandı ve kaydedildi"
+  }
+}

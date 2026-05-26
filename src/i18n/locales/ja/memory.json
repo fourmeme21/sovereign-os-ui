@@ -1,11 +1,8 @@
 {
-  "title":          "メモリ",
-  "empty":          "保存されたメモリはありません",
-  "sync":           "同期する",
-  "syncing":        "同期中...",
-  "sync_success":   "同期完了",
-  "sync_error":     "同期に失敗しました",
-  "query":          "メモリを検索",
-  "query_placeholder": "例: 先週何をしましたか？",
-  "last_synced":    "最終同期: {{time}}"
+  "title":       "プロジェクトメモリ",
+  "empty":       "まだメモリがありません。",
+  "add":         "追加",
+  "placeholder": "メモリを入力...",
+  "saved":       "保存しました ✓",
+  "error":       "保存に失敗しました。"
 }

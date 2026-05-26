@@ -1,13 +1,71 @@
 {
-  "title": "Planını Seç",
+  "eyebrow": "FİYATLANDIRMA",
+  "headline": "Planını",
+  "headline_accent": "Seç",
   "subtitle": "Ücretsiz başla. Hazır olunca yükselt.",
-  "banner": { "quota_exceeded": "Aylık karar limitine ulaştın. Devam etmek için yükselt." },
-  "plans": {
-    "free":  { "name": "Free",  "price": "$0",   "period": "/ay", "cta": "Mevcut Plan" },
-    "solo":  { "name": "Solo",  "price": "$29",  "period": "/ay", "cta": "Solo'ya Geç →" },
-    "pro":   { "name": "Pro",   "price": "$79",  "period": "/ay", "cta": "Pro'ya Geç →" },
-    "team":  { "name": "Team",  "price": "$199", "period": "/ay", "cta": "Team'e Geç →" }
+  "badge": {
+    "active": "MEVCUT",
+    "popular": "POPÜLER"
   },
+  "current_plan": "Mevcut Plan",
+  "downgrade": "Düşür",
+  "footer": "Ödemeler Dodo Payments ile güvence altında\nİstediğin zaman iptal et.",
+  "portal_error": "Portal açılamadı. Tekrar dene.",
   "manage": "Aboneliği Yönet →",
-  "view_plans": "Planları Gör →"
+  "view_plans": "Planları Gör →",
+  "banner": {
+    "quota_exceeded": "Aylık karar limitine ulaştın. Devam etmek için yükselt."
+  },
+  "plans": {
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "/ay",
+      "cta": "Mevcut Plan",
+      "features": [
+        "Ayda 50 karar",
+        "1 proje",
+        "Topluluk desteği"
+      ]
+    },
+    "solo": {
+      "name": "Solo",
+      "price": "$29",
+      "period": "/ay",
+      "cta": "Solo'ya Geç →",
+      "features": [
+        "Ayda 500 karar",
+        "3 proje",
+        "Sovereign Memory",
+        "MCP Bridge",
+        "GitHub entegrasyonu"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$79",
+      "period": "/ay",
+      "cta": "Pro'ya Geç →",
+      "features": [
+        "Ayda 800 karar",
+        "2 kişi",
+        "Sınırsız proje",
+        "Denetim exportu",
+        "Öncelikli destek"
+      ]
+    },
+    "team": {
+      "name": "Team",
+      "price": "$199",
+      "period": "/ay",
+      "cta": "Team'e Geç →",
+      "features": [
+        "Ayda 2000 karar",
+        "10 kişi",
+        "SSO",
+        "SLA garantisi",
+        "Özel destek"
+      ]
+    }
+  }
 }
