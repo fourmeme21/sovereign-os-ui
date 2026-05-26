@@ -8,7 +8,6 @@
     "fs:allow-write-text-file",
     "fs:allow-mkdir",
     "fs:allow-exists",
-    "fs:allow-read-dir",
-    "fs:allow-remove-file"
+    "fs:allow-read-dir"
   ]
 }
