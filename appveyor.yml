@@ -11,9 +11,9 @@ environment:
     secure: Vszv97iXCENoddn0WqWKk2Y9KWxidGS6YInr2g9wlvQ5ENqwxMTZNoB7XoMzk5kdZC6RfGPkSPThx7HmqMG4lIinGh+pEWDWx2Umc/LDxckAFb6feOsTn7o2KsvZ8DSM4y2GvcDAYe5v8hjmS6suxuTWYBDsKgCkLT4z+7zLkTIlFWTO97wUx2yeFxVjoRIBi9FachNVPnI27vhKmI
   GH_PAT:
     secure: MCviJBGKNIARavHRttwmkxGVQBwW0gR16TT+wpIRBWgP+i3GLo5YIxpT8fWpBtU1
-  RUST_BACKTRACE: "1"
+  RUST_BACKTRACE: 1
 
-nodejs_version: "22"
+nodejs_version: 22
 
 install:
   - node --version
