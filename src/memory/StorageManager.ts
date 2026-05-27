@@ -160,4 +160,63 @@ export const StorageManager = {
       await this.writeJSON("sync_ledger.json", ledger);
     }
   },
+
+  // ── TB-9 FIX — Warm'daki session'ı synced:true olarak işaretle ──
+  async markSyncedInWarm(id: string): Promise<void> {
+    try {
+      const months = await readDir(`${ROOT}/warm`, { baseDir: BASE });
+      for (const month of months) {
+        if (!month.isDirectory) continue;
+        const file = `${ROOT}/warm/${month.name}/${id}.json`;
+        if (await exists(file, { baseDir: BASE })) {
+          const raw = await readTextFile(file, { baseDir: BASE });
+          const session: Session = JSON.parse(raw);
+          session.meta.synced = true;
+          await wq.run(() =>
+            writeTextFile(
+              file,
+              JSON.stringify(session, null, 2),
+              { baseDir: BASE }
+            )
+          );
+          return;
+        }
+      }
+    } catch {}
+  },
+
+  // ── TB-10 FIX — Warm'dan en son N session'ı session_num sırasıyla getir ──
+  async readLastNFromWarm(n: number): Promise<Session[]> {
+    const all: Session[] = [];
+    try {
+      const months = await readDir(`${ROOT}/warm`, { baseDir: BASE });
+      // En yeni aydan başla (azalan sıra)
+      const sorted = months
+        .filter((m) => m.isDirectory)
+        .sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
+
+      for (const month of sorted) {
+        const files = await readDir(
+          `${ROOT}/warm/${month.name}`,
+          { baseDir: BASE }
+        );
+        const sortedFiles = files
+          .filter((f) => f.name?.endsWith(".json"))
+          .sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
+
+        for (const f of sortedFiles) {
+          const raw = await readTextFile(
+            `${ROOT}/warm/${month.name}/${f.name}`,
+            { baseDir: BASE }
+          );
+          all.push(JSON.parse(raw));
+          if (all.length >= n) {
+            // session_num artan sırayla döndür
+            return all.sort((a, b) => a.meta.session_num - b.meta.session_num);
+          }
+        }
+      }
+    } catch {}
+    return all.sort((a, b) => a.meta.session_num - b.meta.session_num);
+  },
 };
