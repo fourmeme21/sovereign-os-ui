@@ -1,0 +1,52 @@
+version: "{build}"
+
+image: Visual Studio 2022
+
+environment:
+  VITE_ENGINE_URL:
+    secure: LhL2bRLBeGxkT7xYpMN22WqGZNfyonYYDud+J/LbXbovNyDgUYL6GVgooQV5yqKiqYLAmqlouBn1/eSSqO9j5Q==
+  VITE_SUPABASE_URL:
+    secure: YWYB7Vb35kopW1WkBBWks9AKY+gYmdBMmWtVhf9yCgg0RPuHzAIoZ7kv+ElMigfV
+  VITE_SUPABASE_ANON_KEY:
+    secure: Vszv97iXCENoddn0WqWKk2Y9KWxidGS6YInr2g9wlvQ5ENqwxMTZNoB7XoMzk5kdZC6RfGPkSPThx7HmqMG4lIinGh+pEWDWx2Umc/LDxckAFb6feOsTn7o2KsvZ8DSM4y2GvcDAYe5v8hjmS6suxuTWYBDsKgCkLT4z+7zLkTIlFWTO97wUx2yeFxVjoRIBi9FachNVPnI27vhKmI
+  GH_PAT:
+    secure: MCviJBGKNIARavHRttwmkxGVQBwW0gR16TT+wpIRBWgP+i3GLo5YIxpT8fWpBtU1
+  RUST_BACKTRACE: "1"
+
+nodejs_version: "22"
+
+install:
+  - node --version
+  - npm --version
+  - curl -sSf https://sh.rustup.rs -o rustup-init.exe
+  - rustup-init.exe -y --default-toolchain stable
+  - set PATH=%USERPROFILE%\.cargo\bin;%PATH%
+  - rustup target add x86_64-pc-windows-msvc
+  - cargo --version
+  - npm ci
+
+build_script:
+  - npm run build
+  - cargo tauri build
+
+artifacts:
+  - path: src-tauri\target\release\bundle\msi\*.msi
+    name: installer-msi
+  - path: src-tauri\target\release\bundle\nsis\*.exe
+    name: installer-exe
+
+deploy:
+  - provider: GitHub
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    release: Sovereign OS $(APPVEYOR_REPO_TAG_NAME)
+    auth_token:
+      secure: MCviJBGKNIARavHRttwmkxGVQBwW0gR16TT+wpIRBWgP+i3GLo5YIxpT8fWpBtU1
+    artifact: installer-msi, installer-exe
+    draft: false
+    prerelease: false
+    on:
+      APPVEYOR_REPO_TAG: true
+
+branches:
+  only:
+    - main
