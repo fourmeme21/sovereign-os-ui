@@ -11,6 +11,7 @@ export function useSovereignMemory() {
   const [searchResults, setSearchResults] = useState<Session[]>([]);
   const [isLoading, setIsLoading]         = useState(true);
   const [isSyncing, setIsSyncing]         = useState(false);
+  const [syncError, setSyncError]         = useState<string | null>(null); // TB-11
 
   const search = useMemo(() => new SearchEngine(), []);
 
@@ -71,9 +72,9 @@ export function useSovereignMemory() {
     setHotSessions(updated);
     search.add(newSession);
 
-    // Her 50. session'da cold trigger
+    // Her 50. session'da cold trigger — TB-10: sessions parametresi kaldırıldı
     if (session_num % 50 === 0) {
-      await triggerCold(session_num, updated);
+      await triggerCold(session_num);
     }
   }, [hotSessions, search]);
 
@@ -105,6 +106,8 @@ export function useSovereignMemory() {
   // ── Engine sync ───────────────────────────────────────────────
   const triggerSync = useCallback(async () => {
     setIsSyncing(true);
+    setSyncError(null); // TB-11: önceki hatayı temizle
+
     try {
       const ledger = await StorageManager.readJSON<SyncLedger>("sync_ledger.json")
         ?? { pending_ids: [], last_sync: null };
@@ -113,6 +116,7 @@ export function useSovereignMemory() {
 
       const engineUrl = import.meta.env.VITE_ENGINE_URL;
       const succeeded: string[] = [];
+      let lastError: string | null = null;
 
       for (const id of ledger.pending_ids) {
         const session =
@@ -127,27 +131,59 @@ export function useSovereignMemory() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(session),
           });
-          if (res.ok) succeeded.push(id);
-        } catch {}
+          if (res.ok) {
+            succeeded.push(id);
+          } else {
+            // TB-11: HTTP hata kodunu yakala
+            lastError = `HTTP ${res.status}: ${id}`;
+            console.error("Sync hatası:", lastError);
+          }
+        } catch (err) {
+          // TB-11: bağlantı hatasını yakala
+          lastError = `Bağlantı hatası: ${String(err)}`;
+          console.error("Sync bağlantı hatası:", err);
+        }
       }
 
+      // TB-11: hata varsa state'e yaz
+      if (lastError) setSyncError(lastError);
+
+      // Ledger güncelle
       ledger.pending_ids = ledger.pending_ids.filter(
         (id) => !succeeded.includes(id)
       );
       ledger.last_sync = new Date().toISOString();
       await StorageManager.writeJSON("sync_ledger.json", ledger);
+
+      // TB-9 FIX: Başarılı session'ları synced:true yap
+      if (succeeded.length > 0) {
+        // Hot'takileri güncelle
+        const updatedHot = hotSessions.map((s) =>
+          succeeded.includes(s.meta.id)
+            ? { ...s, meta: { ...s.meta, synced: true } }
+            : s
+        );
+        await StorageManager.writeJSON("hot.json", updatedHot);
+        setHotSessions(updatedHot);
+
+        // Warm'dakileri güncelle
+        for (const id of succeeded) {
+          await StorageManager.markSyncedInWarm(id);
+        }
+      }
     } finally {
       setIsSyncing(false);
     }
   }, [hotSessions]);
 
   // ── Cold summary ──────────────────────────────────────────────
-  const triggerCold = async (session_num: number, sessions: Session[]) => {
+  // TB-10 FIX: sessions parametresi kaldırıldı — warm'dan gerçek 50 session okunuyor
+  const triggerCold = async (session_num: number) => {
+    const warmSessions = await StorageManager.readLastNFromWarm(50);
     const epoch: ColdEpoch = {
       epoch: Math.floor(session_num / 50),
       range: [session_num - 49, session_num],
-      summary: sessions
-        .slice(0, 50)
+      summary: warmSessions
         .map((s) => `[${s.meta.session_num}] ${s.meta.focus}`)
         .join(" · "),
       created_at: new Date().toISOString(),
@@ -163,6 +199,7 @@ export function useSovereignMemory() {
     searchResults,
     isLoading,
     isSyncing,
+    syncError,      // TB-11: UI'a hata mesajı iletildi
     addSession,
     searchSessions,
     clearSearch,
