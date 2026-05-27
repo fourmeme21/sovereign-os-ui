@@ -13,9 +13,8 @@ environment:
     secure: MCviJBGKNIARavHRttwmkxGVQBwW0gR16TT+wpIRBWgP+i3GLo5YIxpT8fWpBtU1
   RUST_BACKTRACE: 1
 
-nodejs_version: 22
-
 install:
+  - ps: Install-Product node 22
   - node --version
   - npm --version
   - curl -sSf https://sh.rustup.rs -o rustup-init.exe
