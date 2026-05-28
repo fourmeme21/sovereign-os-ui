@@ -606,7 +606,7 @@ function LiveDecisionCard() {
 }
 
 // ── NAV ────────────────────────────────────────────────────────
-const DOWNLOAD_URL = "https://github.com/fourmeme21/sovereign-os-ui/releases/download/v0.6.7/sovereign-os_0.6.6_x64-setup.exe";
+const DOWNLOAD_URL = "https://github.com/fourmeme21/sovereign-os-ui/releases/download/v0.7.4/sovereign-os_0.6.6_x64-setup.exe";
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
