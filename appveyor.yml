@@ -3,6 +3,7 @@ version: "{build}"
 image: Visual Studio 2022
 
 environment:
+  CI: false
   VITE_ENGINE_URL:
     secure: LhL2bRLBeGxkT7xYpMN22WqGZNfyonYYDud+J/LbXbovNyDgUYL6GVgooQV5yqKiqYLAmqlouBn1/eSSqO9j5Q==
   VITE_SUPABASE_URL:
