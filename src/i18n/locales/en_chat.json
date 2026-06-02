@@ -1,0 +1,37 @@
+{
+  "login": {
+    "check_email":       "Check your email",
+    "magic_sent_before": "We sent a login link to",
+    "magic_sent_after":  ".\nClick the link to sign in automatically.",
+    "link_note":         "Link valid 60 min · Check your spam folder",
+    "use_different":     "← Use a different email",
+    "title":             "Sovereign Engine",
+    "subtitle":          "We'll send a magic link to your email —\nno password needed.",
+    "email_placeholder": "Email address",
+    "send_btn":          "Send Magic Link →",
+    "sending":           "Sending...",
+    "error_fallback":    "Could not send"
+  },
+  "system": {
+    "active": "Sovereign Engine active · Every message is risk-scored"
+  },
+  "header": {
+    "engine_active": "ENGINE ACTIVE"
+  },
+  "risk": {
+    "intercepted": "engine intercepted"
+  },
+  "decision": {
+    "badge": "DECISION"
+  },
+  "input": {
+    "placeholder":        "Type your message... (Enter → chat, Shift+Enter → new line)",
+    "decision_tooltip":   "Mark as decision and log"
+  },
+  "footer": {
+    "note":          "Every message passes through Sovereign Engine · Risk scored",
+    "chat_note":     "chat",
+    "decision_note": "log as decision"
+  },
+  "error_prefix": "Error: "
+}
