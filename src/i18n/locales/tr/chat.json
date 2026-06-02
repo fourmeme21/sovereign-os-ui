@@ -21,11 +21,17 @@
   "risk": {
     "intercepted": "engine intercepted"
   },
+  "decision": {
+    "badge": "KARAR"
+  },
   "input": {
-    "placeholder": "Mesajını yaz... (Enter → gönder, Shift+Enter → satır)"
+    "placeholder":       "Mesajını yaz... (Enter → sohbet, Shift+Enter → satır)",
+    "decision_tooltip":  "Karar olarak işaretle ve logla"
   },
   "footer": {
-    "note": "Her mesaj Sovereign Engine üzerinden geçiyor · Risk skorlanıyor"
+    "note":          "Her mesaj Sovereign Engine üzerinden geçiyor · Risk skorlanıyor",
+    "chat_note":     "sohbet",
+    "decision_note": "karar olarak logla"
   },
   "error_prefix": "Hata: "
 }
