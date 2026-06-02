@@ -21,11 +21,17 @@
   "risk": {
     "intercepted": "engine intercepted"
   },
+  "decision": {
+    "badge": "DECISION"
+  },
   "input": {
-    "placeholder": "Type your message... (Enter → send, Shift+Enter → new line)"
+    "placeholder":        "Type your message... (Enter → chat, Shift+Enter → new line)",
+    "decision_tooltip":   "Mark as decision and log"
   },
   "footer": {
-    "note": "Every message passes through Sovereign Engine · Risk scored"
+    "note":          "Every message passes through Sovereign Engine · Risk scored",
+    "chat_note":     "chat",
+    "decision_note": "log as decision"
   },
   "error_prefix": "Error: "
 }
