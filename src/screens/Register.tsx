@@ -1,37 +1,60 @@
 // src/screens/Register.tsx
+// ToS checkbox eklendi — R-3 kapsamı
+// accepted_tos + tos_accepted_at Supabase'e yazılıyor
+// ADAPTERv1 Session 8
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useAuthStore } from "../stores/authStore";
 
 export default function RegisterScreen() {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
   const setSession = useAuthStore((s) => s.setSession);
 
-  const [email,    setEmail]    = useState("");
-  const [pass,     setPass]     = useState("");
-  const [pass2,    setPass2]    = useState("");
-  const [error,    setError]    = useState<string | null>(null);
-  const [loading,  setLoading]  = useState(false);
-  const [done,     setDone]     = useState(false);
+  const [email,       setEmail]       = useState("");
+  const [pass,        setPass]        = useState("");
+  const [pass2,       setPass2]       = useState("");
+  const [tosAccepted, setTosAccepted] = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
+  const [loading,     setLoading]     = useState(false);
+  const [done,        setDone]        = useState(false);
 
-  const valid = email && pass && pass === pass2 && pass.length >= 6;
+  const valid =
+    email &&
+    pass &&
+    pass === pass2 &&
+    pass.length >= 6 &&
+    tosAccepted;  // ← ToS kabul zorunlu
 
   const handleRegister = async () => {
     if (!valid) return;
     if (pass !== pass2) { setError("Şifreler eşleşmiyor"); return; }
+    if (!tosAccepted)   { setError("Devam etmek için Hizmet Koşullarını kabul etmelisiniz."); return; }
 
     setLoading(true); setError(null);
     try {
       const { data, error: err } = await supabase.auth.signUp({ email, password: pass });
       if (err) throw err;
 
+      // ToS kabul kaydı — user_profiles'a yaz
+      // signUp'tan dönen user.id kullanılır (session yoksa da id gelir)
+      const userId = data.user?.id;
+      if (userId) {
+        await supabase
+          .from("user_profiles")
+          .update({
+            accepted_tos:    true,
+            tos_accepted_at: new Date().toISOString(),
+          })
+          .eq("id", userId);
+        // Hata loglama — kayıt akışını bloklamaz
+      }
+
       if (data.session) {
-        // E-posta doğrulama kapalıysa direkt session gelir
         setSession(data.session);
         navigate("/junior/chat");
       } else {
-        // Doğrulama e-postası gönderildi
         setDone(true);
       }
     } catch (e: any) {
@@ -109,6 +132,50 @@ export default function RegisterScreen() {
                 Şifreler eşleşmiyor
               </div>
             )}
+
+            {/* ToS Checkbox */}
+            <label style={{
+              display: "flex", alignItems: "flex-start", gap: 10,
+              marginTop: 14, cursor: "pointer",
+            }}>
+              <div
+                onClick={() => setTosAccepted(v => !v)}
+                style={{
+                  width: 16, height: 16, minWidth: 16,
+                  borderRadius: 4, marginTop: 1,
+                  border: tosAccepted ? "none" : "1px solid #3A3A3A",
+                  background: tosAccepted
+                    ? "linear-gradient(135deg,#7C3AED,#9061F9)"
+                    : "#0F0F0F",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", transition: "all .15s",
+                }}
+              >
+                {tosAccepted && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="#fff" strokeWidth="1.5"
+                      strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+              <span style={{ fontSize: 12, color: "#777770", lineHeight: 1.5 }}>
+                <span
+                  onClick={() => setTosAccepted(v => !v)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Okudum ve kabul ediyorum:{" "}
+                </span>
+                <Link
+                  to="/legal/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 600 }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  Hizmet Koşulları
+                </Link>
+              </span>
+            </label>
 
             {error && (
               <div style={{
