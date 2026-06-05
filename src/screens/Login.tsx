@@ -1,19 +1,31 @@
 // src/screens/Login.tsx
+// Session 10: "Şifremi unuttum" akışı eklendi — resetPassword (Supabase)
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../junior/hooks/useAuth";
 
+type Mode = "password" | "otp" | "reset";
+
 export default function LoginScreen() {
   const navigate = useNavigate();
-  const { signIn, signInWithOtp } = useAuth();
+  const { signIn, signInWithOtp, resetPassword } = useAuth();
 
-  const [mode,  setMode]  = useState<"password" | "otp">("password");
-  const [email, setEmail] = useState("");
-  const [pass,  setPass]  = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [mode,      setMode]      = useState<Mode>("password");
+  const [email,     setEmail]     = useState("");
+  const [pass,      setPass]      = useState("");
+  const [otpSent,   setOtpSent]   = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [error,     setError]     = useState<string | null>(null);
+  const [loading,   setLoading]   = useState(false);
 
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setError(null);
+    setOtpSent(false);
+    setResetSent(false);
+  };
+
+  // ── Şifre ile giriş ─────────────────────────────────────────
   const handlePassword = async () => {
     if (!email || !pass) return;
     setLoading(true); setError(null);
@@ -27,6 +39,7 @@ export default function LoginScreen() {
     }
   };
 
+  // ── Magic link ───────────────────────────────────────────────
   const handleOtp = async () => {
     if (!email) return;
     setLoading(true); setError(null);
@@ -35,6 +48,20 @@ export default function LoginScreen() {
       setOtpSent(true);
     } catch (e: any) {
       setError(e.message ?? "Link gönderilemedi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Şifremi unuttum ──────────────────────────────────────────
+  const handleReset = async () => {
+    if (!email) return;
+    setLoading(true); setError(null);
+    try {
+      await resetPassword(email);
+      setResetSent(true);
+    } catch (e: any) {
+      setError(e.message ?? "Sıfırlama maili gönderilemedi");
     } finally {
       setLoading(false);
     }
@@ -59,34 +86,39 @@ export default function LoginScreen() {
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 18, color: "#fff", fontWeight: 800,
           }}>S</div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#EDEDEC" }}>Giriş Yap</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "#EDEDEC" }}>
+            {mode === "reset" ? "Şifre Sıfırla" : "Giriş Yap"}
+          </div>
           <div style={{
             fontSize: 11, color: "#555550", marginTop: 4,
             fontFamily: "'JetBrains Mono', monospace",
           }}>sovereign-engine · auth</div>
         </div>
 
-        {/* Mode toggle */}
-        <div style={{
-          display: "flex", background: "#0F0F0F",
-          border: "1px solid #2A2A2A", borderRadius: 8, padding: 3, marginBottom: 20,
-        }}>
-          {(["password", "otp"] as const).map(m => (
-            <button key={m} onClick={() => { setMode(m); setError(null); setOtpSent(false); }}
-              style={{
-                flex: 1, padding: "7px 0", borderRadius: 6, border: "none", cursor: "pointer",
-                background: mode === m ? "#7C3AED" : "transparent",
-                color: mode === m ? "#fff" : "#555550",
-                fontSize: 11, fontWeight: 600,
-                fontFamily: "'JetBrains Mono', monospace", letterSpacing: ".04em",
-                transition: "all .15s",
-              }}>
-              {m === "password" ? "Şifre" : "Magic Link"}
-            </button>
-          ))}
-        </div>
+        {/* Mode toggle — reset modunda gizle */}
+        {mode !== "reset" && (
+          <div style={{
+            display: "flex", background: "#0F0F0F",
+            border: "1px solid #2A2A2A", borderRadius: 8, padding: 3, marginBottom: 20,
+          }}>
+            {(["password", "otp"] as const).map(m => (
+              <button key={m} onClick={() => switchMode(m)}
+                style={{
+                  flex: 1, padding: "7px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                  background: mode === m ? "#7C3AED" : "transparent",
+                  color: mode === m ? "#fff" : "#555550",
+                  fontSize: 11, fontWeight: 600,
+                  fontFamily: "'JetBrains Mono', monospace", letterSpacing: ".04em",
+                  transition: "all .15s",
+                }}>
+                {m === "password" ? "Şifre" : "Magic Link"}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {otpSent ? (
+        {/* ── MAGIC LINK GÖNDERILDI ── */}
+        {otpSent && (
           <div style={{
             padding: "14px", borderRadius: 10, textAlign: "center",
             background: "#7C3AED18", border: "1px solid #7C3AED40",
@@ -100,12 +132,40 @@ export default function LoginScreen() {
               fontFamily: "'JetBrains Mono', monospace",
             }}>← Geri</button>
           </div>
-        ) : (
+        )}
+
+        {/* ── SIFIRLAMA MAILI GÖNDERILDI ── */}
+        {resetSent && (
+          <div style={{
+            padding: "14px", borderRadius: 10, textAlign: "center",
+            background: "#7C3AED18", border: "1px solid #7C3AED40",
+          }}>
+            <div style={{ fontSize: 22, marginBottom: 8 }}>✉️</div>
+            <div style={{ fontSize: 13, color: "#EDEDEC", fontWeight: 600 }}>Sıfırlama linki gönderildi</div>
+            <div style={{ fontSize: 11, color: "#777770", marginTop: 4 }}>{email}</div>
+            <div style={{ fontSize: 11, color: "#555550", marginTop: 8, lineHeight: 1.5 }}>
+              Maildeki linke tıkla, yeni şifreni belirle.
+            </div>
+            <button onClick={() => { setResetSent(false); switchMode("password"); }} style={{
+              marginTop: 12, background: "transparent", border: "none",
+              color: "#7C3AED", fontSize: 11, cursor: "pointer",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>← Girişe dön</button>
+          </div>
+        )}
+
+        {/* ── FORM ── */}
+        {!otpSent && !resetSent && (
           <>
             <input
               type="email" placeholder="E-posta" value={email}
               onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && (mode === "password" ? handlePassword() : handleOtp())}
+              onKeyDown={e => {
+                if (e.key !== "Enter") return;
+                if (mode === "password") handlePassword();
+                else if (mode === "otp") handleOtp();
+                else handleReset();
+              }}
               style={inputStyle}
             />
 
@@ -118,6 +178,30 @@ export default function LoginScreen() {
               />
             )}
 
+            {/* Şifremi unuttum linki — sadece şifre modunda */}
+            {mode === "password" && (
+              <div style={{ textAlign: "right", marginTop: 6 }}>
+                <button onClick={() => switchMode("reset")} style={{
+                  background: "transparent", border: "none",
+                  color: "#555550", fontSize: 11, cursor: "pointer",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  textDecoration: "underline",
+                }}>
+                  Şifremi unuttum
+                </button>
+              </div>
+            )}
+
+            {/* Şifre sıfırlama modunda açıklama */}
+            {mode === "reset" && (
+              <div style={{
+                marginTop: 8, marginBottom: 4,
+                fontSize: 11, color: "#777770", lineHeight: 1.5,
+              }}>
+                E-posta adresini gir, şifre sıfırlama linki gönderelim.
+              </div>
+            )}
+
             {error && (
               <div style={{
                 marginTop: 10, padding: "8px 12px", borderRadius: 8,
@@ -127,31 +211,60 @@ export default function LoginScreen() {
             )}
 
             <button
-              onClick={mode === "password" ? handlePassword : handleOtp}
-              disabled={loading || !email || (mode === "password" && !pass)}
+              onClick={
+                mode === "password" ? handlePassword
+                : mode === "otp"    ? handleOtp
+                : handleReset
+              }
+              disabled={
+                loading || !email ||
+                (mode === "password" && !pass)
+              }
               style={{
                 ...btnStyle,
-                background: (!loading && email && (mode === "otp" || pass))
-                  ? "linear-gradient(135deg,#7C3AED,#9061F9)" : "#2A2A2A",
-                color: (!loading && email && (mode === "otp" || pass)) ? "#fff" : "#555550",
+                background: (
+                  !loading && email &&
+                  (mode !== "password" || pass)
+                ) ? "linear-gradient(135deg,#7C3AED,#9061F9)" : "#2A2A2A",
+                color: (
+                  !loading && email &&
+                  (mode !== "password" || pass)
+                ) ? "#fff" : "#555550",
                 cursor: (!loading && email) ? "pointer" : "not-allowed",
                 marginTop: 14,
               }}
             >
-              {loading ? "Yükleniyor..." : mode === "password" ? "Giriş →" : "Link Gönder →"}
+              {loading ? "Yükleniyor..."
+                : mode === "password" ? "Giriş →"
+                : mode === "otp"      ? "Link Gönder →"
+                : "Sıfırlama Linki Gönder →"}
             </button>
+
+            {/* Reset modunda geri butonu */}
+            {mode === "reset" && (
+              <button onClick={() => switchMode("password")} style={{
+                width: "100%", marginTop: 10,
+                background: "transparent", border: "none",
+                color: "#555550", fontSize: 11, cursor: "pointer",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                ← Girişe dön
+              </button>
+            )}
           </>
         )}
 
-        <div style={{
-          marginTop: 20, textAlign: "center",
-          fontSize: 12, color: "#555550",
-        }}>
-          Hesabın yok mu?{" "}
-          <Link to="/kayit" style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 600 }}>
-            Kayıt ol
-          </Link>
-        </div>
+        {mode !== "reset" && !otpSent && (
+          <div style={{
+            marginTop: 20, textAlign: "center",
+            fontSize: 12, color: "#555550",
+          }}>
+            Hesabın yok mu?{" "}
+            <Link to="/kayit" style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 600 }}>
+              Kayıt ol
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -171,4 +284,3 @@ const btnStyle: React.CSSProperties = {
   fontSize: 13, fontWeight: 700,
   fontFamily: "inherit", transition: "all .15s",
 };
-    
