@@ -53,7 +53,7 @@ export default function RegisterScreen() {
 
       if (data.session) {
         setSession(data.session);
-        navigate("/junior/chat");
+        navigate("/onboarding");
       } else {
         setDone(true);
       }

@@ -31,7 +31,7 @@ export default function LoginScreen() {
     setLoading(true); setError(null);
     try {
       await signIn(email, pass);
-      navigate("/junior/chat");
+      navigate("/onboarding");
     } catch (e: any) {
       setError(e.message ?? "Giriş başarısız");
     } finally {
