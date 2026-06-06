@@ -1,9 +1,23 @@
+// useSovereignMemory.ts
+// Amaç:    Desktop lokal memory yönetimi — hot/warm/cold katmanı + Supabase sync
+// Bağlı:   StorageManager.ts, SearchEngine.ts, memory_chunks tablosu
+// Karar:   Karar #78 (web'de memory yok), Karar #80 (project_id izolasyon), Karar #81 (memory_type: session_summary), Session 19
+// Dokunma: StorageManager + SearchEngine değiştirilmeden önce bu hook kontrol edilmeli
+
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { StorageManager } from "./StorageManager";
 import { SearchEngine } from "./SearchEngine";
+import { supabase } from "../lib/supabaseClient";
 import type { Session, ColdEpoch, SyncLedger } from "./StorageManager";
 
 export type { Session, ColdEpoch };
+
+// ── SessionMeta project_id eklendi (Karar #80 — proje izolasyonu) ──
+declare module "./StorageManager" {
+  interface SessionMeta {
+    project_id?: string;
+  }
+}
 
 export function useSovereignMemory() {
   const [hotSessions, setHotSessions]     = useState<Session[]>([]);
@@ -11,7 +25,7 @@ export function useSovereignMemory() {
   const [searchResults, setSearchResults] = useState<Session[]>([]);
   const [isLoading, setIsLoading]         = useState(true);
   const [isSyncing, setIsSyncing]         = useState(false);
-  const [syncError, setSyncError]         = useState<string | null>(null); // TB-11
+  const [syncError, setSyncError]         = useState<string | null>(null);
 
   const search = useMemo(() => new SearchEngine(), []);
 
@@ -42,7 +56,8 @@ export function useSovereignMemory() {
     phase: string,
     focus: string,
     content: string,
-    duration_min?: number
+    duration_min?: number,
+    project_id?: string,
   ) => {
     const newSession: Session = {
       meta: {
@@ -52,6 +67,7 @@ export function useSovereignMemory() {
         focus,
         date: new Date().toISOString(),
         duration_min,
+        project_id,
         synced: false,
       },
       content,
@@ -72,7 +88,7 @@ export function useSovereignMemory() {
     setHotSessions(updated);
     search.add(newSession);
 
-    // Her 50. session'da cold trigger — TB-10: sessions parametresi kaldırıldı
+    // Her 50. session'da cold trigger
     if (session_num % 50 === 0) {
       await triggerCold(session_num);
     }
@@ -84,15 +100,11 @@ export function useSovereignMemory() {
       setSearchResults([]);
       return;
     }
-    // Hot — in-memory (anında)
-    const hotResults = search.query(query, hotSessions);
-
-    // Warm — lazy dosya tarama
+    const hotResults  = search.query(query, hotSessions);
     const warmResults = await StorageManager.searchWarm(query);
 
-    // Birleştir, duplicate temizle
     const seen = new Set<string>();
-    const all = [...hotResults, ...warmResults].filter((s) => {
+    const all  = [...hotResults, ...warmResults].filter((s) => {
       if (seen.has(s.meta.id)) return false;
       seen.add(s.meta.id);
       return true;
@@ -103,10 +115,31 @@ export function useSovereignMemory() {
 
   const clearSearch = useCallback(() => setSearchResults([]), []);
 
-  // ── Engine sync ───────────────────────────────────────────────
+  // ── Supabase sync ─────────────────────────────────────────────
+  const syncSessionToSupabase = async (session: Session): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from("memory_chunks")
+      .insert({
+        user_id:     user.id,
+        project_id:  session.meta.project_id ?? null,
+        memory_type: "session_summary",
+        content:     `[${session.meta.session_num}] ${session.meta.focus}\n\n${session.content}`,
+        heat_score:  1.0,
+      });
+
+    if (error) {
+      console.error("Supabase sync hatası:", error.message);
+      return false;
+    }
+    return true;
+  };
+
   const triggerSync = useCallback(async () => {
     setIsSyncing(true);
-    setSyncError(null); // TB-11: önceki hatayı temizle
+    setSyncError(null);
 
     try {
       const ledger = await StorageManager.readJSON<SyncLedger>("sync_ledger.json")
@@ -114,7 +147,6 @@ export function useSovereignMemory() {
 
       if (ledger.pending_ids.length === 0) return;
 
-      const engineUrl = import.meta.env.VITE_ENGINE_URL;
       const succeeded: string[] = [];
       let lastError: string | null = null;
 
@@ -125,27 +157,14 @@ export function useSovereignMemory() {
 
         if (!session) continue;
 
-        try {
-          const res = await fetch(`${engineUrl}/mcp/sync`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(session),
-          });
-          if (res.ok) {
-            succeeded.push(id);
-          } else {
-            // TB-11: HTTP hata kodunu yakala
-            lastError = `HTTP ${res.status}: ${id}`;
-            console.error("Sync hatası:", lastError);
-          }
-        } catch (err) {
-          // TB-11: bağlantı hatasını yakala
-          lastError = `Bağlantı hatası: ${String(err)}`;
-          console.error("Sync bağlantı hatası:", err);
+        const ok = await syncSessionToSupabase(session);
+        if (ok) {
+          succeeded.push(id);
+        } else {
+          lastError = `Supabase sync başarısız: ${id}`;
         }
       }
 
-      // TB-11: hata varsa state'e yaz
       if (lastError) setSyncError(lastError);
 
       // Ledger güncelle
@@ -155,9 +174,8 @@ export function useSovereignMemory() {
       ledger.last_sync = new Date().toISOString();
       await StorageManager.writeJSON("sync_ledger.json", ledger);
 
-      // TB-9 FIX: Başarılı session'ları synced:true yap
+      // Başarılı session'ları synced:true yap
       if (succeeded.length > 0) {
-        // Hot'takileri güncelle
         const updatedHot = hotSessions.map((s) =>
           succeeded.includes(s.meta.id)
             ? { ...s, meta: { ...s.meta, synced: true } }
@@ -166,7 +184,6 @@ export function useSovereignMemory() {
         await StorageManager.writeJSON("hot.json", updatedHot);
         setHotSessions(updatedHot);
 
-        // Warm'dakileri güncelle
         for (const id of succeeded) {
           await StorageManager.markSyncedInWarm(id);
         }
@@ -177,13 +194,12 @@ export function useSovereignMemory() {
   }, [hotSessions]);
 
   // ── Cold summary ──────────────────────────────────────────────
-  // TB-10 FIX: sessions parametresi kaldırıldı — warm'dan gerçek 50 session okunuyor
   const triggerCold = async (session_num: number) => {
     const warmSessions = await StorageManager.readLastNFromWarm(50);
     const epoch: ColdEpoch = {
-      epoch: Math.floor(session_num / 50),
-      range: [session_num - 49, session_num],
-      summary: warmSessions
+      epoch:      Math.floor(session_num / 50),
+      range:      [session_num - 49, session_num],
+      summary:    warmSessions
         .map((s) => `[${s.meta.session_num}] ${s.meta.focus}`)
         .join(" · "),
       created_at: new Date().toISOString(),
@@ -199,7 +215,7 @@ export function useSovereignMemory() {
     searchResults,
     isLoading,
     isSyncing,
-    syncError,      // TB-11: UI'a hata mesajı iletildi
+    syncError,
     addSession,
     searchSessions,
     clearSearch,
