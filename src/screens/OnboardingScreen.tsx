@@ -71,7 +71,7 @@ export default function OnboardingScreen() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          name:        projectName.trim(),
+          project_name: projectName.trim(),
           master_plan: masterPlan.trim(),
         }),
       });
