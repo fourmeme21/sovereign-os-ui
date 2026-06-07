@@ -12,7 +12,8 @@ interface CreateProjectResponse {
 }
 
 // ── Sabitler ────────────────────────────────────────────────────────
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+// VITE_ENGINE_URL — apiClient.ts ile aynı pattern (VITE_API_URL kaldırıldı)
+const API_BASE = import.meta.env.VITE_ENGINE_URL ?? "";
 
 const T = {
   bg:           "#0F0F0F",
