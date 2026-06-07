@@ -19,6 +19,8 @@ declare module "./StorageManager" {
   }
 }
 
+const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
 export function useSovereignMemory() {
   const [hotSessions, setHotSessions]     = useState<Session[]>([]);
   const [coldEpochs, setColdEpochs]       = useState<ColdEpoch[]>([]);
@@ -31,6 +33,7 @@ export function useSovereignMemory() {
 
   // ── Bootstrap ─────────────────────────────────────────────────
   const bootstrap = useCallback(async () => {
+    if (!IS_TAURI) { setIsLoading(false); return; } // Karar #78 — web'de memory yok
     setIsLoading(true);
     try {
       await StorageManager.ensureDirectories();
@@ -59,6 +62,8 @@ export function useSovereignMemory() {
     duration_min?: number,
     project_id?: string,
   ) => {
+    if (!IS_TAURI) return; // Karar #78 — web'de memory yok
+
     const newSession: Session = {
       meta: {
         id: `session_${session_num}`,
@@ -138,6 +143,7 @@ export function useSovereignMemory() {
   };
 
   const triggerSync = useCallback(async () => {
+    if (!IS_TAURI) return; // Karar #78 — web'de memory yok
     setIsSyncing(true);
     setSyncError(null);
 
