@@ -4,7 +4,8 @@
 // Karar:   Karar #45 (system prompt engine'e taşındı), Session 22 (useChatActions refactor)
 //          Karar #53 (chat içi proje drawer), TB-6 Session 37 (project_id bağlantısı)
 // Dokunma: Mesaj state'i veya API rotaları değişirse useChatActions.js güncellenmeli
-//          Proje listesi API'si değişirse useActiveProject hook güncellenmeli
+//          Proje listesi API'si değişirse ProjectDrawer fetchProjects güncellenmeli
+// TB-18:   ProjectDrawer /api/project/list → /api/project düzeltildi (Session 38)
 
 // Phase B.2 — aiProxy refactor
 // Phase B.3 — Gerçek risk skoru entegrasyonu
@@ -84,7 +85,7 @@ function ProjectDrawer({ activeProject, onSelect, onClose, userId, sessionToken 
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE}/api/project/list`, {
+        const res = await fetch(`${API_BASE}/api/project`, {
           headers: sessionToken
             ? { Authorization: `Bearer ${sessionToken}` }
             : {},
