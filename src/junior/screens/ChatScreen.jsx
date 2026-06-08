@@ -1,8 +1,10 @@
 // ChatScreen.jsx
-// Amaç:    Chat UI render'ı — mesaj listesi, input, modal'lar
+// Amaç:    Chat UI render'ı — mesaj listesi, input, modal'lar, proje drawer
 // Bağlı:   useChatActions hook, useAuth, useSovereignMemory, /api/ai/session/close
 // Karar:   Karar #45 (system prompt engine'e taşındı), Session 22 (useChatActions refactor)
+//          Karar #53 (chat içi proje drawer), TB-6 Session 37 (project_id bağlantısı)
 // Dokunma: Mesaj state'i veya API rotaları değişirse useChatActions.js güncellenmeli
+//          Proje listesi API'si değişirse useActiveProject hook güncellenmeli
 
 // Phase B.2 — aiProxy refactor
 // Phase B.3 — Gerçek risk skoru entegrasyonu
@@ -13,6 +15,7 @@
 // Session 20 — Session Kapat butonu (sadece Tauri/desktop)
 // Session 21 — #89 #90: SessionSummaryModal — Claude özet üretir, kullanıcı onaylar, sonra kaydedilir
 // Session 22 — useChatActions hook entegrasyonu (sendMessage bölündü)
+// Session 37 — TB-6: useActiveProject + ProjectDrawer + projectId bağlantısı
 
 import { apiCall }  from "../../lib/apiClient";
 import { useState, useRef, useEffect } from "react";
@@ -30,6 +33,206 @@ const useSovereignMemory = () => ({
   addSession:  async () => {},
   triggerSync: async () => {},
 });
+
+// ── useActiveProject: localStorage'dan aktif proje okur ──────────
+// TB-6: OnboardingScreen'in yazdığı değerleri okur
+// Edge: localStorage boşsa null döner — UI "Proje seçilmedi" gösterir
+// Edge: localStorage bozuksa try/catch ile null'a düşer
+// Edge: drawer'dan proje değiştirilince state + localStorage güncellenir
+const useActiveProject = () => {
+  const readFromStorage = () => {
+    try {
+      return {
+        id:   localStorage.getItem("active_project_id")   ?? null,
+        name: localStorage.getItem("active_project_name") ?? null,
+      };
+    } catch {
+      return { id: null, name: null };
+    }
+  };
+
+  const [activeProject, setActiveProjectState] = useState(readFromStorage);
+
+  const setActiveProject = (id, name) => {
+    try {
+      if (id) {
+        localStorage.setItem("active_project_id",   id);
+        localStorage.setItem("active_project_name", name ?? "");
+      } else {
+        localStorage.removeItem("active_project_id");
+        localStorage.removeItem("active_project_name");
+      }
+    } catch { /* localStorage erişilemez — devam */ }
+    setActiveProjectState({ id, name });
+  };
+
+  return { activeProject, setActiveProject };
+};
+
+// ── ProjectDrawer: Karar #53 — chat içi proje seçim drawer'ı ────
+// Edge: projects listesi boşsa "Henüz proje yok" mesajı gösterilir
+// Edge: API çağrısı başarısız olursa mevcut localStorage değeri korunur
+// Edge: drawer dışına tıklanınca kapanır (overlay)
+function ProjectDrawer({ activeProject, onSelect, onClose, userId, sessionToken }) {
+  const API_BASE   = import.meta.env.VITE_ENGINE_URL ?? "";
+  const [projects, setProjects] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`${API_BASE}/api/project/list`, {
+          headers: sessionToken
+            ? { Authorization: `Bearer ${sessionToken}` }
+            : {},
+        });
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = await res.json();
+        setProjects(data.projects ?? []);
+      } catch (err) {
+        setError("Projeler yüklenemedi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  return (
+    <>
+      {/* Overlay */}
+      <div
+        onClick={onClose}
+        style={{
+          position: "fixed", inset: 0,
+          background: "rgba(0,0,0,0.5)",
+          zIndex: 900,
+        }}
+      />
+
+      {/* Drawer paneli */}
+      <div style={{
+        position: "fixed", top: 0, right: 0,
+        width: 280, height: "100%",
+        background: T.bgSurface,
+        borderLeft: `1px solid ${T.border}`,
+        zIndex: 901,
+        display: "flex", flexDirection: "column",
+        animation: "slideIn .2s ease",
+      }}>
+
+        {/* Başlık */}
+        <div style={{
+          padding: "16px 16px 12px",
+          borderBottom: `1px solid ${T.border}`,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <span style={{
+            fontSize: 9, fontWeight: 700, letterSpacing: ".14em",
+            color: T.textTertiary, fontFamily: "'JetBrains Mono',monospace",
+            textTransform: "uppercase",
+          }}>
+            Projeler
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent", border: "none",
+              color: T.textTertiary, cursor: "pointer",
+              fontSize: 14, padding: "2px 6px", borderRadius: 4,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Liste */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+
+          {loading && (
+            <div style={{
+              padding: "24px 16px", textAlign: "center",
+              fontSize: 11, color: T.textTertiary,
+              fontFamily: "'JetBrains Mono',monospace",
+            }}>
+              Yükleniyor...
+            </div>
+          )}
+
+          {error && !loading && (
+            <div style={{
+              padding: "16px", margin: "8px 12px",
+              background: `${T.danger}10`,
+              border: `1px solid ${T.danger}30`,
+              borderRadius: 8,
+              fontSize: 11, color: T.danger,
+              fontFamily: "'JetBrains Mono',monospace",
+            }}>
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && projects.length === 0 && (
+            <div style={{
+              padding: "24px 16px", textAlign: "center",
+              fontSize: 11, color: T.textTertiary,
+              fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.7,
+            }}>
+              Henüz proje yok.<br />
+              Yeni proje oluşturmak için<br />
+              onboarding'e git.
+            </div>
+          )}
+
+          {!loading && projects.map(p => {
+            const isActive = p.id === activeProject?.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => { onSelect(p.id, p.project_name ?? p.name ?? "Proje"); onClose(); }}
+                style={{
+                  width: "100%", textAlign: "left",
+                  padding: "10px 16px",
+                  background: isActive ? `${T.accent}14` : "transparent",
+                  border: "none",
+                  borderLeft: isActive ? `3px solid ${T.accent}` : "3px solid transparent",
+                  cursor: "pointer",
+                  display: "flex", flexDirection: "column", gap: 3,
+                  transition: "background .15s",
+                }}
+              >
+                <span style={{
+                  fontSize: 13, fontWeight: isActive ? 700 : 400,
+                  color: isActive ? T.accent : T.textPrimary,
+                  fontFamily: "'Inter',system-ui,sans-serif",
+                }}>
+                  {p.project_name ?? p.name ?? "İsimsiz Proje"}
+                </span>
+                <span style={{
+                  fontSize: 9, color: T.textTertiary,
+                  fontFamily: "'JetBrains Mono',monospace",
+                }}>
+                  {p.id?.slice(0, 8)}…
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <style>{`
+          @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+          }
+        `}</style>
+      </div>
+    </>
+  );
+}
 
 // -- LOGIN EKRANI ------------------------------------------------
 function LoginGate({ onLogin }) {
@@ -534,13 +737,14 @@ const verdictColor = (verdict, risk) => {
 };
 
 // -- SESSION KAPAT — backend çağrısı (adım 1) --------------------
+// TB-6: project_id artık gerçek activeProject.id'den geliyor
 // Edge: backend timeout → catch, hata chat'e düşer, modal kapanır
-const fetchSessionClose = async ({ userId, messages }) => {
+const fetchSessionClose = async ({ projectId, messages }) => {
   const history = messages.filter(m => m.role !== "system");
   return apiCall("/api/ai/session/close", {
     method: "POST",
     body: JSON.stringify({
-      project_id: userId,   // TODO: PROD — gerçek project_id props/context'ten gelmeli
+      project_id: projectId ?? null,
       messages:   history.map(m => ({ role: m.role, content: m.content })),
     }),
   });
@@ -551,9 +755,11 @@ export default function ChatScreen() {
   const { t }          = useTranslation("chat");
   const { t: tCommon } = useTranslation("common");
 
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, session } = useAuth();
 
-  // TODO: PROD — project_id gerçek değeri props/context'ten gelmeli
+  // TB-6: aktif proje localStorage'dan okunur
+  const { activeProject, setActiveProject } = useActiveProject();
+
   const { addSession, triggerSync } = useSovereignMemory(null);
 
   const [messages,         setMessages]         = useState([
@@ -566,15 +772,17 @@ export default function ChatScreen() {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [summaryError,     setSummaryError]     = useState(null);
   const [isSavingSummary,  setIsSavingSummary]  = useState(false);
+  const [showDrawer,       setShowDrawer]       = useState(false);
 
   const bottomRef   = useRef(null);
   const textareaRef = useRef(null);
 
-  // ── useChatActions hook — loading + engineLog hook içinde yönetilir
+  // ── useChatActions hook — TB-6: projectId geçiyor
   const { loading, engineLog, sendMessage } = useChatActions({
     messages,
     setMessages,
-    userId: user?.id,
+    userId:    user?.id,
+    projectId: activeProject?.id ?? null,
   });
 
   useEffect(() => {
@@ -603,10 +811,14 @@ export default function ChatScreen() {
   if (!user) return <LoginGate onLogin={() => {}} />;
 
   // ── Adım 1: Modal onayı → backend çağrısı → özet modal'a geç ─
+  // TB-6: projectId artık activeProject.id'den geliyor
   const handleSessionClose = async () => {
     setIsClosing(true);
     try {
-      const data = await fetchSessionClose({ userId: user.id, messages });
+      const data = await fetchSessionClose({
+        projectId: activeProject?.id ?? null,
+        messages,
+      });
       setSessionSummary(data.summary_content ?? "");
       setSummaryError(data.summary_error ?? null);
       setShowCloseModal(false);
@@ -623,12 +835,13 @@ export default function ChatScreen() {
   };
 
   // ── Adım 2: Kullanıcı özeti onaylar → kaydet ──────────────────
+  // TB-6: project_id artık activeProject.id'den geliyor
   const handleSummaryConfirm = async () => {
     setIsSavingSummary(true);
     try {
       await addSession({
         content:    sessionSummary,
-        project_id: user.id,   // TODO: PROD — gerçek project_id props/context'ten gelmeli
+        project_id: activeProject?.id ?? null,
       });
       await triggerSync();
       setShowSummaryModal(false);
@@ -696,6 +909,17 @@ export default function ChatScreen() {
         />
       )}
 
+      {/* Proje Drawer — Karar #53 */}
+      {showDrawer && (
+        <ProjectDrawer
+          activeProject={activeProject}
+          onSelect={setActiveProject}
+          onClose={() => setShowDrawer(false)}
+          userId={user?.id}
+          sessionToken={session?.access_token}
+        />
+      )}
+
       {/* Üst bar */}
       <div style={{
         padding: "12px 16px", borderBottom: `1px solid ${T.border}`,
@@ -707,6 +931,35 @@ export default function ChatScreen() {
           <span style={{ fontSize: 11, color: T.success, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>
             {t("header.engine_active")}
           </span>
+
+          {/* TB-6: Proje adı butonu — tıklanınca drawer açılır (Karar #53) */}
+          <button
+            onClick={() => setShowDrawer(true)}
+            title="Proje değiştir"
+            style={{
+              marginLeft: 4,
+              padding: "3px 10px",
+              borderRadius: 6,
+              border: `1px solid ${T.border}`,
+              background: activeProject?.id ? `${T.accent}12` : "transparent",
+              color: activeProject?.id ? T.accent : T.textTertiary,
+              fontSize: 10,
+              fontWeight: activeProject?.id ? 600 : 400,
+              cursor: "pointer",
+              fontFamily: "'JetBrains Mono',monospace",
+              letterSpacing: "0.02em",
+              transition: "all .15s",
+              display: "flex", alignItems: "center", gap: 5,
+              maxWidth: 140, overflow: "hidden",
+            }}
+          >
+            <span style={{
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {activeProject?.name ?? "Proje seç"}
+            </span>
+            <span style={{ fontSize: 8, opacity: 0.7, flexShrink: 0 }}>▾</span>
+          </button>
 
           {/* Session Kapat — sadece Tauri/desktop */}
           {IS_TAURI && (
