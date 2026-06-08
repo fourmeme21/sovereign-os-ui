@@ -1,7 +1,7 @@
 // useChatActions.js
 // Amaç:    Chat ve karar mesajlarının gönderilmesi + engine log yönetimi
 // Bağlı:   /api/ai/chat, /api/ai/apply, /api/decisions rotaları
-// Karar:   Karar #45 (sistem prompt engine'e taşındı), Session 22 refactor
+// Karar:   Karar #45 (sistem prompt engine'e taşındı), Session 22 refactor, TB-6 Session 37
 // Dokunma: apiCall davranışı değişirse sendChatMessage + sendDecisionMessage güncellenmeli
 
 import { useState } from "react";
@@ -35,7 +35,8 @@ const logToEngine = async (userMsg, assistantMsg, riskScore, verdict, policy) =>
 // ── applyDecision: /api/ai/apply çağrısı — verdict + policy döner ─
 // Edge: endpoint erişilemez → throw, çağıran catch'e düşer
 // Edge: matched:false → verdict null döner, engineLog temizlenir
-const applyDecision = async ({ text, risk, userId, initialVerdict, initialPolicy }) => {
+// TB-6: projectId context'e eklendi — session_id yerine project_id kullanılıyor
+const applyDecision = async ({ text, risk, userId, projectId, initialVerdict, initialPolicy }) => {
   const applyData = await apiCall("/api/ai/apply", {
     method: "POST",
     body: JSON.stringify({
@@ -46,8 +47,9 @@ const applyDecision = async ({ text, risk, userId, initialVerdict, initialPolicy
           params: { message: text },
         },
         context: {
-          risk_level: riskLevel(risk),
-          session_id: userId,
+          risk_level:  riskLevel(risk),
+          session_id:  userId,
+          project_id:  projectId ?? null,
         },
       },
     }),
@@ -66,7 +68,8 @@ const applyDecision = async ({ text, risk, userId, initialVerdict, initialPolicy
 // ── sendChatMessage: sohbet modu — sadece reply + risk ───────────
 // Edge: /api/ai/chat timeout → catch yakalanır, loading false'a döner
 // Edge: reply boş → "" ile mesaj eklenir, UI boş balon gösterir
-const sendChatMessage = async ({ text, messages, setMessages, setLoading }) => {
+// TB-6: projectId payload'a eklendi
+const sendChatMessage = async ({ text, messages, projectId, setMessages, setLoading }) => {
   const history = messages.filter(m => m.role !== "system");
   setMessages(prev => [...prev, { role: "user", content: text, isDecision: false }]);
   setLoading(true);
@@ -79,7 +82,8 @@ const sendChatMessage = async ({ text, messages, setMessages, setLoading }) => {
           ...history.map(m => ({ role: m.role, content: m.content })),
           { role: "user", content: text },
         ],
-        max_tokens: 1024,
+        max_tokens:  1024,
+        project_id:  projectId ?? null,
       }),
     });
     const reply = data.reply ?? "";
@@ -96,8 +100,9 @@ const sendChatMessage = async ({ text, messages, setMessages, setLoading }) => {
 // Edge: /api/ai/chat başarısız → catch, loading false, hata balonu
 // Edge: /api/ai/apply erişilemez → logToEngine fallback devreye girer
 // Edge: verdict DENY → softSteer VerdictBanner'a iletilir
+// TB-6: projectId payload'a eklendi
 const sendDecisionMessage = async ({
-  text, messages, userId,
+  text, messages, userId, projectId,
   setMessages, setLoading, setEngineLog,
 }) => {
   const history = messages.filter(m => m.role !== "system");
@@ -113,7 +118,8 @@ const sendDecisionMessage = async ({
           ...history.map(m => ({ role: m.role, content: m.content })),
           { role: "user", content: text },
         ],
-        max_tokens: 1024,
+        max_tokens:  1024,
+        project_id:  projectId ?? null,
       }),
     });
 
@@ -129,7 +135,7 @@ const sendDecisionMessage = async ({
     let engineLog = null;
 
     try {
-      const result = await applyDecision({ text, risk, userId, initialVerdict, initialPolicy });
+      const result = await applyDecision({ text, risk, userId, projectId, initialVerdict, initialPolicy });
       verdict   = result.verdict;
       policy    = result.policy;
       softSteer = result.softSteer;
@@ -153,7 +159,8 @@ const sendDecisionMessage = async ({
 };
 
 // ── Ana hook ─────────────────────────────────────────────────────
-export function useChatActions({ messages, setMessages, userId }) {
+// TB-6: projectId parametresi eklendi — ChatScreen localStorage'dan okuyup geçirir
+export function useChatActions({ messages, setMessages, userId, projectId }) {
   const [loading,   setLoading]   = useState(false);
   const [engineLog, setEngineLog] = useState(null);
 
@@ -162,10 +169,10 @@ export function useChatActions({ messages, setMessages, userId }) {
     if (!text.trim() || loading) return;
 
     if (!isDecision) {
-      await sendChatMessage({ text, messages, setMessages, setLoading });
+      await sendChatMessage({ text, messages, projectId, setMessages, setLoading });
     } else {
       await sendDecisionMessage({
-        text, messages, userId,
+        text, messages, userId, projectId,
         setMessages, setLoading, setEngineLog,
       });
     }
