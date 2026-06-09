@@ -224,8 +224,30 @@ function GlobalStyle() {
       .adapter-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; border-radius:14px; overflow:hidden; border:1px solid ${T.border}; }
       @media (max-width:768px) { .adapter-grid { grid-template-columns:1fr; } }
 
-      .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; }
-      @media (max-width:600px) { .compare-grid { grid-template-columns:1fr; } }
+      /* compare-grid: tüm 2-kolon karşılaştırma bölümleri */
+      .compare-grid {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:1px;
+        border-radius:14px;
+        overflow:hidden;
+        border:1px solid ${T.border};
+      }
+      @media (max-width:600px) {
+        .compare-grid { grid-template-columns:1fr; }
+        .compare-grid > div { border-right:none !important; }
+      }
+
+      /* adapter-two-col: AdapterSection'ın 2-kolon düzeni */
+      .adapter-two-col {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:64px;
+        align-items:center;
+      }
+      @media (max-width:768px) {
+        .adapter-two-col { grid-template-columns:1fr; gap:32px; }
+      }
 
       @media (max-width:640px) { .section-pad { padding-left:16px !important; padding-right:16px !important; } }
       @media (max-width:540px) { .footer-inner { flex-direction:column; align-items:flex-start; gap:12px; } }
@@ -246,14 +268,12 @@ function GlobalStyle() {
       input[type="email"]:focus { border-color:${T.accent}; box-shadow:0 0 0 3px ${T.accent}22; }
       input[type="email"]::placeholder { color:${T.textTertiary}; }
 
-      /* Focus visible for keyboard nav */
       :focus-visible {
         outline:2px solid ${T.accent};
         outline-offset:3px;
         border-radius:4px;
       }
 
-      /* Toast notification */
       .toast {
         position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
         padding:12px 20px; border-radius:10px; z-index:999;
@@ -265,7 +285,6 @@ function GlobalStyle() {
       }
       .toast-error { background:${T.danger}; color:#fff; }
 
-      /* Reduced motion — disable all animations */
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation-duration:0.01ms !important;
@@ -320,7 +339,6 @@ function Counter({ target, suffix="" }) {
 }
 
 // ── SUPABASE STATS HOOK ─────────────────────────────────────────
-// Fetches real decision data from Supabase. Falls back to zeros on error — never shows mock data.
 function useDecisionStats() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -333,7 +351,6 @@ function useDecisionStats() {
 
     async function fetch_stats() {
       try {
-        // Fetch all decisions
         const res = await fetch(
           `${SUPABASE_URL}/rest/v1/decisions?select=verdict,created_at`,
           {
@@ -352,7 +369,6 @@ function useDecisionStats() {
         const escalated = rows.filter(r => r.verdict === "ASK_HUMAN").length;
         const autoRate  = total > 0 ? Math.round((permitted / total) * 100) : 0;
 
-        // Memory snapshots — sessions table
         const memRes = await fetch(
           `${SUPABASE_URL}/rest/v1/user_sessions?select=id&limit=1000`,
           {
@@ -373,7 +389,6 @@ function useDecisionStats() {
           snapshots: memRows.length,
         });
       } catch {
-        // Fail silently — show nothing rather than wrong numbers
         setStats(null);
       } finally {
         setLoading(false);
@@ -387,7 +402,6 @@ function useDecisionStats() {
 }
 
 // ── LIVE DECISION CARD ──────────────────────────────────────────
-// Pulls real recent decisions from Supabase. Falls back to empty state.
 function LiveDecisionCard() {
   const [decisions, setDecisions] = useState([]);
   const [idx, setIdx] = useState(0);
@@ -456,7 +470,6 @@ function LiveDecisionCard() {
     }
   }, [idx, decisions]);
 
-  // Empty state — Supabase not configured or no data yet
   if (!fetched || !d) {
     return (
       <div className="risk-card-demo" style={{ borderLeft:`4px solid ${T.border}` }}>
@@ -776,7 +789,7 @@ function HeroSection() {
   );
 }
 
-// ── LIVE STATS (hero bottom row, real data) ─────────────────────
+// ── LIVE STATS ──────────────────────────────────────────────────
 function LiveStats() {
   const { stats, loading } = useDecisionStats();
 
@@ -819,7 +832,7 @@ function LiveStats() {
   );
 }
 
-// ── STATUS BADGE (real data) ────────────────────────────────────
+// ── STATUS SECTION ──────────────────────────────────────────────
 function StatusSection() {
   const ref = useReveal();
   const { stats, loading } = useDecisionStats();
@@ -935,10 +948,8 @@ function ProblemSection() {
           </h2>
         </div>
 
-        <div style={{
-          display:"grid", gridTemplateColumns:"1fr 1fr", gap:1,
-          borderRadius:14, overflow:"hidden", border:`1px solid ${T.border}`,
-        }} className="compare-grid">
+        {/* compare-grid class handles responsive — no inline gridTemplateColumns */}
+        <div className="compare-grid">
           {/* Without */}
           <div style={{ padding:"36px 32px", background:T.bgSurface, borderRight:`1px solid ${T.border}` }}>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:28 }}>
@@ -1005,7 +1016,6 @@ function LayersSection() {
           </h2>
         </div>
 
-        {/* Guarantee banner */}
         <div style={{
           textAlign:"center", marginBottom:48,
           padding:"14px 24px", borderRadius:10,
@@ -1065,7 +1075,8 @@ function AdapterSection() {
   return (
     <section ref={ref} className="section-reveal" style={{ padding:"80px 24px" }}>
       <div style={{ maxWidth:1120, margin:"0 auto" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center" }}>
+        {/* adapter-two-col class handles responsive */}
+        <div className="adapter-two-col">
 
           {/* Left copy */}
           <div>
@@ -1096,7 +1107,6 @@ function AdapterSection() {
 
           {/* Right: file generation visual */}
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-            {/* Input */}
             <div style={{
               padding:"16px 20px", borderRadius:10,
               background:T.bgSurface, border:`1px solid ${T.border}`,
@@ -1112,12 +1122,10 @@ function AdapterSection() {
               <div style={{ marginLeft:"auto", fontSize:11, color:T.textTertiary }}>INPUT</div>
             </div>
 
-            {/* Arrow */}
             <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"4px 0" }}>
               <div className="flow-connector" style={{ width:1, height:24, background:`linear-gradient(180deg, ${T.border}, ${T.accent}60, ${T.border})`, flex:"none" }} />
             </div>
 
-            {/* Generated files */}
             <div style={{ padding:"16px 20px", borderRadius:10, background:`${T.accent}08`, border:`1px solid ${T.accent}20` }}>
               <div style={{ fontSize:10, color:T.accent, fontFamily:"'JetBrains Mono',monospace", fontWeight:700, letterSpacing:".14em", marginBottom:14 }}>
                 GENERATED · ADAPTERv1
@@ -1172,7 +1180,8 @@ function BeforeAfterSection() {
           </h2>
         </div>
 
-        <div className="compare-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:1, borderRadius:14, overflow:"hidden", border:`1px solid ${T.border}` }}>
+        {/* compare-grid class handles responsive */}
+        <div className="compare-grid">
           {/* Before */}
           <div style={{ padding:"36px 32px", background:T.bgPrimary, borderRight:`1px solid ${T.border}` }}>
             <div style={{ fontSize:12, fontWeight:700, color:T.danger, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".14em", marginBottom:28 }}>
@@ -1243,7 +1252,8 @@ function ROISection() {
           </h2>
         </div>
 
-        <div className="compare-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:1, borderRadius:14, overflow:"hidden", border:`1px solid ${T.border}` }}>
+        {/* compare-grid class handles responsive */}
+        <div className="compare-grid">
           {/* Left: inputs */}
           <div style={{ padding:"40px 36px", background:T.bgSurface, borderRight:`1px solid ${T.border}` }}>
             <div style={{ fontSize:13, color:T.textSecondary, marginBottom:32, lineHeight:1.7 }}>
@@ -1386,10 +1396,9 @@ function RiskTierSection() {
   const ref = useReveal();
   const { stats } = useDecisionStats();
 
-  // Use real counts if available, otherwise show relative proportions
   const counts = stats
     ? [stats.permitted, Math.max(stats.escalated - 3, 0), Math.min(stats.escalated, 3), stats.denied]
-    : [94, 4, 1, 1]; // proportional fallback (percentage-like)
+    : [94, 4, 1, 1];
 
   return (
     <section ref={ref} className="section-reveal" style={{ padding:"80px 24px" }}>
@@ -1432,7 +1441,6 @@ function RiskTierSection() {
           ))}
         </div>
 
-        {/* Distribution bar */}
         <div style={{ marginTop:20, display:"flex", height:6, borderRadius:4, overflow:"hidden", gap:2 }}>
           {TIERS.map((t, i) => (
             <div key={t.tier} style={{ flex:counts[i], background:t.color, opacity:.7, borderRadius:2 }} />
