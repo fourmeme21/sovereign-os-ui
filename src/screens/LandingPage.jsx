@@ -711,16 +711,17 @@ function HeroSection() {
               color:T.textPrimary, marginBottom:16,
               animation:"fade-up .7s .2s both", letterSpacing:"-.02em",
             }}>
-              Your AI forgets.<br />
-              <span style={{ color:T.danger }}>Your project pays the price.</span>
+              More powerful AI.<br />
+              <span style={{ color:T.danger }}>Higher stakes.</span><br />
+              <span className="accent-text">No governance.</span>
             </h1>
 
             <p style={{
               fontSize:"clamp(15px,1.6vw,18px)", color:T.textSecondary,
               lineHeight:1.7, maxWidth:440, marginBottom:36, animation:"fade-up .7s .35s both",
             }}>
-              Sovereign preserves project memory, decisions, and context across
-              every AI session. Build once. Continue forever.
+              Every decision intercepted, signed, and logged — before it touches
+              your project. Persistent memory. Zero context loss. Full audit chain.
             </p>
 
             <div style={{ display:"flex", gap:12, flexWrap:"wrap", animation:"fade-up .7s .45s both" }}>
@@ -864,22 +865,61 @@ function StatusSection() {
   );
 }
 
+// ── FABLE BANNER ─────────────────────────────────────────────────
+function FableBanner() {
+  return (
+    <div style={{ padding:"0 24px 48px" }}>
+      <div style={{ maxWidth:1120, margin:"0 auto" }}>
+        <div style={{
+          padding:"16px 24px", borderRadius:12,
+          background:`linear-gradient(135deg, ${T.warning}0A, ${T.accent}0A)`,
+          border:`1px solid ${T.warning}30`,
+          display:"flex", alignItems:"center", gap:16, flexWrap:"wrap",
+        }}>
+          <div style={{
+            width:32, height:32, borderRadius:8, flexShrink:0,
+            background:`${T.warning}18`, border:`1px solid ${T.warning}40`,
+            display:"flex", alignItems:"center", justifyContent:"center",
+            fontSize:15,
+          }}>⚡</div>
+          <div style={{ flex:1, minWidth:200 }}>
+            <span style={{ fontSize:13, fontWeight:700, color:T.warning, fontFamily:"'JetBrains Mono',monospace", letterSpacing:".06em" }}>
+              CLAUDE FABLE 5 JUST LAUNCHED
+            </span>
+            <span style={{ fontSize:13, color:T.textSecondary, marginLeft:12 }}>
+              Days-long autonomous sessions. No oversight layer by default.
+              That's exactly what Sovereign was built for.
+            </span>
+          </div>
+          <a href="#how" style={{ textDecoration:"none", flexShrink:0 }}>
+            <span style={{
+              fontSize:12, color:T.accent, fontWeight:600,
+              fontFamily:"'JetBrains Mono',monospace",
+              borderBottom:`1px solid ${T.accent}40`, paddingBottom:1,
+            }}>See how Sovereign governs it →</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── WITHOUT / WITH ────────────────────────────────────────────────
 function ProblemSection() {
   const ref = useReveal();
 
   const without = [
-    "Claude forgot the architecture.",
-    "Cursor changed a critical pattern.",
-    "A decision made last month disappeared.",
-    "The team repeated work.",
+    "Your AI works for days. You have no audit trail.",
+    "A decision made autonomously can't be rolled back.",
+    "No policy enforced. No blast radius calculated.",
+    "Anything goes. Nobody signed off.",
   ];
 
   const withS = [
-    "Decisions persist across every session.",
-    "Context survives model switches.",
-    "AI follows project rules automatically.",
-    "Every session continues where the last ended.",
+    "Every autonomous decision intercepted and logged.",
+    "Signed execution tokens — every action traceable.",
+    "Policy enforced before execution, not after.",
+    "Full rollback. Complete audit chain. Zero ambiguity.",
   ];
 
   return (
@@ -890,8 +930,8 @@ function ProblemSection() {
             THE PROBLEM
           </div>
           <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:"clamp(28px,3.5vw,44px)", color:T.textPrimary, letterSpacing:"-.01em" }}>
-            AI moves fast.<br />
-            <span style={{ color:T.danger }}>Without memory, it moves blind.</span>
+            More powerful AI means<br />
+            <span style={{ color:T.danger }}>more damage when it goes wrong.</span>
           </h2>
         </div>
 
@@ -1557,6 +1597,7 @@ export default function App() {
       <main style={{ position:"relative", zIndex:1 }}>
         <HeroSection />
         <StatusSection />
+        <FableBanner />
         <ProblemSection />
         <AdapterSection />
         <BeforeAfterSection />
