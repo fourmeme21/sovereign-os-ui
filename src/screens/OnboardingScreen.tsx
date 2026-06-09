@@ -1,18 +1,21 @@
 // src/screens/OnboardingScreen.tsx
 // Session 12 — Onboarding akışı: master plan girişi + /api/project/create bağlantısı
 // TB-6 — Session 37: goToApp() localStorage'a active_project_id + active_project_name yazar
+// Session 39: Step 3 artık doğrudan Chat'e değil GenerationProgress'e yönlendirir.
+//   GenerationProgress onComplete(firstDecision) çağırınca Chat'e geçilir.
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../junior/hooks/useAuth";
+import GenerationProgress from "../junior/screens/GenerationProgress";
 
-// ── Tipler ──────────────────────────────────────────────────────────
+// ── Tipler ──────────────────────────────────────────────────────────────
 interface CreateProjectResponse {
   id: string;
   gen_status: "pending" | "completed" | "partial_success" | "failed";
 }
 
-// ── Sabitler ────────────────────────────────────────────────────────
+// ── Sabitler ────────────────────────────────────────────────────────────
 // VITE_ENGINE_URL — apiClient.ts ile aynı pattern (VITE_API_URL kaldırıldı)
 const API_BASE = import.meta.env.VITE_ENGINE_URL ?? "";
 
@@ -30,7 +33,7 @@ const T = {
   success:      "#22C55E",
 } as const;
 
-// ── Step göstergesi ─────────────────────────────────────────────────
+// ── Step göstergesi ─────────────────────────────────────────────────────
 function StepDot({ active, done }: { active: boolean; done: boolean }) {
   return (
     <div style={{
@@ -41,23 +44,23 @@ function StepDot({ active, done }: { active: boolean; done: boolean }) {
   );
 }
 
-// ── Ana ekran ───────────────────────────────────────────────────────
+// ── Ana ekran ───────────────────────────────────────────────────────────
 export default function OnboardingScreen() {
   const navigate           = useNavigate();
   const { user, session }  = useAuth() as { user: any; session: any };
 
-  const [step, setStep]           = useState<1 | 2 | 3>(1);
+  const [step, setStep]               = useState<1 | 2 | 3>(1);
   const [projectName, setProjectName] = useState("");
   const [masterPlan, setMasterPlan]   = useState("");
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState<string | null>(null);
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState<string | null>(null);
+  const [projectId, setProjectId]     = useState<string | null>(null);
 
-  // ── Validation ──────────────────────────────────────────────────
+  // ── Validation ──────────────────────────────────────────────────────
   const step1Valid = projectName.trim().length >= 2;
   const step2Valid = masterPlan.trim().length >= 50;
 
-  // ── API çağrısı ─────────────────────────────────────────────────
+  // ── API çağrısı ─────────────────────────────────────────────────────
   async function createProject() {
     if (!step2Valid) return;
     setLoading(true);
@@ -92,11 +95,24 @@ export default function OnboardingScreen() {
     }
   }
 
-  // ── Tamamlandı → localStorage'a yaz → yönlendir ─────────────────
-  // TB-6: project_id + project_name localStorage'a yazılır
-  // ChatScreen bu değerleri okuyarak aktif projeyi bilir
-  // Edge: projectId null ise (kullanıcı atladıysa) localStorage'a yazılmaz
-  function goToApp() {
+  // ── GenerationProgress tamamlandı → Chat'e geç ──────────────────────
+  // Session 39: GenerationProgress onComplete(firstDecision) çağırır.
+  //   firstDecision: kullanıcının onayladığı ilk karar metni.
+  //   localStorage'a yazılır, Chat bunu okuyarak ilk mesaj olarak kullanabilir.
+  // TB-6: project_id + project_name localStorage'a yazılır.
+  function handleGenerationComplete(firstDecision: string) {
+    if (projectId) {
+      localStorage.setItem("active_project_id",       projectId);
+      localStorage.setItem("active_project_name",     projectName.trim());
+      localStorage.setItem("pending_first_decision",  firstDecision);
+    }
+    navigate("/junior", { replace: true });
+  }
+
+  // ── Atla (proje oluşturmadan) → localStorage yazmadan Chat'e geç ────
+  // Edge: projectId null ise (kullanıcı step 2'yi geçmeden atladıysa)
+  //       localStorage'a yazılmaz.
+  function skipToApp() {
     if (projectId) {
       localStorage.setItem("active_project_id",   projectId);
       localStorage.setItem("active_project_name", projectName.trim());
@@ -104,7 +120,19 @@ export default function OnboardingScreen() {
     navigate("/junior", { replace: true });
   }
 
-  // ── Render ──────────────────────────────────────────────────────
+  // ── Step 3: GenerationProgress ekranı — tam sayfa ───────────────────
+  // OnboardingScreen kendi layout'unu gizler, GenerationProgress tam ekran açılır.
+  if (step === 3 && projectId) {
+    return (
+      <GenerationProgress
+        projectId={projectId}
+        projectName={projectName.trim()}
+        onComplete={handleGenerationComplete}
+      />
+    );
+  }
+
+  // ── Render: Step 1 & 2 ──────────────────────────────────────────────
   return (
     <div style={{
       minHeight: "100vh",
@@ -234,62 +262,28 @@ export default function OnboardingScreen() {
             </>
           )}
 
-          {/* ── STEP 3: Tamamlandı ── */}
-          {step === 3 && (
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 36, marginBottom: 16 }}>🚀</div>
-              <div style={{
-                fontSize: 17, fontWeight: 700,
-                color: T.textPrimary, marginBottom: 8,
-              }}>
-                Proje oluşturuldu!
-              </div>
-              <div style={{
-                fontSize: 13, color: T.textSecond,
-                lineHeight: 1.6, marginBottom: 8,
-              }}>
-                Adapter arka planda üretiliyor. Bu birkaç dakika sürebilir.
-                Hazır olduğunda chat ekranında bildirim alırsınız.
-              </div>
-              {projectId && (
-                <div style={{
-                  fontSize: 10, color: T.textTertiary,
-                  fontFamily: "'JetBrains Mono',monospace",
-                  marginBottom: 24,
-                }}>
-                  ID: {projectId}
-                </div>
-              )}
-              <PrimaryButton onClick={goToApp}>
-                Uygulamaya Geç →
-              </PrimaryButton>
-            </div>
-          )}
-
         </div>
 
         {/* Alt link — atla */}
-        {step !== 3 && (
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            <button
-              onClick={goToApp}
-              style={{
-                background: "transparent", border: "none",
-                color: T.textTertiary, cursor: "pointer",
-                fontSize: 12, fontFamily: "'JetBrains Mono',monospace",
-              }}
-            >
-              Şimdi değil, atla →
-            </button>
-          </div>
-        )}
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <button
+            onClick={skipToApp}
+            style={{
+              background: "transparent", border: "none",
+              color: T.textTertiary, cursor: "pointer",
+              fontSize: 12, fontFamily: "'JetBrains Mono',monospace",
+            }}
+          >
+            Şimdi değil, atla →
+          </button>
+        </div>
 
       </div>
     </div>
   );
 }
 
-// ── Küçük bileşenler ────────────────────────────────────────────────
+// ── Küçük bileşenler ────────────────────────────────────────────────────────
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
@@ -365,7 +359,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-// ── Stil sabitleri ──────────────────────────────────────────────────
+// ── Stil sabitleri ──────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
   width: "100%",
   background: "#0F0F0F",
