@@ -31,7 +31,7 @@ export default function Baglan() {
   };
 
   const [health, setHealth] = useState({
-    engine: "checking", github: "checking", mcp: "checking", memory: "checking",
+    engine: "checking", github: "checking", memory: "checking",
   });
 
   const [githubToken,     setGithubToken]     = useState(() => localStorage.getItem("github_token") ?? "");
@@ -47,17 +47,12 @@ export default function Baglan() {
   useEffect(() => { checkHealth(); }, []);
 
   const checkHealth = async () => {
-    setHealth({ engine: "checking", github: "checking", mcp: "checking", memory: "checking" });
+    setHealth({ engine: "checking", github: "checking", memory: "checking" });
 
     try {
       const res = await fetch(`${ENGINE_URL}/health`);
       setHealth((h) => ({ ...h, engine: res.ok ? "ok" : "error" }));
     } catch { setHealth((h) => ({ ...h, engine: "error" })); }
-
-    try {
-      const res = await fetch(`${ENGINE_URL}/mcp/status`);
-      setHealth((h) => ({ ...h, mcp: res.ok ? "ok" : "error" }));
-    } catch { setHealth((h) => ({ ...h, mcp: "error" })); }
 
     try {
       const res = await fetch(`${ENGINE_URL}/memory/query`, {
@@ -140,11 +135,14 @@ export default function Baglan() {
         {SERVICES.map((s) => {
           const status   = health[s.key];
           const isGithub = s.key === "github";
+          const isMcp    = s.key === "mcp";
 
           return (
             <div key={s.key} style={{ display: "flex", flexDirection: "column", gap: 0 }}>
               <div className="service-row" style={{ borderRadius: isGithub && githubFormOpen ? "10px 10px 0 0" : 10 }}>
-                <div className="service-indicator">{DOT[status]}</div>
+                <div className="service-indicator">
+                  {isMcp ? <span className="dot-grey" /> : DOT[status]}
+                </div>
                 <div className="service-info">
                   <span className="service-label">{s.label}</span>
                   <span className="service-desc">
@@ -154,19 +152,31 @@ export default function Baglan() {
                   </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div className={`service-status service-status-${status}`}>{LABEL[status]}</div>
-                  {isGithub && (
-                    <button
-                      className="btn-secondary"
-                      style={{ fontSize: 11, padding: "4px 10px" }}
-                      onClick={() => {
-                        setGithubInput(""); setGithubRepoInput("");
-                        setRepoError(""); setTokenError("");
-                        setGithubFormOpen((v) => !v);
-                      }}
-                    >
-                      {githubFormOpen ? t("github.cancel") : githubToken ? t("github.change") : t("github.connect")}
-                    </button>
+                  {isMcp ? (
+                    <span style={{
+                      fontSize: 11, padding: "3px 8px", borderRadius: 5,
+                      background: "rgba(129,140,248,.12)", border: "1px solid rgba(129,140,248,.25)",
+                      color: "#818cf8", fontFamily: "'JetBrains Mono', monospace", letterSpacing: ".04em",
+                    }}>
+                      {t("services.mcp.coming_soon")}
+                    </span>
+                  ) : (
+                    <>
+                      <div className={`service-status service-status-${status}`}>{LABEL[status]}</div>
+                      {isGithub && (
+                        <button
+                          className="btn-secondary"
+                          style={{ fontSize: 11, padding: "4px 10px" }}
+                          onClick={() => {
+                            setGithubInput(""); setGithubRepoInput("");
+                            setRepoError(""); setTokenError("");
+                            setGithubFormOpen((v) => !v);
+                          }}
+                        >
+                          {githubFormOpen ? t("github.cancel") : githubToken ? t("github.change") : t("github.connect")}
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
