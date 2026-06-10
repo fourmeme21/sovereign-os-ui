@@ -2,7 +2,8 @@
 // Amaç:    Chat UI render'ı — mesaj listesi, input, modal'lar, proje drawer
 // Bağlı:   useChatActions hook, useAuth, useSovereignMemory, /api/ai/session/close
 // Karar:   Karar #45 (system prompt engine'e taşındı), Session 22 (useChatActions refactor)
-//          Karar #53 (chat içi proje drawer), TB-6 Session 37 (project_id bağlantısı)
+//          Karar #53 (chat içi proje drawer), TB-6 Session 37 (project_id bağlantısı),
+//          TB-13 (QualityBadge — codeQualityGuard çıktısı gösterimi)
 // Dokunma: Mesaj state'i veya API rotaları değişirse useChatActions.js güncellenmeli
 //          Proje listesi API'si değişirse ProjectDrawer fetchProjects güncellenmeli
 // TB-18:   ProjectDrawer /api/project/list → /api/project düzeltildi (Session 38)
@@ -17,6 +18,7 @@
 // Session 21 — #89 #90: SessionSummaryModal — Claude özet üretir, kullanıcı onaylar, sonra kaydedilir
 // Session 22 — useChatActions hook entegrasyonu (sendMessage bölündü)
 // Session 37 — TB-6: useActiveProject + ProjectDrawer + projectId bağlantısı
+// Session 40 — TB-13: QualityBadge komponenti + useChatActions quality entegrasyonu
 
 import { apiCall }  from "../../lib/apiClient";
 import { useState, useRef, useEffect } from "react";
@@ -437,6 +439,91 @@ function VerdictBanner({ verdict, softSteer }) {
   );
 }
 
+// -- KALİTE BADGE — TB-13 ----------------------------------------
+// Amaç:    Kod üretim yanıtlarında kalite skoru + judge todos gösterir
+// Bağlı:   useChatActions → quality alanı → codeQualityGuard.ts çıktısı
+// Karar:   TB-13
+// Dokunma: quality.judge null olabilir — lint-only gösterime düşer
+//          escalated:true → sarı uyarı, passed:true → yeşil rozet
+//
+// Edge case'ler:
+//   1. quality null → null döner, hiçbir şey render edilmez
+//   2. judge null (lint geçemedi, MAX_ITERATIONS aşıldı) → sadece lint skoru gösterilir
+//   3. escalated:true + judge:null → "İNCELEME GEREKİYOR" uyarısı lint dataya bakarak üretilir
+//   4. todos boş array → todos bölümü render edilmez
+//   5. score:0 API hatası fallback → escalated zaten true olur, rozet sarı gösterilir
+function QualityBadge({ quality }) {
+  if (!quality) return null;
+
+  const { passed, escalated, lintResult, judge } = quality;
+
+  const color = passed    ? T.success
+              : escalated ? T.warning
+              :             T.danger;
+
+  const icon  = passed    ? "✅"
+              : escalated ? "⚠️"
+              :             "❌";
+
+  const label = passed    ? `KALİTE ${lintResult?.score ?? "?"}/${lintResult?.maxScore ?? 13}`
+              : escalated ? "İNCELEME GEREKİYOR"
+              :             `BAŞARISIZ ${lintResult?.score ?? 0}/${lintResult?.maxScore ?? 13}`;
+
+  const todos = judge?.todos ?? [];
+
+  return (
+    <div style={{
+      marginTop: 8,
+      paddingTop: 8,
+      borderTop: `1px solid ${T.border}`,
+    }}>
+      {/* Skor rozeti */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: todos.length ? 6 : 0 }}>
+        <span style={{ fontSize: 10 }}>{icon}</span>
+        <span style={{
+          fontSize: 9, fontWeight: 700, color,
+          fontFamily: "'JetBrains Mono',monospace",
+          background: `${color}14`,
+          padding: "2px 7px", borderRadius: 5,
+          border: `1px solid ${color}30`,
+          letterSpacing: "0.04em",
+        }}>
+          {label}
+        </span>
+        {judge?.score != null && (
+          <span style={{
+            fontSize: 9, color: T.textTertiary,
+            fontFamily: "'JetBrains Mono',monospace",
+          }}>
+            JUDGE {judge.score}/100
+          </span>
+        )}
+      </div>
+
+      {/* Todos — sadece varsa */}
+      {todos.length > 0 && (
+        <div style={{
+          marginTop: 4,
+          padding: "6px 8px",
+          background: `${T.warning}08`,
+          border: `1px solid ${T.warning}20`,
+          borderRadius: 6,
+        }}>
+          {todos.map((todo, i) => (
+            <div key={i} style={{
+              fontSize: 10, color: T.textSecondary,
+              fontFamily: "'JetBrains Mono',monospace",
+              lineHeight: 1.6,
+            }}>
+              📝 {todo}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // -- SESSION KAPAT MODAL — İlk onay adımı ----------------------
 function SessionCloseModal({ onConfirm, onCancel, isClosing }) {
   return (
@@ -697,6 +784,8 @@ function MessageBubble({ msg }) {
         {!isUser && msg.verdict && (
           <VerdictBanner verdict={msg.verdict} softSteer={msg.softSteer} />
         )}
+        {/* TB-13: Kod kalitesi badge — sadece assistant mesajlarında, quality varsa */}
+        {!isUser && <QualityBadge quality={msg.quality ?? null} />}
       </div>
     </div>
   );
