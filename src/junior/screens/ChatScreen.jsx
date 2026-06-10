@@ -4,8 +4,10 @@
 // Karar:   Karar #45 (system prompt engine'e taşındı), Session 22 (useChatActions refactor)
 //          Karar #53 (chat içi proje drawer), TB-6 Session 37 (project_id bağlantısı),
 //          TB-13 (QualityBadge — codeQualityGuard çıktısı gösterimi)
+//          TB-23 (GitHub push butonu — qualityMeta.passed → commitFile)
 // Dokunma: Mesaj state'i veya API rotaları değişirse useChatActions.js güncellenmeli
 //          Proje listesi API'si değişirse ProjectDrawer fetchProjects güncellenmeli
+//          commitFile signature değişirse GitHubPushButton güncellenmeli
 // TB-18:   ProjectDrawer /api/project/list → /api/project düzeltildi (Session 38)
 
 // Phase B.2 — aiProxy refactor
@@ -19,6 +21,7 @@
 // Session 22 — useChatActions hook entegrasyonu (sendMessage bölündü)
 // Session 37 — TB-6: useActiveProject + ProjectDrawer + projectId bağlantısı
 // Session 40 — TB-13: QualityBadge komponenti + useChatActions quality entegrasyonu
+// Session 42 — TB-23: GitHubPushButton — quality.passed → commitFile() + manifest SHA güncelleme
 
 import { apiCall }  from "../../lib/apiClient";
 import { useState, useRef, useEffect } from "react";
@@ -26,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { T } from "../../tokens";
 import { useAuth } from "../hooks/useAuth";
 import { useChatActions } from "../hooks/useChatActions";
+import { useGithubBridge } from "../hooks/useGithubBridge";
 
 // Tauri ortamı tespiti
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -524,6 +528,85 @@ function QualityBadge({ quality }) {
   );
 }
 
+// -- GITHUB PUSH BUTONU — TB-23 ----------------------------------
+// Amaç:    quality.passed → "GitHub'a Kaydet" butonu gösterir, commitFile() tetikler
+// Bağlı:   useGithubBridge.commitFile, activeProject.id, session.access_token
+// Karar:   TB-23, Karar #62 (manifest), Karar #63 (token body'de)
+// Dokunma: commitFile signature değişirse buradaki çağrı güncellenmeli
+//
+// Edge case'ler:
+//   1. quality.passed false → null döner, buton render edilmez
+//   2. projectId null → buton disabled, tooltip ile uyarır
+//   3. github_token localStorage'da yok → commitFile hata fırlatır, onError'a düşer
+//   4. isPushing true → buton disabled, çift tıklama engellenir
+//   5. content boş → push engellenir
+function GitHubPushButton({ quality, content, projectId, authToken, onSuccess, onError }) {
+  const [isPushing, setIsPushing] = useState(false);
+  const { commitFile } = useGithubBridge();
+
+  if (!quality?.passed) return null;
+
+  const canPush = !!projectId && !!content?.trim() && !isPushing;
+
+  const handlePush = async () => {
+    if (!canPush) return;
+    setIsPushing(true);
+    try {
+      const path = `sovereign/${Date.now()}.md`;
+      const result = await commitFile({
+        path,
+        content,
+        message: "SE OS: quality passed — auto commit",
+        projectId,
+        authToken,
+      });
+      onSuccess?.(result);
+    } catch (err) {
+      onError?.(err.message ?? "GitHub push başarısız.");
+    } finally {
+      setIsPushing(false);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.border}` }}>
+      <button
+        onClick={handlePush}
+        disabled={!canPush}
+        title={!projectId ? "Önce bir proje seç" : "GitHub'a kaydet"}
+        style={{
+          padding: "5px 12px",
+          borderRadius: 7,
+          border: `1px solid ${canPush ? T.accent : T.border}`,
+          background: canPush ? `${T.accent}14` : "transparent",
+          color: canPush ? T.accent : T.textTertiary,
+          fontSize: 10, fontWeight: 700,
+          cursor: canPush ? "pointer" : "not-allowed",
+          fontFamily: "'JetBrains Mono',monospace",
+          letterSpacing: "0.04em",
+          display: "flex", alignItems: "center", gap: 5,
+          transition: "all .15s",
+        }}
+      >
+        {isPushing ? (
+          <>
+            <div style={{
+              width: 8, height: 8,
+              border: `2px solid ${T.border}`,
+              borderTopColor: T.accent,
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+            }} />
+            Kaydediliyor...
+          </>
+        ) : (
+          <>🐙 GitHub'a Kaydet</>
+        )}
+      </button>
+    </div>
+  );
+}
+
 // -- SESSION KAPAT MODAL — İlk onay adımı ----------------------
 function SessionCloseModal({ onConfirm, onCancel, isClosing }) {
   return (
@@ -716,7 +799,7 @@ function SessionSummaryModal({ summary, error, onConfirm, onCancel, isSaving, on
 }
 
 // -- MESAJ BALONU ------------------------------------------------
-function MessageBubble({ msg }) {
+function MessageBubble({ msg, activeProject, authToken, onPushSuccess, onPushError }) {
   const { t }  = useTranslation("chat");
   const isUser   = msg.role === "user";
   const isSystem = msg.role === "system";
@@ -786,6 +869,17 @@ function MessageBubble({ msg }) {
         )}
         {/* TB-13: Kod kalitesi badge — sadece assistant mesajlarında, quality varsa */}
         {!isUser && <QualityBadge quality={msg.quality ?? null} />}
+        {/* TB-23: GitHub push butonu — sadece assistant mesajlarında, quality.passed ise */}
+        {!isUser && (
+          <GitHubPushButton
+            quality={msg.quality ?? null}
+            content={msg.content}
+            projectId={activeProject?.id ?? null}
+            authToken={authToken}
+            onSuccess={onPushSuccess}
+            onError={onPushError}
+          />
+        )}
       </div>
     </div>
   );
@@ -899,6 +993,21 @@ export default function ChatScreen() {
   );
 
   if (!user) return <LoginGate onLogin={() => {}} />;
+
+  // ── TB-23: GitHub push geri bildirim handler'ları ─────────────
+  const handlePushSuccess = (result) => {
+    setMessages(prev => [
+      ...prev,
+      { role: "system", content: `✅ GitHub'a kaydedildi. SHA: ${result.sha?.slice(0, 7)}` },
+    ]);
+  };
+
+  const handlePushError = (errMsg) => {
+    setMessages(prev => [
+      ...prev,
+      { role: "system", content: `❌ GitHub push başarısız: ${errMsg}` },
+    ]);
+  };
 
   // ── Adım 1: Modal onayı → backend çağrısı → özet modal'a geç ─
   // TB-6: projectId artık activeProject.id'den geliyor
@@ -1104,7 +1213,16 @@ export default function ChatScreen() {
 
       {/* Mesajlar */}
       <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column" }}>
-        {messages.map((msg, i) => <MessageBubble key={i} msg={msg} />)}
+        {messages.map((msg, i) => (
+          <MessageBubble
+            key={i}
+            msg={msg}
+            activeProject={activeProject}
+            authToken={session?.access_token}
+            onPushSuccess={handlePushSuccess}
+            onPushError={handlePushError}
+          />
+        ))}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
