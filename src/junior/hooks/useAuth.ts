@@ -2,6 +2,7 @@
 // Amaç:    Supabase auth işlemlerini useAuthStore üzerinden expose eder
 // Bağlı:   src/stores/authStore.ts, src/lib/supabaseClient.ts
 // Karar:   Session 10 — resetPassword + session kaydı (çoklu açılım koruması)
+// Karar:   Session 13 — emailRedirectTo /auth/callback olarak düzeltildi (iPhone magic link fix)
 // Dokunma: authStore.ts setSession / signOut değişirse burası da güncellenir
 
 import { useAuthStore } from "../../stores/authStore";
@@ -60,7 +61,9 @@ export function useAuth() {
   const signInWithOtp = async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/junior/chat` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`, // ← DÜZELTİLDİ
+      },
     });
     if (error) throw error;
   };
