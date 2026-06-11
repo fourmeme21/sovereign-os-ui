@@ -9,7 +9,7 @@
   "services": {
     "engine": { "label": "Sovereign Engine", "desc": "Running on Railway"   },
     "memory": { "label": "Sovereign Memory", "desc": "pgvector + Voyage AI" },
-    "mcp":    { "label": "MCP Server",       "desc": "Claude bridge"        },
+    "mcp":    { "label": "MCP Server",       "desc": "Claude bridge", "coming_soon": "Coming soon"  },
     "github": { "label": "GitHub",           "desc": "Repo connection"      }
   },
   "github": {
