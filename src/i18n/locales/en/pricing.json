@@ -23,18 +23,18 @@
       "period": "/month",
       "cta": "Current Plan",
       "features": [
-        "50 decisions/month",
-        "1 project",
+        "30 demo decisions/month",
+        "No project creation",
         "Community support"
       ]
     },
     "solo": {
       "name": "Solo",
-      "price": "$29",
+      "price": "$49",
       "period": "/month",
       "cta": "Get Solo →",
       "features": [
-        "500 decisions/month",
+        "300 decisions/month",
         "3 projects",
         "Sovereign Memory",
         "MCP Bridge",
@@ -43,25 +43,24 @@
     },
     "pro": {
       "name": "Pro",
-      "price": "$79",
+      "price": "$99",
       "period": "/month",
       "cta": "Get Pro →",
       "features": [
-        "800 decisions/month",
-        "2 seats",
-        "Unlimited projects",
+        "1000 decisions/month",
+        "10 projects",
         "Audit export",
         "Priority support"
       ]
     },
     "team": {
       "name": "Team",
-      "price": "$199",
+      "price": "$249",
       "period": "/month",
       "cta": "Get Team →",
       "features": [
-        "2000 decisions/month",
-        "10 seats",
+        "5000 decisions/month",
+        "20 projects",
         "SSO",
         "SLA guarantee",
         "Dedicated support"
