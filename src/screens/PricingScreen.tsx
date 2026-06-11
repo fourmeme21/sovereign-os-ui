@@ -1,4 +1,8 @@
 // src/screens/PricingScreen.tsx
+// Amaç:    Fiyatlandırma ekranı — plan kartları, checkout, portal yönlendirmesi
+// Bağlı:   /api/billing/checkout · /api/billing/portal · authStore.tier
+// Karar:   Session 42 — fiyatlar güncellendi (Solo $49, Pro $99, Team $249)
+// Dokunma: Fiyat değişikliğinde tierGuard.ts TIER_LIMITS + pricing.json (4 dil) de güncellenmeli
 // Route: /junior/fiyatlandirma
 // Phase D.5 — Dodo Payments entegrasyonu
 
@@ -12,9 +16,9 @@ import { apiCall } from "../lib/apiClient";
 
 const PLANS = [
   { tier: "free",  priceNum: 0,   highlight: false, badgeKey: null      },
-  { tier: "solo",  priceNum: 29,  highlight: true,  badgeKey: "popular" },
-  { tier: "pro",   priceNum: 79,  highlight: false, badgeKey: null      },
-  { tier: "team",  priceNum: 199, highlight: false, badgeKey: null      },
+  { tier: "solo",  priceNum: 49,  highlight: true,  badgeKey: "popular" },
+  { tier: "pro",   priceNum: 99,  highlight: false, badgeKey: null      },
+  { tier: "team",  priceNum: 249, highlight: false, badgeKey: null      },
 ] as const;
 
 type PlanTier = (typeof PLANS)[number]["tier"];
