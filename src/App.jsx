@@ -1,3 +1,11 @@
+// App.jsx
+// Amaç:    Sovereign OS ana uygulama kabuğu — sidebar, prompt tab, routing
+// Bağlı:   /api/ai/chat · useEnginePolling · useAuthStore · useJuniorStore
+// Karar:   Session 42 — Junior butonu + Memory nav eklendi
+//          Session 43 — analyze() Math.random kaldırıldı → /api/ai/chat bağlandı (Karar #analyze-realdata)
+// Dokunma: analyze() değiştirilirse aiProxy /chat response şeması kontrol edilmeli
+//          Auth token akışı değişirse useAuthStore.session güncellenmeli
+
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase }        from "./lib/supabaseClient";
@@ -19,25 +27,7 @@ import { useJuniorStore } from "./junior/stores/juniorStore";
 import KararAkisiPanel from "./junior/components/KararAkisiPanel";
 import { MemoryPanel } from "./memory/MemoryPanel";
 
-const rand  = (min, max) => Math.random() * (max - min) + min;
-const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
-
-function generateFactors(riskScore, affectedArea) {
-  const area       = affectedArea.toLowerCase();
-  const isAuth     = /auth|login|session|token/.test(area);
-  const isPayment  = /payment|stripe|billing/.test(area);
-  const isSecurity = /security|middleware|policy/.test(area);
-  const isUtils    = /utils|constants|helper/.test(area);
-  const base = riskScore;
-  return [
-    { w:35, s: isAuth||isPayment  ? clamp(base + rand(-1,1), 0, 10)          : clamp(base * 0.6 + rand(-1,1),    0, 10) },
-    { w:25, s: isUtils            ? clamp(base * 0.3 + rand(-0.5,0.5), 0, 10): clamp(base * 0.5 + rand(-1,1),    0, 10) },
-    { w:15, s: isSecurity         ? clamp(base + rand(-0.5,0.5), 0, 10)       : clamp(base * 0.7 + rand(-1.5,1.5),0, 10) },
-    { w:10, s: clamp(base * 0.8 + rand(-2,0),          0, 10) },
-    { w:10, s: clamp(base * 0.4 + rand(-1,1),          0, 10) },
-    { w:5,  s: clamp(base * 0.3 + rand(-0.5,0.5),      0, 10) },
-  ].map(f => ({ ...f, s: Math.round(f.s * 10) / 10 }));
-}
+const ENGINE_URL = import.meta.env.VITE_ENGINE_URL ?? "";
 
 export default function SovereignApp() {
   const navigate = useNavigate();
@@ -81,45 +71,68 @@ export default function SovereignApp() {
     });
   }, [cards, autoCount]);
 
-  const analyze = useCallback(() => {
+  // ── Analiz — /api/ai/chat endpoint bağlantısı ──
+  // Edge: engine offline → engineError banner zaten aktif, setAnalyzing(false) ile UI kurtarılır
+  // Edge: token yoksa (oturum açılmamış) → 401 döner, hata loglanır, UI kilitlenmez
+  // Edge: verdict null/tanımsız gelirse → PERMIT varsayılır, pending false olur
+  const analyze = useCallback(async () => {
     if (!input.trim() || analyzing) return;
     setAnalyzing(true);
     setMain(null);
-    setTimeout(() => {
-      const score   = Math.floor(Math.random() * 9) + 1;
-      const pending = score >= 5;
-      const reasons = {
-        tr: {
-          high:   "Auth modülünde kritik sembol silme tespit edildi. Güvenlik bölgesine dokunuluyor — insan onayı zorunlu.",
-          medium: "Orta seviye etki. Dış bağımlılık değişikliği ve yeni API çağrısı mevcut. İnceleme önerilir.",
-          low:    "Minimal etki. Yardımcı fonksiyon güncellemesi, sembol silinmiyor, dışa açık API değişmiyor.",
+
+    try {
+      const session = useAuthStore.getState().session;
+      const token   = session?.access_token ?? null;
+
+      const res = await fetch(`${ENGINE_URL}/api/ai/chat`, {
+        method:  "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
-        en: {
-          high:   "Critical symbol deletion detected in auth module. Touching security zone — human approval required.",
-          medium: "Medium-level impact. External dependency change and new API call present. Review recommended.",
-          low:    "Minimal impact. Helper function update, no symbol deletion, no changes to public API.",
-        },
-      };
-      const r    = reasons[lang];
+        body: JSON.stringify({
+          messages:  [{ role: "user", content: input }],
+          max_tokens: 512,
+        }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        console.error("[analyze] engine hata:", res.status, errBody);
+        return;
+      }
+
+      const data = await res.json();
+
+      // verdict: PERMIT → auto, ASK_HUMAN / DENY → pending_human
+      const pending = data.verdict === "ASK_HUMAN" || data.verdict === "DENY";
+
       const card = {
-        id:`d-${Date.now()}`,
-        status: pending ? "PENDING_HUMAN" : "AUTO_APPROVED",
-        riskScore: score,
+        id:           `d-${Date.now()}`,
+        status:       pending ? "PENDING_HUMAN" : "AUTO_APPROVED",
+        riskScore:    typeof data.risk === "number" ? data.risk : 5,
+        verdict:      data.verdict  ?? "PERMIT",
         affectedArea: input.slice(0, 48) + (input.length > 48 ? "…" : ""),
-        humanLabel: score >= 7 ? r.high : score >= 4 ? r.medium : r.low,
-        reason: score >= 7 ? r.high : score >= 4 ? r.medium : r.low,
-        traceId:`${Math.random().toString(36).slice(2,10)}-${Math.random().toString(36).slice(2,6)}`,
-        ago: lang === "tr" ? "Az önce" : "Just now",
-        timestamp: Date.now(),
-        factors: generateFactors(score, input.slice(0, 48)),
-        confidence: Math.max(0.3, 1 - (score / 10) * 0.5 + rand(-0.1, 0.1)),
+        humanLabel:   data.reason   ?? "",
+        reason:       data.reason   ?? "",
+        traceId:      data.trace_id ?? `chat-${Date.now().toString(16)}`,
+        ago:          lang === "tr" ? "Az önce" : "Just now",
+        timestamp:    Date.now(),
+        confidence:   typeof data.confidence === "number" ? data.confidence : null,
+        // factors: engine /chat response'unda dönmüyor; WhyPanel factors=[] ile boş render ediyor — davranış korundu
+        factors:      [],
       };
+
       setMain(card);
       setMainKey(k => k + 1);
       if (!pending) setAutoCount(c => c + 1);
       else setCards(p => [card, ...p].slice(0, 8));
+
+    } catch (err) {
+      console.error("[analyze] beklenmeyen hata:", err);
+    } finally {
       setAnalyzing(false);
-    }, 1950);
+    }
   }, [input, analyzing, lang, setAutoCount, setCards]);
 
   const approve = (id) => {
