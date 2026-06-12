@@ -19,9 +19,7 @@ jobs:
 
       - name: Create Release
         id: create
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: "Sovereign OS ${{ github.ref_name }}"
@@ -30,6 +28,8 @@ jobs:
             Windows (.msi / .exe) ve macOS (.dmg) installer asagidadir.
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
   build-tauri:
     needs: create-release
