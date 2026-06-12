@@ -50,7 +50,7 @@ export function SettingsScreen({ onClear }) {
     setPortalLoading(true);
     try {
       const data = await apiCall(
-        `/api/billing/portal?email=${encodeURIComponent(userEmail)}`,
+        `/api/billing/portal`,
         { method: "GET" }
       );
       window.location.href = data.portalUrl;
