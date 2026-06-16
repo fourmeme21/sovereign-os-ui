@@ -36,5 +36,13 @@
         "silent": true
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMyOEMyMTJENDA1MkRFMUYKUldRZjNsSkFMU0dNTWpqTWFhY29iMUU1UWRTMzBIVjNCcmxtM2d4dkhmamxkOU80TUVuTzNkMEcK",
+      "endpoints": [
+        "https://github.com/fourmeme21/sovereign-os-ui/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
