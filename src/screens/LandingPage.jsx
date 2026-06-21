@@ -626,30 +626,30 @@ function Toast({ message, type = "error", onClose }) {
 }
 
 // ── NAV ─────────────────────────────────────────────────────────
-const APP_VERSION = "0.6.8";
-const RELEASES_BASE = `https://github.com/Sovereign34/sovereign-os-ui/releases/download/v${APP_VERSION}`;
+// Not: Sabit bir versiyon numarasına (APP_VERSION) gömülü exe dosya
+// adı kullanmıyoruz artık — her yeni release'de versiyon değişince
+// kod güncellenmezse link 404 veriyordu. Bunun yerine GitHub'ın
+// "latest" release sayfasına yönlendiriyoruz; bu link hangi versiyon
+// yayınlanmış olursa olsun her zaman çalışır.
+const RELEASES_LATEST_PAGE =
+  "https://github.com/Sovereign34/sovereign-os-ui/releases/latest";
 
 function getDownloadInfo() {
   const ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
   if (/Macintosh|Mac OS X/.test(ua)) {
-    // Apple Silicon vs Intel can't be reliably told apart from the UA string
-    // (Rosetta reports as Intel). Default to Apple Silicon — the majority of
-    // active Macs — and offer the Intel build as a secondary link.
     return {
-      url: `${RELEASES_BASE}/sovereign-os_${APP_VERSION}_aarch64.dmg`,
+      url: RELEASES_LATEST_PAGE,
       label: "Mac",
-      secondaryUrl: `${RELEASES_BASE}/sovereign-os_${APP_VERSION}_x64.dmg`,
-      secondaryLabel: "Intel Mac",
     };
   }
   if (/Windows/.test(ua)) {
     return {
-      url: `${RELEASES_BASE}/sovereign-os_${APP_VERSION}_x64-setup.exe`,
+      url: RELEASES_LATEST_PAGE,
       label: "Windows",
     };
   }
   return {
-    url: `https://github.com/Sovereign34/sovereign-os-ui/releases/tag/v${APP_VERSION}`,
+    url: RELEASES_LATEST_PAGE,
     label: "Desktop App",
   };
 }
