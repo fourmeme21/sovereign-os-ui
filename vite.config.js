@@ -18,14 +18,11 @@ export default defineConfig({
     target: ["es2021", "chrome105", "safari15"],
     minify: !process.env.TAURI_ENV_DEBUG ? "esbuild" : false,
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
-    rollupOptions: {
-      // @tauri-apps/plugin-fs gerçek ES module olarak import ediliyor
-      // (StorageManager.ts) — bare specifier olarak external bırakılırsa
-      // tarayıcı "Failed to resolve module specifier" hatası verir.
-      // Bu yüzden plugin-fs bundle'a dahil edilir; diğer @tauri-apps/*
-      // paketleri externalleştirme davranışı korunur.
-      external: (id) =>
-        id.startsWith("@tauri-apps/") && id !== "@tauri-apps/plugin-fs",
-    },
+    // Not: @tauri-apps/* paketleri (api, plugin-fs, plugin-updater,
+    // plugin-process vb.) tarayıcıya otomatik enjekte edilen globaller
+    // DEĞİL, gerçek ES module'ler. Externalize edilirlerse tarayıcı
+    // bare import'ları çözemez ve "Failed to resolve module specifier"
+    // hatası verir. Bu yüzden hiçbiri external bırakılmıyor, hepsi
+    // normal şekilde bundle'a dahil ediliyor.
   },
 });
