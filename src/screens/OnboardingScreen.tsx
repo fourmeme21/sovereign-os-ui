@@ -6,6 +6,9 @@
 // Session 12 — Onboarding akışı: master plan girişi + /api/project/create bağlantısı
 // TB-6 — Session 37: goToApp() localStorage'a active_project_id + active_project_name yazar
 // Session 39: Step 3 artık doğrudan Chat'e değil GenerationProgress'e yönlendirir.
+// TC-1 (LOCAL_MEMORY_CHAIN_REPORT, KIRIK 1) — CreateProjectResponse.id → project_id.
+//   Backend (projectRouter.ts) project_id alanıyla dönüyordu, frontend id okuyordu → data.id hep undefined,
+//   active_project_id localStorage'a hiç yazılmıyordu.
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +18,7 @@ import GenerationProgress from "../junior/screens/GenerationProgress";
 
 // ── Tipler ──────────────────────────────────────────────────────────────
 interface CreateProjectResponse {
-  id: string;
+  project_id: string;
   gen_status: "pending" | "completed" | "partial_success" | "failed";
 }
 
@@ -94,7 +97,7 @@ export default function OnboardingScreen() {
       }
 
       const data: CreateProjectResponse = await res.json();
-      setProjectId(data.id);
+      setProjectId(data.project_id);
       setStep(3);
     } catch (err: any) {
       setError(err.message ?? "Beklenmedik hata");
